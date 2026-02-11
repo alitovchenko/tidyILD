@@ -1,0 +1,16 @@
+citHeader("To cite package 'tidyILD' in publications use:")
+
+citEntry(
+  entry = "Manual",
+  title = "tidyILD: Tidy Intensive Longitudinal Data Analysis",
+  author = personList(as.person("Alex Litovchenko")),
+  year = 2025,
+  url = "https://github.com/alitovchenko/tidyILD",
+  textVersion = paste0(
+    "Litovchenko A (2025). tidyILD: Tidy Intensive Longitudinal Data Analysis. ",
+    "R package version ", packageVersion("tidyILD"), ", ",
+    "<https://github.com/alitovchenko/tidyILD>."
+  )
+)
+
+citFooter("For more information see https://github.com/alitovchenko/tidyILD.")

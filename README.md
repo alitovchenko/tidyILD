@@ -5,8 +5,7 @@ Tidyverse-native toolkit for **intensive longitudinal data (ILD)**.
 ## Install
 
 ```r
-# From source (once available)
-remotes::install_github("your-org/tidyILD")
+remotes::install_github("alitovchenko/tidyILD")
 ```
 
 ## Quick start
