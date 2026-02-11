@@ -11,7 +11,8 @@ ild_meta(x)
 }
 \value{
 A named list of metadata (ild_id, ild_time, ild_gap_threshold,
-  ild_n_units, ild_n_obs, ild_spacing).
+  ild_n_units, ild_n_obs, ild_spacing). \code{ild_spacing} includes overall
+  stats and may contain \code{by_id}, a tibble of per-person spacing stats.
 }
 \description{
 Returns the metadata attributes set by [ild_prepare()]: user-facing

@@ -9,6 +9,7 @@
 #' @param irregular Logical. If `TRUE`, add random jitter to time (default `FALSE`).
 #' @param seed Integer. Random seed for reproducibility (default 42).
 #' @return A data frame with columns `id`, `time` (POSIXct or numeric), and `y`.
+#' @importFrom stats runif rnorm
 #' @examples
 #' d <- ild_simulate(n_id = 3, n_obs_per = 5, seed = 1)
 #' x <- ild_prepare(d, id = "id", time = "time")

@@ -87,7 +87,8 @@ validate_ild <- function(x) {
 #'
 #' @param x An ILD object (see [is_ild()]).
 #' @return A named list of metadata (ild_id, ild_time, ild_gap_threshold,
-#'   ild_n_units, ild_n_obs, ild_spacing).
+#'   ild_n_units, ild_n_obs, ild_spacing). \code{ild_spacing} includes overall
+#'   stats and may contain \code{by_id}, a tibble of per-person spacing stats.
 #' @export
 ild_meta <- function(x) {
   validate_ild(x)

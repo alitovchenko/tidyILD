@@ -75,4 +75,12 @@ ild_plot(fit1, type = "fitted")
 
 ## Reproducibility
 
-Use a fixed seed when simulating or fitting models so results can be recreated. The pipeline is deterministic for a given seed and data.
+Use a fixed seed when simulating or fitting models so results can be recreated. The pipeline is deterministic for a given seed and data. When saving results (e.g. after [ild_lme()] or [ild_diagnostics()]), you can attach a reproducibility manifest and save a single bundle with [ild_manifest()] and [ild_bundle()]:
+
+```{r reproducibility}
+# Optional: build a manifest with scenario and seed, then bundle the fit for saving
+manifest <- ild_manifest(seed = 42, scenario = ild_summary(x), include_session = FALSE)
+bundle <- ild_bundle(fit1, manifest = manifest, label = "model_ar1")
+# saveRDS(bundle, "run.rds")  # one file with result + manifest + label
+names(bundle)
+```

@@ -83,6 +83,27 @@ test_that("ild_prepare spacing is descriptive list", {
   expect_true("median_dt" %in% names(spacing))
   expect_true("iqr_dt" %in% names(spacing))
   expect_true("pct_gap" %in% names(spacing))
+  expect_true("by_id" %in% names(spacing))
+  expect_s3_class(spacing$by_id, "tbl_df")
+  expect_named(spacing$by_id, c("id", "median_dt", "iqr_dt", "n_intervals", "pct_gap"))
+})
+
+test_that("ild_prepare spacing by_id has one row per person and correct stats", {
+  # id 1: times 0, 10, 20 -> intervals 10, 10; median=10, iqr=0. id 2: times 0, 5, 15 -> intervals 5, 10; median=7.5.
+  # gap_threshold=8: id1 intervals 10,10 both >8 so pct_gap=100; id2 intervals 5,10 so one >8, pct_gap=50.
+  d <- data.frame(
+    id = c(1, 1, 1, 2, 2, 2),
+    time = as.POSIXct(c(0, 10, 20, 0, 5, 15), origin = "1970-01-01"),
+    x = 1:6
+  )
+  x <- ild_prepare(d, id = "id", time = "time", gap_threshold = 8)
+  by_id <- attr(x, "ild_spacing")$by_id
+  expect_equal(nrow(by_id), 2)
+  by_id <- by_id[order(by_id$id), ]
+  expect_equal(by_id$id, c(1, 2))
+  expect_equal(by_id$median_dt, c(10, 7.5))
+  expect_equal(by_id$n_intervals, c(2L, 2L))
+  expect_equal(by_id$pct_gap, c(100, 50))
 })
 
 test_that("ild_prepare duplicate_handling collapse aggregates with collapse_fn", {

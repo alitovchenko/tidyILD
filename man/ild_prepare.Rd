@@ -34,7 +34,10 @@ Variables not in \code{collapse_fn} keep their first value within the duplicate 
 }
 \value{
 An ILD tibble with `.ild_*` columns and metadata attributes.
-  Use [ild_summary()] to inspect and check gap flags before modeling.
+  Spacing metadata (see [ild_meta()]) includes overall stats and a
+  \code{by_id} tibble of per-person spacing stats (median_dt, iqr_dt,
+  n_intervals, pct_gap). Use [ild_summary()] to inspect and check gap
+  flags before modeling.
 }
 \description{
 Validates and encodes longitudinal structure: parses time, sorts by id and

@@ -30,6 +30,38 @@ ild_spacing_stats <- function(dt, gap_threshold = NULL) {
   )
 }
 
+#' Per-person spacing stats: one row per id (median_dt, iqr_dt, n_intervals, pct_gap).
+#' Returns tibble with columns id, median_dt, iqr_dt, n_intervals, pct_gap.
+#' @noRd
+ild_spacing_by_id <- function(data, id_col, dt_col, gap_threshold = NULL) {
+  if (!nrow(data)) {
+    return(tibble::tibble(
+      id = data[[id_col]],
+      median_dt = double(nrow(data)),
+      iqr_dt = double(nrow(data)),
+      n_intervals = integer(nrow(data)),
+      pct_gap = double(nrow(data))
+    ))
+  }
+  g <- dplyr::group_by(data, .data[[id_col]])
+  out <- dplyr::summarise(g,
+    id = .data[[id_col]][1],
+    median_dt = stats::median(.data[[dt_col]], na.rm = TRUE),
+    iqr_dt = stats::IQR(.data[[dt_col]], na.rm = TRUE),
+    n_intervals = as.integer(sum(!is.na(.data[[dt_col]]))),
+    pct_gap = if (!is.null(gap_threshold) && is.finite(gap_threshold)) {
+      d <- .data[[dt_col]]
+      d <- d[!is.na(d)]
+      if (length(d) == 0) NA_real_ else mean(d > gap_threshold) * 100
+    } else NA_real_,
+    .groups = "drop"
+  )
+  out[[id_col]] <- NULL
+  out$median_dt[is.nan(out$median_dt)] <- NA_real_
+  out$iqr_dt[is.nan(out$iqr_dt)] <- NA_real_
+  tibble::as_tibble(out)
+}
+
 #' Convert time column to numeric (seconds from epoch) for .ild_time_num
 #' Handles Date, POSIXct, POSIXlt, and numeric (passed through).
 #' @noRd

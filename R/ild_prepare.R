@@ -17,7 +17,10 @@
 #'   Used only when \code{duplicate_handling = "collapse"}. E.g. \code{list(x = mean, y = function(z) z[1])}.
 #'   Variables not in \code{collapse_fn} keep their first value within the duplicate group.
 #' @return An ILD tibble with `.ild_*` columns and metadata attributes.
-#'   Use [ild_summary()] to inspect and check gap flags before modeling.
+#'   Spacing metadata (see [ild_meta()]) includes overall stats and a
+#'   \code{by_id} tibble of per-person spacing stats (median_dt, iqr_dt,
+#'   n_intervals, pct_gap). Use [ild_summary()] to inspect and check gap
+#'   flags before modeling.
 #' @importFrom dplyr arrange group_by mutate n row_number summarise ungroup
 #' @importFrom tibble as_tibble
 #' @export
@@ -65,6 +68,8 @@ ild_prepare <- function(data,
   # Descriptive spacing stats (no hard classifier)
   dt_vals <- out[[".ild_dt"]]
   spacing <- ild_spacing_stats(dt_vals, gap_threshold = if (is.finite(gap_threshold)) gap_threshold else NULL)
+  spacing$by_id <- ild_spacing_by_id(out, ".ild_id", ".ild_dt",
+    gap_threshold = if (is.finite(gap_threshold)) gap_threshold else NULL)
 
   new_ild_df(
     data = out,

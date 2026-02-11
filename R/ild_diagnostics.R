@@ -13,6 +13,7 @@
 #' @return A list with: `acf` (ACF values or list by id), `residuals`, `fitted`,
 #'   `id`, `time` (or `seq`), `ar1_param` (if applicable), and `plot` (a ggplot or list of plots).
 #' @importFrom ggplot2 aes geom_point geom_hline labs theme_minimal ggplot stat_qq stat_qq_line
+#' @importFrom stats coef
 #' @export
 ild_diagnostics <- function(object, data = NULL, by_id = TRUE, ...) {
   if (inherits(object, "ild_lme") || !is.null(attr(object, "ild_data", exact = TRUE))) {

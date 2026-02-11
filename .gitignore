@@ -13,3 +13,5 @@ doc/
 *.pdf
 ..Rcheck/
 .Rcheck/
+tidyILD.Rcheck/
+*.tar.gz
