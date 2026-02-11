@@ -1,0 +1,14 @@
+^\.git
+^\.github
+^\.Rproj\.user
+^\.cursor
+^\.Rcheck$
+^\.\.Rcheck
+^README\.Rmd$
+^LICENSE\.md$
+^\.gitignore$
+^\.cursorignore$
+^data-raw$
+^doc$
+^Meta$
+^\.DS_Store
