@@ -71,7 +71,8 @@ ild_manifest <- function(seed = NULL,
 #' @return A list with elements \code{result}, \code{manifest}, \code{label},
 #'   suitable for [saveRDS()].
 #' @examples
-#' fit <- ild_lme(y ~ 1 + (1 | id), ild_prepare(ild_simulate(seed = 1), "id", "time"), ar1 = FALSE, warn_no_ar1 = FALSE)
+#' dat <- ild_prepare(ild_simulate(seed = 1), "id", "time")
+#' fit <- ild_lme(y ~ 1 + (1 | id), dat, ar1 = FALSE, warn_no_ar1 = FALSE)
 #' b <- ild_bundle(fit, label = "ar1")
 #' names(b)
 #' b <- ild_bundle(fit, manifest = ild_manifest(seed = 1, scenario = list(n_obs = 50)), label = "run1")

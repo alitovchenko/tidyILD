@@ -1,8 +1,7 @@
 Package: tidyILD
 Title: Tidy Intensive Longitudinal Data Analysis
 Version: 0.0.1
-Author: Alex Litovchenko [aut, cre]
-Maintainer: Alex Litovchenko <al4877@columbia.edu>
+Authors@R: person(given = "Alex", family = "Litovchenko", role = c("aut", "cre"), email = "al4877@columbia.edu")
 Description: An opinionated, tidyverse-native toolkit for intensive longitudinal
   data (ILD). Encodes time structure, enforces within-between decomposition,
   provides spacing-aware lags, and integrates diagnostics and visualization.
@@ -10,7 +9,7 @@ Description: An opinionated, tidyverse-native toolkit for intensive longitudinal
   unified pipeline from raw EMA/diary data to interpretable models.
 License: MIT + file LICENSE
 Encoding: UTF-8
-R: ">= 4.0.0"
+Depends: R (>= 4.0.0)
 Imports:
   tibble,
   dplyr,
