@@ -25,6 +25,7 @@ Suggests:
   broom.mixed
 VignetteBuilder: knitr
 Collate:
+  'package.R'
   'ild-class.R'
   'utils.R'
   'ild_prepare.R'
