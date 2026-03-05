@@ -25,3 +25,12 @@ test_that("ild_decomposition errors on non-numeric variable", {
   x <- ild_prepare(d, id = "id", time = "time")
   expect_error(ild_decomposition(x, "cat"), "not numeric")
 })
+
+test_that("ild_center_plot returns ggplot matching decomposition plot", {
+  d <- ild_simulate(n_id = 5, n_obs_per = 6, seed = 1)
+  x <- ild_prepare(d, id = "id", time = "time")
+  p <- ild_center_plot(x, "y")
+  expect_s3_class(p, "gg")
+  p2 <- ild_decomposition(x, "y", plot = TRUE)$plot
+  expect_s3_class(p2, "gg")
+})

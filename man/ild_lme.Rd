@@ -11,6 +11,7 @@ ild_lme(
   correlation_class = c("auto", "AR1", "CAR1"),
   random = ~1 | .ild_id,
   warn_no_ar1 = TRUE,
+  warn_uncentered = TRUE,
   ...
 )
 }
@@ -33,6 +34,10 @@ to choose CAR1 (irregular-ish) or AR1 (regular-ish). Use `"CAR1"` or
 
 \item{warn_no_ar1}{If `TRUE` (default), warn when `ar1 = FALSE` that
 temporal autocorrelation is not modeled.}
+
+\item{warn_uncentered}{If `TRUE` (default), warn when a predictor in the
+formula varies both within and between persons but is not decomposed
+(no \code{_wp}/\code{_bp}); suggests using [ild_center()].}
 
 \item{...}{Passed to [lme4::lmer()] or [nlme::lme()].}
 }

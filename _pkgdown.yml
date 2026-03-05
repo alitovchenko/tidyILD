@@ -15,9 +15,9 @@ reference:
   - title: Setup and validation
     contents: [ild_prepare, as_ild, is_ild, validate_ild, ild_meta]
   - title: Summaries and inspection
-    contents: [ild_summary, ild_spacing_class, ild_missing_pattern, ild_plot]
+    contents: [ild_summary, ild_spacing_class, ild_spacing, ild_missing_pattern, ild_missing_bias, ild_plot]
   - title: Within-person and lags
-    contents: [ild_center, ild_decomposition, ild_lag, ild_check_lags]
+    contents: [ild_center, ild_center_plot, ild_decomposition, ild_lag, ild_check_lags, ild_align]
   - title: Modeling
     contents: [ild_lme]
   - title: Diagnostics and visualization

@@ -67,3 +67,32 @@ test_that("ild_lme correlation default uses CAR1 for irregular data", {
   expect_equal(attr(fit, "ild_correlation_class"), "CAR1")
   expect_true(inherits(fit$modelStruct$corStruct, "corCAR1"))
 })
+
+test_that("ild_lme warns when predictor is uncentered (WP and BP variance)", {
+  d <- ild_simulate(n_id = 4, n_obs_per = 6, seed = 1)
+  d$stress <- d$y + rnorm(nrow(d), 0, 0.5)
+  x <- ild_prepare(d, id = "id", time = "time")
+  expect_warning(
+    ild_lme(y ~ stress + (1 | id), data = x, ar1 = FALSE, warn_no_ar1 = FALSE),
+    "ild_center"
+  )
+})
+
+test_that("ild_lme does not warn about centering when predictors are _wp/_bp", {
+  d <- ild_simulate(n_id = 4, n_obs_per = 6, seed = 1)
+  x <- ild_prepare(d, id = "id", time = "time")
+  x <- ild_center(x, y)
+  fit <- suppressWarnings(
+    ild_lme(y ~ y_bp + y_wp + (1 | id), data = x, ar1 = FALSE, warn_no_ar1 = FALSE)
+  )
+  expect_true(inherits(fit, "lmerMod"))
+})
+
+test_that("ild_lme warn_uncentered = FALSE suppresses uncentered warning", {
+  d <- ild_simulate(n_id = 4, n_obs_per = 6, seed = 1)
+  d$stress <- d$y + rnorm(nrow(d), 0, 0.5)
+  x <- ild_prepare(d, id = "id", time = "time")
+  fit <- ild_lme(y ~ stress + (1 | id), data = x, ar1 = FALSE, warn_no_ar1 = FALSE,
+                 warn_uncentered = FALSE)
+  expect_true(inherits(fit, "lmerMod"))
+})

@@ -51,7 +51,11 @@ diag <- ild_diagnostics(fit); diag; plot_ild_diagnostics(diag)
 - `ild_check_lags()` — lag validity (valid/invalid, pct_invalid, lag order)
 - `ild_acf()` — ACF on a variable or on residuals (pre-model check for AR1)
 - `ild_spacing_class()` — regular-ish vs irregular-ish
+- `ild_spacing()` — spacing diagnostics (median/IQR, large gaps %, CV) and AR1/CAR1 recommendation
+- `ild_center_plot()` — standalone WP vs BP density plot
 - `ild_missing_pattern()` — missingness by person/variable
+- `ild_missing_bias()` — test if missingness is associated with a predictor (informative missingness)
+- `ild_align()` — align secondary stream (e.g. wearables) to primary ILD within a time window
 - `ild_lme()` — mixed-effects model (lmer or nlme with AR1/CAR1)
 - `ild_diagnostics()` — residual ACF, residuals vs fitted/time (use `print()` for summary)
 - `plot_ild_diagnostics()` — build diagnostic plots from an `ild_diagnostics` object

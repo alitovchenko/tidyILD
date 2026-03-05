@@ -59,7 +59,6 @@ plot_ild_decomposition <- function(x, vars) {
   means_i <- tapply(x[[v]], x[[id_col]], mean, na.rm = TRUE)
   person_means <- means_i[as.character(x[[id_col]])]
   wp_vals <- x[[v]] - person_means
-  ids <- unique(x[[id_col]])
   bp_vals <- as.vector(means_i)
   df_wp <- data.frame(value = wp_vals, component = "WP (within-person deviation)")
   df_bp <- data.frame(value = bp_vals, component = "BP (person mean)")
@@ -68,4 +67,29 @@ plot_ild_decomposition <- function(x, vars) {
     ggplot2::geom_density(alpha = 0.3) +
     ggplot2::labs(title = paste0("WP vs BP: ", v), x = v, y = "Density") +
     ggplot2::theme_minimal()
+}
+
+#' Standalone WP/BP centering plot
+#'
+#' Shows within-person deviation and between-person (person mean) distribution
+#' for selected variable(s). Uses the same plot as [ild_decomposition(..., plot = TRUE)].
+#' Useful when you only want the visualization without the variance table.
+#'
+#' @param x An ILD object (see [is_ild()]).
+#' @param ... Variables to plot (tidy-select). Must be numeric. Only the first is plotted.
+#' @return A ggplot object (WP vs BP density overlay for the first selected variable).
+#' @export
+#' @examples
+#' d <- ild_simulate(n_id = 10, n_obs_per = 8, seed = 1)
+#' x <- ild_prepare(d, id = "id", time = "time")
+#' ild_center_plot(x, y)
+ild_center_plot <- function(x, ...) {
+  validate_ild(x)
+  vars <- names(dplyr::select(x, ...))
+  if (length(vars) == 0) stop("No variables selected for center plot.", call. = FALSE)
+  for (v in vars) {
+    if (!v %in% names(x)) stop("Variable '", v, "' not found in data.", call. = FALSE)
+    if (!is.numeric(x[[v]])) stop("Variable '", v, "' is not numeric.", call. = FALSE)
+  }
+  plot_ild_decomposition(x, vars)
 }

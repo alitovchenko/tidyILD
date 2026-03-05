@@ -34,10 +34,12 @@ A minimal workflow: simulate or load data, prepare with
   \item{Setup and validation}{\code{\link{ild_prepare}}, \code{\link{as_ild}},
     \code{\link{is_ild}}, \code{\link{validate_ild}}, \code{\link{ild_meta}}}
   \item{Summaries and inspection}{\code{\link{ild_summary}},
-    \code{\link{ild_spacing_class}}, \code{\link{ild_missing_pattern}},
+    \code{\link{ild_spacing_class}}, \code{\link{ild_spacing}},
+    \code{\link{ild_missing_pattern}}, \code{\link{ild_missing_bias}},
     \code{\link{ild_plot}} (types: trajectory, gaps, missingness)}
-  \item{Within-person and lags}{\code{\link{ild_center}}, \code{\link{ild_decomposition}},
-    \code{\link{ild_lag}}, \code{\link{ild_check_lags}}}
+  \item{Within-person and lags}{\code{\link{ild_center}}, \code{\link{ild_center_plot}},
+    \code{\link{ild_decomposition}}, \code{\link{ild_lag}}, \code{\link{ild_check_lags}},
+    \code{\link{ild_align}}}
   \item{Modeling}{\code{\link{ild_lme}}}
   \item{Diagnostics and visualization}{\code{\link{ild_acf}}, \code{\link{ild_diagnostics}},
     \code{\link{ild_plot}} (types: fitted, residual_acf)}

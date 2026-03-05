@@ -19,6 +19,9 @@
 #'   `~ 1 | .ild_id`). Must use `.ild_id` as grouping for correlation to match.
 #' @param warn_no_ar1 If `TRUE` (default), warn when `ar1 = FALSE` that
 #'   temporal autocorrelation is not modeled.
+#' @param warn_uncentered If `TRUE` (default), warn when a predictor in the
+#'   formula varies both within and between persons but is not decomposed
+#'   (no \code{_wp}/\code{_bp}); suggests using [ild_center()].
 #' @param ... Passed to [lme4::lmer()] or [nlme::lme()].
 #' @return A fitted model object (class `lmerMod` or `lme`) with attribute
 #'   `ild_data` (the ILD data) and `ild_ar1` (logical). When `ar1 = TRUE`,
@@ -46,8 +49,18 @@ ild_lme <- function(formula,
                     correlation_class = c("auto", "AR1", "CAR1"),
                     random = ~ 1 | .ild_id,
                     warn_no_ar1 = TRUE,
+                    warn_uncentered = TRUE,
                     ...) {
   validate_ild(data)
+  if (warn_uncentered) {
+    uncentered <- ild_detect_uncentered_predictors(data, formula)
+    if (length(uncentered) > 0) {
+      warning("Predictor(s) '", paste(uncentered, collapse = "', '"),
+              "' vary both within and between persons. Consider using ild_center(",
+              paste(uncentered, collapse = ", "), ") to separate within- and ",
+              "between-person effects and avoid conflation bias.", call. = FALSE)
+    }
+  }
   correlation_class <- match.arg(correlation_class)
   if (ar1) {
     if (ild_formula_has_random(formula)) {
@@ -116,4 +129,32 @@ ild_formula_has_random <- function(f) {
     }
   }
   FALSE
+}
+
+#' Predictors that vary both WP and BP but are not _wp/_bp (uncentered).
+#' @param data ILD object
+#' @param formula Model formula (fixed or mixed)
+#' @return Character vector of variable names to warn about (may be empty).
+#' @noRd
+ild_detect_uncentered_predictors <- function(data, formula) {
+  all_v <- all.vars(formula)
+  if (length(all_v) <= 1) return(character())
+  preds <- all_v[-1]
+  nms <- names(data)
+  id_col <- ".ild_id"
+  out <- character()
+  for (v in preds) {
+    if (!v %in% nms) next
+    if (!is.numeric(data[[v]])) next
+    if (grepl("_wp$|_bp$", v)) next
+    means_i <- tapply(data[[v]], data[[id_col]], mean, na.rm = TRUE)
+    bp_var <- stats::var(as.vector(means_i))
+    if (is.na(bp_var) || bp_var < 1e-10) next
+    wp_var_by_id <- tapply(data[[v]], data[[id_col]], function(z) stats::var(z, na.rm = TRUE))
+    wp_var_by_id[is.na(wp_var_by_id)] <- 0
+    wp_var <- mean(wp_var_by_id, na.rm = TRUE)
+    if (is.na(wp_var) || wp_var < 1e-10) next
+    out <- c(out, v)
+  }
+  unique(out)
 }
