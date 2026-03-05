@@ -27,4 +27,4 @@ reference:
   - title: Reproducibility
     contents: [ild_manifest, ild_bundle]
   - title: Utilities and data
-    contents: [ild_simulate, ema_example]
+    contents: [ild_simulate, ild_power, ema_example]

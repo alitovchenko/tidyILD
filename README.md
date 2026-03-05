@@ -68,6 +68,7 @@ diag <- ild_diagnostics(fit); diag; plot_ild_diagnostics(diag)
 - `augment_ild_model()` — tibble with .ild_id, .ild_time, outcome, .fitted, .resid
 - `tidy_ild_model()` — fixed-effect table (estimate, SE, CI, p) for both engines
 - `ild_simulate()` — simulated ILD (n_id, n_time/n_obs_per, ar1, wp_effect, bp_effect, irregular)
+- `ild_power()` — simulation-based power for a fixed effect (ild_simulate → ild_lme → effect recovery)
 - `ema_example` — built-in dataset (`data(ema_example)`)
 - **broom**: Load `broom.mixed` for `tidy(fit)` and `augment(fit)` on `ild_lme` fits.
 

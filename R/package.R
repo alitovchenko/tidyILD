@@ -40,7 +40,7 @@
 #'     \code{\link{ild_plot}} (types: fitted, residual_acf), \code{\link{ild_heatmap}},
 #'     \code{\link{ild_spaghetti}}, \code{\link{ild_circadian}}}
 #'   \item{Reproducibility}{\code{\link{ild_manifest}}, \code{\link{ild_bundle}}}
-#'   \item{Utilities and data}{\code{\link{ild_simulate}}, \code{\link{ema_example}}}
+#'   \item{Utilities and data}{\code{\link{ild_simulate}}, \code{\link{ild_power}}, \code{\link{ema_example}}}
 #'   \item{Person-level}{\code{\link{ild_person_model}}, \code{\link{ild_person_distribution}}}
 #'   \item{Model tidiers}{\code{\link{augment_ild_model}}, \code{\link{tidy_ild_model}};
 #'     \code{\link{tidy.ild_lme}}, \code{\link{augment.ild_lme}} (broom.mixed, see \code{\link{broom_ild_lme}})}
