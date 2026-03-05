@@ -1,0 +1,30 @@
+# pkgdown site config for tidyILD
+# Build with: pkgdown::build_site() from package root
+
+url: https://alitovchenko.github.io/tidyILD
+
+development:
+  mode: auto
+
+navbar:
+  structure:
+    left: [reference, articles, news]
+    right: [github]
+
+reference:
+  - title: Setup and validation
+    contents: [ild_prepare, as_ild, is_ild, validate_ild, ild_meta]
+  - title: Summaries and inspection
+    contents: [ild_summary, ild_spacing_class, ild_missing_pattern, ild_plot]
+  - title: Within-person and lags
+    contents: [ild_center, ild_lag, ild_check_lags]
+  - title: Modeling
+    contents: [ild_lme]
+  - title: Diagnostics and visualization
+    contents: [ild_diagnostics, plot_ild_diagnostics]
+  - title: Model tidiers
+    contents: [augment_ild_model, tidy_ild_model, broom_ild_lme]
+  - title: Reproducibility
+    contents: [ild_manifest, ild_bundle]
+  - title: Utilities and data
+    contents: [ild_simulate, ema_example]

@@ -1,6 +1,7 @@
 # tidyILD
 
-Tidyverse-native toolkit for **intensive longitudinal data (ILD)**.
+Tidyverse-native toolkit for **intensive longitudinal data (ILD)**.  
+Author: **Alex Litovchenko**.
 
 ## Install
 
@@ -21,14 +22,23 @@ d <- data.frame(
 )
 x <- ild_prepare(d, id = "id", time = "time", gap_threshold = 7200)
 
-# Inspect
+# Inspect (summary tibble + list)
 ild_summary(x)
 
 # Within-between decomposition
 x <- ild_center(x, mood)
 
-# Spacing-aware lags
+# Spacing-aware lags (max_gap from metadata if omitted)
 x <- ild_lag(x, mood, mode = "gap_aware", max_gap = 7200)
+
+# Missingness (summary tibble + plot + by_id)
+ild_missing_pattern(x, vars = "mood")
+
+# Fit and report: tidy fixed effects, fitted vs observed, residual ACF + QQ
+fit <- ild_lme(mood ~ 1 + (1 | id), data = x, ar1 = FALSE, warn_no_ar1 = FALSE)
+tidy_ild_model(fit)
+ild_plot(fit, type = "fitted")
+diag <- ild_diagnostics(fit); diag; plot_ild_diagnostics(diag)
 ```
 
 ## Pipeline
@@ -40,8 +50,11 @@ x <- ild_lag(x, mood, mode = "gap_aware", max_gap = 7200)
 - `ild_spacing_class()` — regular-ish vs irregular-ish
 - `ild_missing_pattern()` — missingness by person/variable
 - `ild_lme()` — mixed-effects model (lmer or nlme with AR1/CAR1)
-- `ild_diagnostics()` — residual ACF, residuals vs fitted/time
+- `ild_diagnostics()` — residual ACF, residuals vs fitted/time (use `print()` for summary)
+- `plot_ild_diagnostics()` — build diagnostic plots from an `ild_diagnostics` object
 - `ild_plot()` — trajectory, heatmap, gaps, fitted vs observed, residual ACF
+- `augment_ild_model()` — tibble with .ild_id, .ild_time, outcome, .fitted, .resid
+- `tidy_ild_model()` — fixed-effect table (estimate, SE, CI, p) for both engines
 - `ild_simulate()` — simple simulated ILD for examples
 - `ild_check_lags()` — audit lag columns (valid vs invalid)
 - `ema_example` — built-in dataset (`data(ema_example)`)
@@ -50,8 +63,13 @@ x <- ild_lag(x, mood, mode = "gap_aware", max_gap = 7200)
 ## Vignettes
 
 - **From raw data to model**: full pipeline with `ild_prepare()` through `ild_lme()` and `ild_plot()`.
+- **Short analysis report**: fit, tidy fixed effects, fitted vs observed, residual ACF and Q-Q.
 - **Within-between decomposition and irregular spacing**: centering and gap-aware lags.
 - **Glossary and quick-start**: function glossary and checklist.
+
+## pkgdown site
+
+Documentation and vignettes are built with [pkgdown](https://pkgdown.r-lib.org/). From the package root: `pkgdown::build_site()`. Config: `_pkgdown.yml`.
 
 ## License
 

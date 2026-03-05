@@ -39,8 +39,9 @@ temporal autocorrelation is not modeled.}
 \value{
 A fitted model object (class `lmerMod` or `lme`) with attribute
   `ild_data` (the ILD data) and `ild_ar1` (logical). When `ar1 = TRUE`,
-  the returned object has class `ild_lme` prepended for [ild_diagnostics()]
-  and [ild_plot()].
+  the returned object has class `ild_lme` prepended and attribute
+  `ild_random_resolved` (the formula actually passed to nlme, e.g. `~ 1 | M2ID`).
+  See [ild_diagnostics()] and [ild_plot()].
 }
 \description{
 When `ar1 = FALSE`, fits with [lme4::lmer()] (no residual correlation).
@@ -48,4 +49,17 @@ When `ar1 = TRUE`, fits with [nlme::lme()] using a residual correlation
 structure: CAR1 (continuous-time) by default for irregular spacing,
 or AR1 when spacing is regular-ish. Use [ild_spacing_class()] to inform
 the choice; override with `correlation_class`.
+}
+\examples{
+# lme4 path: formula includes random effects
+dat <- ild_simulate(n_id = 5, n_obs_per = 6, seed = 1)
+dat <- ild_prepare(dat, id = "id", time = "time")
+dat <- ild_center(dat, y)
+fit_lmer <- ild_lme(y ~ y_bp + y_wp + (1 + y_wp | id), data = dat,
+                    ar1 = FALSE, warn_no_ar1 = FALSE)
+
+# nlme path: fixed-only formula, random via random=
+fit_lme <- ild_lme(y ~ y_bp + y_wp, data = dat,
+                   random = ~ 1 + y_wp | id, ar1 = TRUE)
+
 }

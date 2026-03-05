@@ -24,3 +24,46 @@ test_that("ild_lme correlation_class override", {
   fit <- ild_lme(y ~ 1, data = x, ar1 = TRUE, correlation_class = "AR1")
   expect_equal(attr(fit, "ild_correlation_class"), "AR1")
 })
+
+test_that("ild_lme engine selection: ar1 FALSE returns lmerMod, ar1 TRUE returns lme", {
+  d <- ild_simulate(n_id = 3, n_obs_per = 5, seed = 10)
+  x <- ild_prepare(d, id = "id", time = "time")
+  fit_lmer <- ild_lme(y ~ 1 + (1 | id), data = x, ar1 = FALSE, warn_no_ar1 = FALSE)
+  fit_lme <- ild_lme(y ~ 1, data = x, ar1 = TRUE)
+  expect_true(inherits(fit_lmer, "lmerMod"))
+  expect_s3_class(fit_lme, "lme")
+})
+
+test_that("ild_lme default random mapping works when id column is not .ild_id", {
+  dat <- data.frame(
+    M2ID = rep(1:3, each = 4),
+    time = rep(as.POSIXct(0:3, origin = "1970-01-01"), 3),
+    y = rnorm(12)
+  )
+  x <- ild_prepare(dat, id = "M2ID", time = "time")
+  fit <- ild_lme(y ~ 1, data = x, ar1 = TRUE)
+  expect_equal(ild_meta(attr(fit, "ild_data"))$ild_id, "M2ID")
+  expect_s3_class(fit, "lme")
+  resolved <- attr(fit, "ild_random_resolved")
+  expect_false(is.null(resolved))
+  dep <- paste(deparse(resolved), collapse = " ")
+  expect_true(grepl("M2ID", dep, fixed = TRUE))
+  expect_false(grepl(".ild_id", dep, fixed = TRUE))
+})
+
+test_that("ild_lme ar1 TRUE rejects lme4 random syntax in formula", {
+  d <- ild_simulate(n_id = 3, n_obs_per = 5, seed = 20)
+  x <- ild_prepare(d, id = "id", time = "time")
+  expect_error(
+    ild_lme(y ~ 1 + (1 | id), data = x, ar1 = TRUE),
+    "fixed-effects-only"
+  )
+})
+
+test_that("ild_lme correlation default uses CAR1 for irregular data", {
+  d <- ild_simulate(n_id = 3, n_obs_per = 6, irregular = TRUE, seed = 30)
+  x <- ild_prepare(d, id = "id", time = "time")
+  fit <- ild_lme(y ~ 1, data = x, ar1 = TRUE)
+  expect_equal(attr(fit, "ild_correlation_class"), "CAR1")
+  expect_true(inherits(fit$modelStruct$corStruct, "corCAR1"))
+})

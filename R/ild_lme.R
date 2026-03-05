@@ -22,8 +22,21 @@
 #' @param ... Passed to [lme4::lmer()] or [nlme::lme()].
 #' @return A fitted model object (class `lmerMod` or `lme`) with attribute
 #'   `ild_data` (the ILD data) and `ild_ar1` (logical). When `ar1 = TRUE`,
-#'   the returned object has class `ild_lme` prepended for [ild_diagnostics()]
-#'   and [ild_plot()].
+#'   the returned object has class `ild_lme` prepended and attribute
+#'   `ild_random_resolved` (the formula actually passed to nlme, e.g. `~ 1 | M2ID`).
+#'   See [ild_diagnostics()] and [ild_plot()].
+#' @examples
+#' # lme4 path: formula includes random effects
+#' dat <- ild_simulate(n_id = 5, n_obs_per = 6, seed = 1)
+#' dat <- ild_prepare(dat, id = "id", time = "time")
+#' dat <- ild_center(dat, y)
+#' fit_lmer <- ild_lme(y ~ y_bp + y_wp + (1 + y_wp | id), data = dat,
+#'                     ar1 = FALSE, warn_no_ar1 = FALSE)
+#'
+#' # nlme path: fixed-only formula, random via random=
+#' fit_lme <- ild_lme(y ~ y_bp + y_wp, data = dat,
+#'                    random = ~ 1 + y_wp | id, ar1 = TRUE)
+#'
 #' @importFrom lme4 lmer
 #' @importFrom nlme corAR1 corCAR1 lme
 #' @export
@@ -37,6 +50,12 @@ ild_lme <- function(formula,
   validate_ild(data)
   correlation_class <- match.arg(correlation_class)
   if (ar1) {
+    if (ild_formula_has_random(formula)) {
+      stop("When ar1 = TRUE, use a fixed-effects-only formula and pass random ",
+           "effects via the random argument. Formula must not contain (1|id) or similar. ",
+           "In model formulas, | is interpreted as an lme4-style random-effects operator.",
+           call. = FALSE)
+    }
     if (!requireNamespace("nlme", quietly = TRUE)) {
       stop("Package 'nlme' is required for ar1 = TRUE.", call. = FALSE)
     }
@@ -67,6 +86,7 @@ ild_lme <- function(formula,
     attr(fit, "ild_data") <- data
     attr(fit, "ild_ar1") <- TRUE
     attr(fit, "ild_correlation_class") <- cor_class
+    attr(fit, "ild_random_resolved") <- random_form
     class(fit) <- c(class(fit), "ild_lme")
     return(fit)
   }
@@ -81,4 +101,19 @@ ild_lme <- function(formula,
   attr(fit, "ild_ar1") <- FALSE
   # Do not add ild_lme to class for S4 lmerMod (breaks residuals/fitted dispatch)
   fit
+}
+
+#' Detect if formula contains random effects (e.g. (1|id))
+#' @param f Formula or call to recurse.
+#' @return Logical.
+#' @noRd
+ild_formula_has_random <- function(f) {
+  if (is.call(f)) {
+    if (identical(f[[1]], as.name("|"))) return(TRUE)
+    for (i in seq_along(f)) {
+      if (i == 1) next
+      if (ild_formula_has_random(f[[i]])) return(TRUE)
+    }
+  }
+  FALSE
 }

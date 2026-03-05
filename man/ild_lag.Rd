@@ -9,7 +9,7 @@ ild_lag(
   ...,
   n = 1L,
   mode = c("index", "gap_aware", "time_window"),
-  max_gap = Inf,
+  max_gap = NULL,
   window = NULL,
   resolution = c("closest_prior", "last_in_window", "mean_in_window")
 )
@@ -23,7 +23,8 @@ ild_lag(
 
 \item{mode}{Character. \code{"index"}: row-based lag. \code{"gap_aware"}: same but NA when interval exceeds \code{max_gap}. \code{"time_window"}: value from (time - window, time] with \code{resolution}.}
 
-\item{max_gap}{Numeric. For \code{gap_aware} only. Same units as \code{.ild_time_num}.}
+\item{max_gap}{Numeric. For \code{gap_aware} only. Same units as \code{.ild_time_num}.
+If \code{NULL}, uses \code{ild_meta(x)$ild_gap_threshold} (metadata-driven default).}
 
 \item{window}{Numeric. For \code{time_window} only: time window width (same units as \code{.ild_time_num}).}
 

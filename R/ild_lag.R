@@ -9,17 +9,23 @@
 #' @param n Integer. Lag order (default 1 = previous observation).
 #' @param mode Character. \code{"index"}: row-based lag. \code{"gap_aware"}: same but NA when interval exceeds \code{max_gap}. \code{"time_window"}: value from (time - window, time] with \code{resolution}.
 #' @param max_gap Numeric. For \code{gap_aware} only. Same units as \code{.ild_time_num}.
+#'   If \code{NULL}, uses \code{ild_meta(x)$ild_gap_threshold} (metadata-driven default).
 #' @param window Numeric. For \code{time_window} only: time window width (same units as \code{.ild_time_num}).
 #' @param resolution Character. For \code{time_window}: \code{"closest_prior"}, \code{"last_in_window"}, or \code{"mean_in_window"}.
 #' @return The same ILD tibble with new lag columns. ILD attributes preserved.
 #' @importFrom dplyr group_by lag mutate select ungroup
 #' @export
 ild_lag <- function(x, ..., n = 1L, mode = c("index", "gap_aware", "time_window"),
-                   max_gap = Inf, window = NULL,
+                   max_gap = NULL, window = NULL,
                    resolution = c("closest_prior", "last_in_window", "mean_in_window")) {
   validate_ild(x)
   mode <- match.arg(mode)
   resolution <- match.arg(resolution)
+  if (mode == "gap_aware" && is.null(max_gap)) {
+    max_gap <- ild_meta(x)$ild_gap_threshold
+    if (!is.finite(max_gap)) max_gap <- Inf
+  }
+  if (mode != "gap_aware" && is.null(max_gap)) max_gap <- Inf
   n <- as.integer(n)[1]
   if (n < 1 && mode != "time_window") stop("'n' must be >= 1 for index/gap_aware.", call. = FALSE)
   vars <- names(dplyr::select(x, ...))

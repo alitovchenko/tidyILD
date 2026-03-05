@@ -43,8 +43,8 @@ A minimal workflow: simulate or load data, prepare with
     \code{\link{ild_plot}} (types: fitted, residual_acf)}
   \item{Reproducibility}{\code{\link{ild_manifest}}, \code{\link{ild_bundle}}}
   \item{Utilities and data}{\code{\link{ild_simulate}}, \code{\link{ema_example}}}
-  \item{Model tidiers}{\code{\link{tidy.ild_lme}}, \code{\link{augment.ild_lme}}
-    (see \code{\link{broom_ild_lme}})}
+  \item{Model tidiers}{\code{\link{augment_ild_model}}, \code{\link{tidy_ild_model}};
+    \code{\link{tidy.ild_lme}}, \code{\link{augment.ild_lme}} (broom.mixed, see \code{\link{broom_ild_lme}})}
 }
 }
 
@@ -54,6 +54,8 @@ A minimal workflow: simulate or load data, prepare with
 \itemize{
   \item \emph{From raw data to model with tidyILD} --- Full pipeline:
     prepare, inspect, center, lag, fit, diagnose.
+  \item \emph{Short analysis report} --- Fit, tidy fixed effects,
+    fitted vs observed, residual ACF and Q-Q.
   \item \emph{Within-between decomposition and irregular spacing} ---
     Centering (BP/WP), gap-aware lags, spacing classification.
   \item \emph{Glossary and quick-start checklist} --- Table of main
