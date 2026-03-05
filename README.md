@@ -46,7 +46,10 @@ diag <- ild_diagnostics(fit); diag; plot_ild_diagnostics(diag)
 - `ild_prepare()` — encode longitudinal structure, spacing, gaps
 - `ild_summary()` — one-shot summary
 - `ild_center()` — person-mean centering (WP/BP)
-- `ild_lag()` — index or gap-aware lags
+- `ild_lag()` — index, gap-aware, or time-window lags (supports `lubridate::hours(2)` etc.)
+- `ild_decomposition()` — WP/BP variance and ratio; optional WP vs BP density plot
+- `ild_check_lags()` — lag validity (valid/invalid, pct_invalid, lag order)
+- `ild_acf()` — ACF on a variable or on residuals (pre-model check for AR1)
 - `ild_spacing_class()` — regular-ish vs irregular-ish
 - `ild_missing_pattern()` — missingness by person/variable
 - `ild_lme()` — mixed-effects model (lmer or nlme with AR1/CAR1)
@@ -55,8 +58,8 @@ diag <- ild_diagnostics(fit); diag; plot_ild_diagnostics(diag)
 - `ild_plot()` — trajectory, heatmap, gaps, fitted vs observed, residual ACF
 - `augment_ild_model()` — tibble with .ild_id, .ild_time, outcome, .fitted, .resid
 - `tidy_ild_model()` — fixed-effect table (estimate, SE, CI, p) for both engines
-- `ild_simulate()` — simple simulated ILD for examples
-- `ild_check_lags()` — audit lag columns (valid vs invalid)
+- `ild_simulate()` — simulated ILD (n_id, n_time/n_obs_per, ar1, wp_effect, bp_effect, irregular)
+- **Future:** `ild_person_model(data, formula)` — per-person fits (N-of-1) planned.
 - `ema_example` — built-in dataset (`data(ema_example)`)
 - **broom**: Load `broom.mixed` for `tidy(fit)` and `augment(fit)` on `ild_lme` fits.
 

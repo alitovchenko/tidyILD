@@ -1,31 +1,52 @@
 #' Augment an ILD model fit with fitted values and residuals
 #'
 #' Returns a tibble with one row per observation: \code{.ild_id}, \code{.ild_time},
-#' the outcome (response) variable, \code{.fitted}, and \code{.resid}. This structure
-#' is used internally by [ild_diagnostics()] and [ild_plot()] so both can share the
-#' same data source. Random effects predictions can be added in a later version.
+#' the response variable (column name from the model formula, e.g. \code{y}),
+#' \code{.fitted}, and \code{.resid}. This structure is used internally by
+#' [ild_diagnostics()] and [ild_plot()]. Requires \code{attr(fit, "ild_data")};
+#' refit with [ild_lme()] if missing. Random effects predictions can be added later.
 #'
 #' @param fit A fitted model from [ild_lme()] (must have \code{attr(fit, "ild_data")}).
 #' @param ... Unused.
-#' @return A tibble with columns \code{.ild_id}, \code{.ild_time}, \code{outcome}
-#'   (the response variable), \code{.fitted}, \code{.resid}.
+#' @return A tibble with columns \code{.ild_id}, \code{.ild_time}, the response
+#'   (name from formula), \code{.fitted}, \code{.resid}.
 #' @export
 augment_ild_model <- function(fit, ...) {
   data <- attr(fit, "ild_data", exact = TRUE)
-  if (is.null(data)) stop("Model object missing ild_data attribute.", call. = FALSE)
+  if (is.null(data)) {
+    stop("Fit was not produced by tidyILD; refit using ild_lme() so the fit carries ild_data.",
+         call. = FALSE)
+  }
   validate_ild(data)
   res <- stats::residuals(fit)
   f <- tryCatch(stats::fitted(fit), error = function(e) NULL)
   if (is.null(f) || length(f) != nrow(data)) f <- rep(NA_real_, nrow(data))
   mf <- tryCatch(stats::model.frame(fit, data = data), error = function(e) stats::model.frame(fit))
   y <- stats::model.response(mf)
-  tibble::tibble(
+  out_name <- ild_response_name(fit)
+  out <- tibble::tibble(
     .ild_id = data[[".ild_id"]],
     .ild_time = data[[".ild_time"]],
-    outcome = y,
     .fitted = f,
     .resid = res
   )
+  out[[out_name]] <- y
+  out <- out[c(".ild_id", ".ild_time", out_name, ".fitted", ".resid")]
+  out
+}
+
+#' Get response variable name from an ild_lme fit (lmer or lme)
+#' @param fit lmerMod or lme object.
+#' @return Character; name of the response (e.g. "y"). Falls back to "outcome" if not determined.
+#' @noRd
+ild_response_name <- function(fit) {
+  f <- tryCatch(stats::formula(fit), error = function(e) NULL)
+  if (is.null(f)) return("outcome")
+  vars <- all.vars(f)
+  if (length(vars) >= 1L) return(vars[1L])
+  lhs <- tryCatch(f[[2L]], error = function(e) NULL)
+  if (!is.null(lhs)) return(deparse(lhs, nlines = 1L))
+  "outcome"
 }
 
 #' Tidy fixed effects from an ILD model fit

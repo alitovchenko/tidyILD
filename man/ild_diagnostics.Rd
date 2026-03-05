@@ -29,7 +29,7 @@ ild_diagnostics(
 \value{
 A list of class `ild_diagnostics` with: `meta` (engine, ar1, id_col, time_col,
   n_obs, n_id, type, by_id), `data` (list with `residuals` = tibble of .ild_id, .ild_time,
-  .resid, .fitted; \code{data$residuals} always exists, \code{.resid} is always filled,
+  response (name from formula), .resid, .fitted; \code{data$residuals} always exists, \code{.resid} is always filled,
   \code{.fitted} is returned when it can be computed without refitting, otherwise NA),
   `stats` (list with `acf` = list(pooled = tibble, by_id = list) when requested,
   `ar1_param` = numeric or NULL for lme). Use [plot_ild_diagnostics()] for plots.
@@ -42,7 +42,7 @@ parameter is reported when `type` includes `"residual_acf"`.
 }
 \details{
 The return value follows a stable schema: `meta` (engine, ar1, id/time columns,
-n_obs, n_id), `data$residuals` (tibble with `.ild_id`, `.ild_time`, `.resid`, `.fitted`),
+n_obs, n_id), `data$residuals` (tibble with `.ild_id`, `.ild_time`, response, `.resid`, `.fitted`),
 and `stats` (e.g. `acf`, `ar1_param`). Plots are not stored in the object; use
 [plot_ild_diagnostics()] to generate them from a diagnostics object. The column
 \code{.resid} is always filled; \code{.fitted} is filled when it can be computed

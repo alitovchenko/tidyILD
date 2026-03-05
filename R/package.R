@@ -31,10 +31,10 @@
 #'   \item{Summaries and inspection}{\code{\link{ild_summary}},
 #'     \code{\link{ild_spacing_class}}, \code{\link{ild_missing_pattern}},
 #'     \code{\link{ild_plot}} (types: trajectory, gaps, missingness)}
-#'   \item{Within-person and lags}{\code{\link{ild_center}}, \code{\link{ild_lag}},
-#'     \code{\link{ild_check_lags}}}
+#'   \item{Within-person and lags}{\code{\link{ild_center}}, \code{\link{ild_decomposition}},
+#'     \code{\link{ild_lag}}, \code{\link{ild_check_lags}}}
 #'   \item{Modeling}{\code{\link{ild_lme}}}
-#'   \item{Diagnostics and visualization}{\code{\link{ild_diagnostics}},
+#'   \item{Diagnostics and visualization}{\code{\link{ild_acf}}, \code{\link{ild_diagnostics}},
 #'     \code{\link{ild_plot}} (types: fitted, residual_acf)}
 #'   \item{Reproducibility}{\code{\link{ild_manifest}}, \code{\link{ild_bundle}}}
 #'   \item{Utilities and data}{\code{\link{ild_simulate}}, \code{\link{ema_example}}}
@@ -70,6 +70,9 @@
 #'     with AR1 or CAR1 for residual autocorrelation;
 #'     \code{\link{ild_spacing_class}} helps choose \code{regular-ish} vs
 #'     \code{irregular-ish} spacing.
+#'   \item \strong{Future:} \code{ild_person_model(data, formula)} is planned to fit
+#'     models separately per participant (e.g. id and slope per person) for N-of-1 or
+#'     idiographic analysis.
 #' }
 #'
 #' @author Alex Litovchenko \email{al4877@columbia.edu}

@@ -12,12 +12,13 @@ augment_ild_model(fit, ...)
 \item{...}{Unused.}
 }
 \value{
-A tibble with columns \code{.ild_id}, \code{.ild_time}, \code{outcome}
-  (the response variable), \code{.fitted}, \code{.resid}.
+A tibble with columns \code{.ild_id}, \code{.ild_time}, the response
+  (name from formula), \code{.fitted}, \code{.resid}.
 }
 \description{
 Returns a tibble with one row per observation: \code{.ild_id}, \code{.ild_time},
-the outcome (response) variable, \code{.fitted}, and \code{.resid}. This structure
-is used internally by [ild_diagnostics()] and [ild_plot()] so both can share the
-same data source. Random effects predictions can be added in a later version.
+the response variable (column name from the model formula, e.g. \code{y}),
+\code{.fitted}, and \code{.resid}. This structure is used internally by
+[ild_diagnostics()] and [ild_plot()]. Requires \code{attr(fit, "ild_data")};
+refit with [ild_lme()] if missing. Random effects predictions can be added later.
 }

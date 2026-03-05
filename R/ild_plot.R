@@ -137,7 +137,9 @@ ild_plot_missingness <- function(data, vars, id_var, time_var) {
 
 ild_plot_fitted <- function(fit, data) {
   aug <- augment_ild_model(fit)
-  ggplot2::ggplot(aug, ggplot2::aes(x = .data$outcome, y = .data$.fitted, color = .data$.ild_id)) +
+  resp_name <- setdiff(names(aug), c(".ild_id", ".ild_time", ".fitted", ".resid"))[1L]
+  if (is.na(resp_name)) resp_name <- "outcome"
+  ggplot2::ggplot(aug, ggplot2::aes(x = .data[[resp_name]], y = .data$.fitted, color = .data$.ild_id)) +
     ggplot2::geom_point(alpha = 0.7) +
     ggplot2::geom_abline(slope = 1, intercept = 0, linetype = 2) +
     ggplot2::labs(x = "Observed", y = "Fitted", title = "Fitted vs Observed") +

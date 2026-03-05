@@ -17,11 +17,11 @@ reference:
   - title: Summaries and inspection
     contents: [ild_summary, ild_spacing_class, ild_missing_pattern, ild_plot]
   - title: Within-person and lags
-    contents: [ild_center, ild_lag, ild_check_lags]
+    contents: [ild_center, ild_decomposition, ild_lag, ild_check_lags]
   - title: Modeling
     contents: [ild_lme]
   - title: Diagnostics and visualization
-    contents: [ild_diagnostics, plot_ild_diagnostics]
+    contents: [ild_acf, ild_diagnostics, plot_ild_diagnostics]
   - title: Model tidiers
     contents: [augment_ild_model, tidy_ild_model, broom_ild_lme]
   - title: Reproducibility

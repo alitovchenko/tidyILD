@@ -6,7 +6,7 @@
 #' parameter is reported when `type` includes `"residual_acf"`.
 #'
 #' The return value follows a stable schema: `meta` (engine, ar1, id/time columns,
-#' n_obs, n_id), `data$residuals` (tibble with `.ild_id`, `.ild_time`, `.resid`, `.fitted`),
+#' n_obs, n_id), `data$residuals` (tibble with `.ild_id`, `.ild_time`, response, `.resid`, `.fitted`),
 #' and `stats` (e.g. `acf`, `ar1_param`). Plots are not stored in the object; use
 #' [plot_ild_diagnostics()] to generate them from a diagnostics object. The column
 #' \code{.resid} is always filled; \code{.fitted} is filled when it can be computed
@@ -25,7 +25,7 @@
 #' @param ... Unused.
 #' @return A list of class `ild_diagnostics` with: `meta` (engine, ar1, id_col, time_col,
 #'   n_obs, n_id, type, by_id), `data` (list with `residuals` = tibble of .ild_id, .ild_time,
-#'   .resid, .fitted; \code{data$residuals} always exists, \code{.resid} is always filled,
+#'   response (name from formula), .resid, .fitted; \code{data$residuals} always exists, \code{.resid} is always filled,
 #'   \code{.fitted} is returned when it can be computed without refitting, otherwise NA),
 #'   `stats` (list with `acf` = list(pooled = tibble, by_id = list) when requested,
 #'   `ar1_param` = numeric or NULL for lme). Use [plot_ild_diagnostics()] for plots.
@@ -56,13 +56,15 @@ ild_diagnostics <- function(object, data = NULL, type = c("residual_acf", "resid
     if (is.null(f) || length(f) != nrow(data)) f <- rep(NA_real_, nrow(data))
     mf <- tryCatch(stats::model.frame(object, data = data), error = function(e) stats::model.frame(object))
     y <- tryCatch(stats::model.response(mf), error = function(e) rep(NA_real_, nrow(data)))
+    out_name <- ild_response_name(object)
     data_resid <- tibble::tibble(
       .ild_id = data[[id_col]],
       .ild_time = data[[".ild_time"]],
-      outcome = y,
       .fitted = f,
       .resid = res
     )
+    data_resid[[out_name]] <- y
+    data_resid <- data_resid[c(".ild_id", ".ild_time", out_name, ".fitted", ".resid")]
   }
   res <- data_resid$.resid
   engine <- if (inherits(object, "lme")) "lme" else "lmer"

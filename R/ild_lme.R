@@ -83,7 +83,7 @@ ild_lme <- function(formula,
       correlation = cor_form,
       ...
     )
-    attr(fit, "ild_data") <- data
+    attr(fit, "ild_data") <- data  # both engines set ild_data for augment_ild_model/diagnostics
     attr(fit, "ild_ar1") <- TRUE
     attr(fit, "ild_correlation_class") <- cor_class
     attr(fit, "ild_random_resolved") <- random_form
@@ -97,7 +97,7 @@ ild_lme <- function(formula,
     stop("Package 'lme4' is required for ar1 = FALSE.", call. = FALSE)
   }
   fit <- lme4::lmer(formula, data = data, ...)
-  attr(fit, "ild_data") <- data
+  attr(fit, "ild_data") <- data  # both engines set ild_data for augment_ild_model/diagnostics
   attr(fit, "ild_ar1") <- FALSE
   # Do not add ild_lme to class for S4 lmerMod (breaks residuals/fitted dispatch)
   fit
