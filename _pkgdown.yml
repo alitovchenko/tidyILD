@@ -15,13 +15,13 @@ reference:
   - title: Setup and validation
     contents: [ild_prepare, as_ild, is_ild, validate_ild, ild_meta]
   - title: Summaries and inspection
-    contents: [ild_summary, ild_spacing_class, ild_spacing, ild_missing_pattern, ild_missing_bias, ild_plot]
+    contents: [ild_summary, ild_spacing_class, ild_spacing, ild_design_check, ild_missing_pattern, ild_missing_bias, ild_plot]
   - title: Within-person and lags
-    contents: [ild_center, ild_center_plot, ild_decomposition, ild_lag, ild_check_lags, ild_align]
+    contents: [ild_center, ild_center_plot, ild_decomposition, ild_lag, ild_check_lags, ild_crosslag, ild_align]
   - title: Modeling
-    contents: [ild_lme]
+    contents: [ild_lme, ild_person_model, ild_person_distribution]
   - title: Diagnostics and visualization
-    contents: [ild_acf, ild_diagnostics, plot_ild_diagnostics]
+    contents: [ild_acf, ild_diagnostics, plot_ild_diagnostics, ild_heatmap, ild_spaghetti, ild_circadian]
   - title: Model tidiers
     contents: [augment_ild_model, tidy_ild_model, broom_ild_lme]
   - title: Reproducibility

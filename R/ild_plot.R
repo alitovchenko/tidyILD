@@ -158,3 +158,27 @@ ild_plot_residual_acf <- function(fit, data) {
     ggplot2::labs(x = "Lag", y = "ACF", title = "Residual ACF") +
     ggplot2::theme_minimal()
 }
+
+#' ILD heatmap (alias for ild_plot with type = "heatmap")
+#'
+#' Person x time heatmap of a variable. See [ild_plot()].
+#' @param x ILD object or fitted model (for heatmap, data are taken from ild_data if model).
+#' @param var Variable to plot. If NULL, single data column is used.
+#' @param ... Passed to [ild_plot()] (e.g. id_var, time_var).
+#' @return A ggplot object.
+#' @export
+ild_heatmap <- function(x, var = NULL, ...) {
+  ild_plot(x, type = "heatmap", var = var, ...)
+}
+
+#' ILD spaghetti / person trajectories (alias for ild_plot with type = "trajectory")
+#'
+#' Line plot of variable over time, one line per person. See [ild_plot()].
+#' @param x ILD object or fitted model.
+#' @param var Variable to plot. If NULL, single data column is used.
+#' @param ... Passed to [ild_plot()] (e.g. max_ids, seed, id_var, time_var).
+#' @return A ggplot object.
+#' @export
+ild_spaghetti <- function(x, var = NULL, ...) {
+  ild_plot(x, type = "trajectory", var = var, ...)
+}

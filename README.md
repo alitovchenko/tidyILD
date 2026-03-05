@@ -49,21 +49,25 @@ diag <- ild_diagnostics(fit); diag; plot_ild_diagnostics(diag)
 - `ild_lag()` — index, gap-aware, or time-window lags (supports `lubridate::hours(2)` etc.)
 - `ild_decomposition()` — WP/BP variance and ratio; optional WP vs BP density plot
 - `ild_check_lags()` — lag validity (valid/invalid, pct_invalid, lag order)
+- `ild_crosslag()` — one-call cross-lag: lag predictor, check lags, fit outcome ~ lag
 - `ild_acf()` — ACF on a variable or on residuals (pre-model check for AR1)
 - `ild_spacing_class()` — regular-ish vs irregular-ish
 - `ild_spacing()` — spacing diagnostics (median/IQR, large gaps %, CV) and AR1/CAR1 recommendation
+- `ild_design_check()` — aggregate spacing, WP/BP, missingness, and recommendations
 - `ild_center_plot()` — standalone WP vs BP density plot
 - `ild_missing_pattern()` — missingness by person/variable
 - `ild_missing_bias()` — test if missingness is associated with a predictor (informative missingness)
 - `ild_align()` — align secondary stream (e.g. wearables) to primary ILD within a time window
 - `ild_lme()` — mixed-effects model (lmer or nlme with AR1/CAR1)
+- `ild_person_model()` — fit model per person (N-of-1); `ild_person_distribution()` — plot distribution of estimates
 - `ild_diagnostics()` — residual ACF, residuals vs fitted/time (use `print()` for summary)
 - `plot_ild_diagnostics()` — build diagnostic plots from an `ild_diagnostics` object
 - `ild_plot()` — trajectory, heatmap, gaps, fitted vs observed, residual ACF
+- `ild_heatmap()`, `ild_spaghetti()` — aliases for heatmap and trajectory plots
+- `ild_circadian()` — variable by hour of day (when time is POSIXct)
 - `augment_ild_model()` — tibble with .ild_id, .ild_time, outcome, .fitted, .resid
 - `tidy_ild_model()` — fixed-effect table (estimate, SE, CI, p) for both engines
 - `ild_simulate()` — simulated ILD (n_id, n_time/n_obs_per, ar1, wp_effect, bp_effect, irregular)
-- **Future:** `ild_person_model(data, formula)` — per-person fits (N-of-1) planned.
 - `ema_example` — built-in dataset (`data(ema_example)`)
 - **broom**: Load `broom.mixed` for `tidy(fit)` and `augment(fit)` on `ild_lme` fits.
 

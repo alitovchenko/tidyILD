@@ -1,6 +1,6 @@
 Package: tidyILD
 Title: Tidy Intensive Longitudinal Data Analysis
-Version: 0.0.1
+Version: 0.2.0
 Authors@R: person(given = "Alex", family = "Litovchenko", role = c("aut", "cre"), email = "al4877@columbia.edu")
 Description: An opinionated, tidyverse-native toolkit for intensive longitudinal
   data (ILD). Encodes time structure, enforces within-between decomposition,
@@ -35,16 +35,20 @@ Collate:
   'ild_lag.R'
   'ild_spacing_class.R'
   'ild_spacing.R'
+  'ild_design_check.R'
   'ild_missing_pattern.R'
   'ild_missing_bias.R'
   'ild_check_lags.R'
+  'ild_crosslag.R'
   'ild_acf.R'
   'ild_align.R'
   'ild_lme.R'
+  'ild_person_model.R'
   'ild_model_tidiers.R'
   'ild_diagnostics.R'
   'ild_manifest.R'
   'ild_plot.R'
+  'ild_circadian.R'
   'ild_simulate.R'
   'data.R'
   'broom.R'

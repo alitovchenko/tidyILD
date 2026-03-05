@@ -35,16 +35,18 @@ A minimal workflow: simulate or load data, prepare with
     \code{\link{is_ild}}, \code{\link{validate_ild}}, \code{\link{ild_meta}}}
   \item{Summaries and inspection}{\code{\link{ild_summary}},
     \code{\link{ild_spacing_class}}, \code{\link{ild_spacing}},
-    \code{\link{ild_missing_pattern}}, \code{\link{ild_missing_bias}},
-    \code{\link{ild_plot}} (types: trajectory, gaps, missingness)}
+    \code{\link{ild_design_check}}, \code{\link{ild_missing_pattern}},
+    \code{\link{ild_missing_bias}}, \code{\link{ild_plot}} (types: trajectory, gaps, missingness)}
   \item{Within-person and lags}{\code{\link{ild_center}}, \code{\link{ild_center_plot}},
     \code{\link{ild_decomposition}}, \code{\link{ild_lag}}, \code{\link{ild_check_lags}},
-    \code{\link{ild_align}}}
-  \item{Modeling}{\code{\link{ild_lme}}}
+    \code{\link{ild_crosslag}}, \code{\link{ild_align}}}
+  \item{Modeling}{\code{\link{ild_lme}}, \code{\link{ild_person_model}}}
   \item{Diagnostics and visualization}{\code{\link{ild_acf}}, \code{\link{ild_diagnostics}},
-    \code{\link{ild_plot}} (types: fitted, residual_acf)}
+    \code{\link{ild_plot}} (types: fitted, residual_acf), \code{\link{ild_heatmap}},
+    \code{\link{ild_spaghetti}}, \code{\link{ild_circadian}}}
   \item{Reproducibility}{\code{\link{ild_manifest}}, \code{\link{ild_bundle}}}
-  \item{Utilities and data}{\code{\link{ild_simulate}}, \code{\link{ema_example}}}
+  \item{Utilities and data}{\code{\link{ild_simulate}}, \code{\link{ild_power}}, \code{\link{ema_example}}}
+  \item{Person-level}{\code{\link{ild_person_model}}, \code{\link{ild_person_distribution}}}
   \item{Model tidiers}{\code{\link{augment_ild_model}}, \code{\link{tidy_ild_model}};
     \code{\link{tidy.ild_lme}}, \code{\link{augment.ild_lme}} (broom.mixed, see \code{\link{broom_ild_lme}})}
 }
@@ -81,9 +83,9 @@ A minimal workflow: simulate or load data, prepare with
     with AR1 or CAR1 for residual autocorrelation;
     \code{\link{ild_spacing_class}} helps choose \code{regular-ish} vs
     \code{irregular-ish} spacing.
-  \item \strong{Future:} \code{ild_person_model(data, formula)} is planned to fit
-    models separately per participant (e.g. id and slope per person) for N-of-1 or
-    idiographic analysis.
+  \item \strong{Person-level:} \code{\link{ild_person_model}} fits models separately
+    per participant; \code{\link{ild_person_distribution}} plots the distribution of
+    estimates across persons (N-of-1 / idiographic).
 }
 }
 

@@ -57,14 +57,23 @@ plots$qq
 
 ## With AR1 (nlme)
 
-Same workflow with residual autocorrelation:
+Same workflow with residual autocorrelation (nlme path). If the AR1 model fails to converge on this small example, we show the code only; in practice use more data or a different seed.
 
 ```{r fit_ar1}
-fit_ar1 <- ild_lme(y ~ y_bp + y_wp, data = x, random = ~ 1 | id, ar1 = TRUE)
-tidy_ild_model(fit_ar1)
+fit_ar1 <- tryCatch(
+  ild_lme(y ~ y_bp + y_wp, data = x, random = ~ 1 | id, ar1 = TRUE),
+  error = function(e) NULL
+)
+if (!is.null(fit_ar1)) {
+  tidy_ild_model(fit_ar1)
+} else {
+  message("AR1 fit did not converge on this run; use ild_lme(..., ar1 = TRUE) with your data.")
+}
 ```
 
-```{r diag_ar1}
-diag_ar1 <- ild_diagnostics(fit_ar1, type = c("residual_acf", "qq"))
-diag_ar1
+```{r diag_ar1, eval = !is.null(fit_ar1)}
+if (!is.null(fit_ar1)) {
+  diag_ar1 <- ild_diagnostics(fit_ar1, type = c("residual_acf", "qq"))
+  diag_ar1
+}
 ```
