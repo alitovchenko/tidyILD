@@ -18,10 +18,18 @@
 #' @export
 #' @examples
 #' prim <- ild_prepare(
-#'   data.frame(id = rep(1:2, each = 3), time = as.POSIXct(rep(c(0, 3600, 7200), 2), origin = "1970-01-01"), y = rnorm(6)),
+#'   data.frame(
+#'     id = rep(1:2, each = 3),
+#'     time = as.POSIXct(rep(c(0, 3600, 7200), 2), origin = "1970-01-01"),
+#'     y = rnorm(6)
+#'   ),
 #'   id = "id", time = "time"
 #' )
-#' sec <- data.frame(id = rep(1:2, each = 4), time = as.POSIXct(rep(c(0, 1800, 3600, 5400), 2), origin = "1970-01-01"), heart_rate = 60 + rnorm(8, 0, 5))
+#' sec <- data.frame(
+#'   id = rep(1:2, each = 4),
+#'   time = as.POSIXct(rep(c(0, 1800, 3600, 5400), 2), origin = "1970-01-01"),
+#'   heart_rate = 60 + rnorm(8, 0, 5)
+#' )
 #' ild_align(prim, sec, "heart_rate", window = 3600, fun = "mean")
 ild_align <- function(primary, secondary, value_var, window,
                      time_secondary = "time", fun = c("mean", "median", "closest")) {
@@ -59,5 +67,10 @@ ild_align <- function(primary, secondary, value_var, window,
   }
   out <- tibble::as_tibble(primary)
   out[[paste0(value_var, "_aligned")]] <- aligned
-  restore_ild_attrs(primary, out)
+  out <- restore_ild_attrs(primary, out)
+  out <- ild_add_step(out, "ild_align",
+    list(value_var = value_var, window = window, time_secondary = time_secondary, fun = fun),
+    list(created = paste0(value_var, "_aligned"))
+  )
+  out
 }

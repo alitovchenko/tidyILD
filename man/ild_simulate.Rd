@@ -43,5 +43,6 @@ AR(1) within-person correlation and configurable WP/BP variance. Use
 \examples{
 d <- ild_simulate(n_id = 3, n_obs_per = 5, seed = 1)
 x <- ild_prepare(d, id = "id", time = "time")
-d2 <- ild_simulate(n_id = 100, n_time = 50, ar1 = 0.4, wp_effect = 0.6, bp_effect = 0.3, irregular = TRUE, seed = 1)
+d2 <- ild_simulate(n_id = 100, n_time = 50, ar1 = 0.4, wp_effect = 0.6,
+  bp_effect = 0.3, irregular = TRUE, seed = 1)
 }

@@ -19,7 +19,9 @@ reference:
   - title: Within-person and lags
     contents: [ild_center, ild_center_plot, ild_decomposition, ild_lag, ild_check_lags, ild_crosslag, ild_align]
   - title: Modeling
-    contents: [ild_lme, ild_person_model, ild_person_distribution]
+    contents: [ild_lme, ild_person_model, ild_person_distribution, ild_tvem, ild_tvem_plot]
+  - title: Robust SE and missingness
+    contents: [ild_robust_se, ild_missing_model, ild_ipw_weights, ild_ipw_refit]
   - title: Diagnostics and visualization
     contents: [ild_acf, ild_diagnostics, plot_ild_diagnostics, ild_heatmap, ild_spaghetti, ild_circadian]
   - title: Model tidiers

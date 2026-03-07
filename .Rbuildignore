@@ -13,3 +13,5 @@
 ^Meta$
 ^\.DS_Store
 ^downloads$
+^HANDOFF\.md$
+^_pkgdown\.yml$

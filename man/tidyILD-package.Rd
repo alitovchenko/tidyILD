@@ -36,18 +36,24 @@ A minimal workflow: simulate or load data, prepare with
   \item{Summaries and inspection}{\code{\link{ild_summary}},
     \code{\link{ild_spacing_class}}, \code{\link{ild_spacing}},
     \code{\link{ild_design_check}}, \code{\link{ild_missing_pattern}},
-    \code{\link{ild_missing_bias}}, \code{\link{ild_plot}} (types: trajectory, gaps, missingness)}
+    \code{\link{ild_missing_bias}}, \code{\link{ild_missing_model}},
+    \code{\link{ild_ipw_weights}}, \code{\link{ild_ipw_refit}},
+    \code{\link{ild_plot}} (types: trajectory, gaps, missingness)}
   \item{Within-person and lags}{\code{\link{ild_center}}, \code{\link{ild_center_plot}},
     \code{\link{ild_decomposition}}, \code{\link{ild_lag}}, \code{\link{ild_check_lags}},
     \code{\link{ild_crosslag}}, \code{\link{ild_align}}}
-  \item{Modeling}{\code{\link{ild_lme}}, \code{\link{ild_person_model}}}
+  \item{Modeling}{\code{\link{ild_lme}}, \code{\link{ild_person_model}},
+    \code{\link{ild_tvem}} (time-varying effects)}
   \item{Diagnostics and visualization}{\code{\link{ild_acf}}, \code{\link{ild_diagnostics}},
     \code{\link{ild_plot}} (types: fitted, residual_acf), \code{\link{ild_heatmap}},
-    \code{\link{ild_spaghetti}}, \code{\link{ild_circadian}}}
+    \code{\link{ild_spaghetti}}, \code{\link{ild_circadian}}, \code{\link{ild_tvem_plot}}}
+  \item{Provenance and methods}{\code{\link{ild_provenance}}, \code{\link{ild_history}},
+    \code{\link{ild_methods}}, \code{\link{ild_compare_pipelines}}, \code{\link{ild_export_provenance}}}
   \item{Reproducibility}{\code{\link{ild_manifest}}, \code{\link{ild_bundle}}}
   \item{Utilities and data}{\code{\link{ild_simulate}}, \code{\link{ild_power}}, \code{\link{ema_example}}}
   \item{Person-level}{\code{\link{ild_person_model}}, \code{\link{ild_person_distribution}}}
-  \item{Model tidiers}{\code{\link{augment_ild_model}}, \code{\link{tidy_ild_model}};
+  \item{Model tidiers}{\code{\link{augment_ild_model}}, \code{\link{tidy_ild_model}}
+    (model or robust SE via \code{se = "robust"}), \code{\link{ild_robust_se}};
     \code{\link{tidy.ild_lme}}, \code{\link{augment.ild_lme}} (broom.mixed, see \code{\link{broom_ild_lme}})}
 }
 }

@@ -40,9 +40,17 @@ have different timestamps.
 }
 \examples{
 prim <- ild_prepare(
-  data.frame(id = rep(1:2, each = 3), time = as.POSIXct(rep(c(0, 3600, 7200), 2), origin = "1970-01-01"), y = rnorm(6)),
+  data.frame(
+    id = rep(1:2, each = 3),
+    time = as.POSIXct(rep(c(0, 3600, 7200), 2), origin = "1970-01-01"),
+    y = rnorm(6)
+  ),
   id = "id", time = "time"
 )
-sec <- data.frame(id = rep(1:2, each = 4), time = as.POSIXct(rep(c(0, 1800, 3600, 5400), 2), origin = "1970-01-01"), heart_rate = 60 + rnorm(8, 0, 5))
+sec <- data.frame(
+  id = rep(1:2, each = 4),
+  time = as.POSIXct(rep(c(0, 1800, 3600, 5400), 2), origin = "1970-01-01"),
+  heart_rate = 60 + rnorm(8, 0, 5)
+)
 ild_align(prim, sec, "heart_rate", window = 3600, fun = "mean")
 }

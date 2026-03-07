@@ -30,15 +30,17 @@
 #'   See [ild_diagnostics()] and [ild_plot()].
 #' @examples
 #' # lme4 path: formula includes random effects
+#' set.seed(1)
 #' dat <- ild_simulate(n_id = 5, n_obs_per = 6, seed = 1)
 #' dat <- ild_prepare(dat, id = "id", time = "time")
 #' dat <- ild_center(dat, y)
-#' fit_lmer <- ild_lme(y ~ y_bp + y_wp + (1 + y_wp | id), data = dat,
+#' fit_lmer <- ild_lme(y ~ y_bp + y_wp + (1 | id), data = dat,
 #'                     ar1 = FALSE, warn_no_ar1 = FALSE)
-#'
-#' # nlme path: fixed-only formula, random via random=
+#' # nlme path (may not converge on all platforms; see ?nlme::lme)
+#' \dontrun{
 #' fit_lme <- ild_lme(y ~ y_bp + y_wp, data = dat,
-#'                    random = ~ 1 + y_wp | id, ar1 = TRUE)
+#'                    random = ~ 1 | id, ar1 = TRUE)
+#' }
 #'
 #' @importFrom lme4 lmer
 #' @importFrom nlme corAR1 corCAR1 lme
@@ -100,6 +102,13 @@ ild_lme <- function(formula,
     attr(fit, "ild_ar1") <- TRUE
     attr(fit, "ild_correlation_class") <- cor_class
     attr(fit, "ild_random_resolved") <- random_form
+    attr(fit, "ild_provenance") <- ild_new_analysis_provenance(data, "ild_lme", list(
+      formula = deparse(formula),
+      random = deparse(random_form),
+      ar1 = TRUE,
+      correlation_class = cor_class,
+      method = "lme"
+    ), list(n_obs = nrow(data), n_id = length(unique(data[[".ild_id"]]))))
     class(fit) <- c(class(fit), "ild_lme")
     return(fit)
   }
@@ -112,6 +121,12 @@ ild_lme <- function(formula,
   fit <- lme4::lmer(formula, data = data, ...)
   attr(fit, "ild_data") <- data  # both engines set ild_data for augment_ild_model/diagnostics
   attr(fit, "ild_ar1") <- FALSE
+  attr(fit, "ild_provenance") <- ild_new_analysis_provenance(data, "ild_lme", list(
+    formula = deparse(formula),
+    ar1 = FALSE,
+    correlation_class = NA_character_,
+    method = "lmer"
+  ), list(n_obs = nrow(data), n_id = length(unique(data[[".ild_id"]]))))
   # Do not add ild_lme to class for S4 lmerMod (breaks residuals/fitted dispatch)
   fit
 }

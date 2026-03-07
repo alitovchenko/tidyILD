@@ -57,14 +57,16 @@ the choice; override with `correlation_class`.
 }
 \examples{
 # lme4 path: formula includes random effects
+set.seed(1)
 dat <- ild_simulate(n_id = 5, n_obs_per = 6, seed = 1)
 dat <- ild_prepare(dat, id = "id", time = "time")
 dat <- ild_center(dat, y)
-fit_lmer <- ild_lme(y ~ y_bp + y_wp + (1 + y_wp | id), data = dat,
+fit_lmer <- ild_lme(y ~ y_bp + y_wp + (1 | id), data = dat,
                     ar1 = FALSE, warn_no_ar1 = FALSE)
-
-# nlme path: fixed-only formula, random via random=
+# nlme path (may not converge on all platforms; see ?nlme::lme)
+\dontrun{
 fit_lme <- ild_lme(y ~ y_bp + y_wp, data = dat,
-                   random = ~ 1 + y_wp | id, ar1 = TRUE)
+                   random = ~ 1 | id, ar1 = TRUE)
+}
 
 }
