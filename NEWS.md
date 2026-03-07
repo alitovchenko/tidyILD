@@ -1,43 +1,37 @@
 # tidyILD 0.2.0
 
-## Major additions
+This release builds on four pillars: **methodological safeguards**, **modeling breadth**, **provenance tracking**, and **reporting tools**.
 
-- **Robust uncertainty**
-  - New function `ild_robust_se()` providing cluster-robust variance estimators (CR0/CR2/CR3) using the clubSandwich package.
-  - `tidy_ild_model()` gains `se = "robust"` and `robust_type` arguments; CIs and p-values use Wald normal approximation when using robust SEs.
+## Safeguards
 
-- **Missingness and IPW diagnostics**
-  - `ild_missing_model()` fits models for missingness (glm/glmer) and returns fit, tidy table, and predicted probabilities.
-  - `ild_ipw_weights()` generates inverse probability weights (stabilized or not, with optional trim).
-  - `ild_ipw_refit()` refits ild_lme models using IPW (lmer backend; nlme not supported). Documented as diagnostic/sensitivity tooling, not a full MNAR solution.
+- **Robust uncertainty:** `ild_robust_se()` provides cluster-robust variance estimators (CR0/CR2/CR3) via clubSandwich. `tidy_ild_model()` gains `se = "robust"` and `robust_type`; CIs and p-values use Wald normal approximation when using robust SEs.
+- **Missingness and IPW:** `ild_missing_model()` fits missingness models (glm/glmer); `ild_ipw_weights()` generates inverse probability weights (stabilized or not, optional trim); `ild_ipw_refit()` refits ild_lme with IPW (lmer only). Documented as diagnostic/sensitivity tooling, not a full MNAR solution.
+- **Design and diagnostics:** `ild_design_check()` aggregates spacing, WP/BP decomposition, and missingness with recommendations. `ild_spacing()` reports interval stats and AR1/CAR1 recommendation. `ild_missing_bias()` tests whether missingness is associated with a predictor. `ild_center_plot()` for WP vs BP density. WP/BP safeguard warning in `ild_lme()` when predictors vary at both levels (suggests `ild_center()`).
 
-- **Time-varying effects**
-  - `ild_tvem()` fits time-varying effect models using mgcv (s(time) + s(time, by = predictor) + optional random intercept by person).
-  - `ild_tvem_plot()` visualizes the time-varying coefficient curve with confidence band.
+## Modeling breadth
 
-- **Power analysis**
-  - `ild_power()` for simulation-based power of a fixed effect (ild_simulate -> ild_lme -> effect recovery). Supports lmer and nlme; lmerMod inference uses Wald z-approximation when p-values are not provided by the backend.
+- **Time-varying effects:** `ild_tvem()` fits time-varying effect models using mgcv; `ild_tvem_plot()` visualizes the coefficient curve with confidence band.
+- **Power analysis:** `ild_power()` for simulation-based power of a fixed effect (ild_simulate -> ild_lme -> effect recovery); supports lmer and nlme.
+- **Cross-lag and person-level:** `ild_crosslag()` one-call pipeline (ild_lag -> ild_check_lags -> ild_lme). `ild_person_model()` and `ild_person_distribution()` for per-person fits and estimate distribution.
+- **Multi-stream alignment:** `ild_align()` aligns a secondary stream to primary ILD within a time window (e.g. self-report + wearables).
+- **Visualization:** `ild_heatmap()`, `ild_spaghetti()`, `ild_circadian()` (time-of-day patterns when time is POSIXct).
 
-- **Design and diagnostics**
-  - `ild_design_check()` aggregates spacing, WP/BP decomposition, and missingness with a custom print method.
-  - `ild_spacing()` reports interval stats (median, IQR, large gaps %, CV) and AR1/CAR1 recommendation.
-  - `ild_missing_bias()` tests whether missingness is associated with a predictor.
-  - `ild_center_plot()` for standalone WP vs BP density plot.
+## Provenance
 
-- **Cross-lag and person-level**
-  - `ild_crosslag()` one-call pipeline: ild_lag -> ild_check_lags -> ild_lme; returns fit, lag coefficient, and optional diagnostics.
-  - `ild_person_model()` and `ild_person_distribution()` for per-person fits and visualization of estimate distribution.
+- **Data and analysis provenance:** Preprocessing steps (ild_prepare, ild_center, ild_lag, ild_align, ild_ipw_weights) and analysis steps (ild_lme, ild_diagnostics, ild_tvem, ild_power, ild_missing_model, ild_crosslag, ild_ipw_refit) are recorded with a stable schema (version, schema_version, object_type, step_id, args, outputs).
+- **ild_provenance()** and **ild_history()** return or print the recorded steps. **ild_export_provenance()** writes provenance to JSON or YAML for reproducibility supplements and archiving.
+- **ild_compare_pipelines()** compares two ILD or model objects and reports differing steps and arguments.
 
-- **Visualization**
-  - `ild_heatmap()` and `ild_spaghetti()` as thin aliases for `ild_plot(type = "heatmap")` and `ild_plot(type = "trajectory")`.
-  - `ild_circadian()` for time-of-day patterns (when time is POSIXct).
-  - `ild_align()` for multi-stream alignment within a time window (e.g. self-report + wearables).
+## Reporting
+
+- **ild_methods()** generates a methods-style narrative from provenance (row counts, AR1/CAR1, created variables, IPW and robust SE when specified). Optional `robust_se` argument for cluster-robust SE mention.
+- **ild_report()** returns a standardized list: `meta` (n_obs, n_id, engine), `methods`, `model_table`, `diagnostics_summary`, `provenance`, `provenance_export_path`. Optional provenance export in one call.
+- New vignette: *Reproducible ILD workflows with tidyILD provenance* (ild_history, ild_methods, ild_report, export, compare).
 
 ## Other improvements
 
-- **Model tidiers:** `augment_ild_model()` and `tidy_ild_model()` with consistent columns across lmer/nlme; S3 print methods for diagnostics and tidy model object.
-- **Documentation:** Package help and vignettes updated; pkgdown site; short analysis-report vignette with robust SE, TVEM, and AR1 examples.
-- **CRAN:** Examples use `set.seed()` for determinism; `ild_power()` examples kept small (n_sim = 25); nlme example in ild_lme wrapped in `\dontrun{}` where convergence is platform-sensitive.
+- **Model tidiers:** `augment_ild_model()` and `tidy_ild_model()` with consistent columns across lmer/nlme; S3 print methods.
+- **Documentation:** Package described as a reproducible, tidyverse-style framework with safeguards, provenance, and reporting. Vignettes use `set.seed()` / `seed` for determinism; optional-package examples (e.g. clubSandwich) use `eval = requireNamespace(...)`. `ild_power()` examples kept small (n_sim = 25).
 
 # tidyILD 0.0.1 (initial release)
 

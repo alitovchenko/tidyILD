@@ -33,7 +33,7 @@ ild_add_step <- function(x, step, args, outputs = NULL) {
       as.character(utils::packageVersion("tidyILD")),
       error = function(e) "0.0.0"
     )
-    bundle$provenance <- list(version = pv, object_type = "ild_data", steps = list())
+    bundle$provenance <- list(version = pv, schema_version = "1", object_type = "ild_data", steps = list())
   }
   step_id <- as.character(length(bundle$provenance$steps) + 1L)
   step_record <- list(
@@ -85,6 +85,8 @@ ild_provenance_object_type <- function(step) {
     step,
     ild_lme = "ild_model",
     ild_tvem = "ild_model",
+    ild_crosslag = "ild_model",
+    ild_ipw_refit = "ild_model",
     ild_diagnostics = "ild_diagnostics",
     ild_power = "ild_power",
     ild_missing_model = "ild_missingness",
@@ -125,9 +127,11 @@ ild_new_analysis_provenance <- function(source = NULL, step, args, outputs = NUL
     args = args,
     outputs = outputs
   )
+  schema_version <- "1"
   if (is.null(source)) {
     return(list(
       version = pv,
+      schema_version = schema_version,
       object_type = object_type,
       source_data_provenance = NULL,
       analysis_steps = list(step_record)
@@ -137,6 +141,7 @@ ild_new_analysis_provenance <- function(source = NULL, step, args, outputs = NUL
   if (!is.null(existing) && is.list(existing)) {
     return(list(
       version = pv,
+      schema_version = schema_version,
       object_type = object_type,
       source_data_provenance = existing$source_data_provenance,
       analysis_steps = c(existing$analysis_steps, list(step_record))
@@ -145,6 +150,7 @@ ild_new_analysis_provenance <- function(source = NULL, step, args, outputs = NUL
   data_prov <- ild_get_history(source)
   list(
     version = pv,
+    schema_version = schema_version,
     object_type = object_type,
     source_data_provenance = data_prov,
     analysis_steps = list(step_record)

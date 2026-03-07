@@ -65,7 +65,7 @@ ild_normalize_internal <- function(x) {
     gap_threshold = ild_gap_threshold,
     created = NA,
     spacing = ild_spacing,
-    provenance = list(version = pv, object_type = "ild_data", steps = list())
+    provenance = list(version = pv, schema_version = "1", object_type = "ild_data", steps = list())
   )
   if (!inherits(x, "tidyild_df")) {
     class(x) <- c("tidyild_df", "ild_tbl", setdiff(class(x), c("tidyild_df", "ild_tbl")))
@@ -186,7 +186,7 @@ new_ild_df <- function(data, ild_id, ild_time, gap_threshold, spacing, tz = "UTC
     gap_threshold = gap_threshold,
     created = Sys.time(),
     spacing = spacing,
-    provenance = list(version = pv, object_type = "ild_data", steps = list())
+    provenance = list(version = pv, schema_version = "1", object_type = "ild_data", steps = list())
   )
   class(x) <- c("tidyild_df", "ild_tbl", class(x))
   x

@@ -45,6 +45,12 @@ ild_ipw_refit <- function(fit_or_formula, data, weights = ".ipw", ar1 = FALSE, .
     fit <- do.call(lme4::lmer, args)
     attr(fit, "ild_data") <- data
     attr(fit, "ild_ar1") <- FALSE
+    attr(fit, "ild_provenance") <- ild_new_analysis_provenance(
+      fit_or_formula,
+      "ild_ipw_refit",
+      list(weights = weights),
+      list()
+    )
     return(fit)
   }
   if (inherits(fit_or_formula, "lme")) {
@@ -55,6 +61,12 @@ ild_ipw_refit <- function(fit_or_formula, data, weights = ".ipw", ar1 = FALSE, .
     fit <- do.call(lme4::lmer, args)
     attr(fit, "ild_data") <- data
     attr(fit, "ild_ar1") <- FALSE
+    attr(fit, "ild_provenance") <- ild_new_analysis_provenance(
+      data,
+      "ild_ipw_refit",
+      list(weights = weights),
+      list()
+    )
     return(fit)
   }
   stop("fit_or_formula must be an ild_lme() fit (lmerMod) or a formula.", call. = FALSE)

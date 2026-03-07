@@ -48,7 +48,8 @@ A minimal workflow: simulate or load data, prepare with
     \code{\link{ild_plot}} (types: fitted, residual_acf), \code{\link{ild_heatmap}},
     \code{\link{ild_spaghetti}}, \code{\link{ild_circadian}}, \code{\link{ild_tvem_plot}}}
   \item{Provenance and methods}{\code{\link{ild_provenance}}, \code{\link{ild_history}},
-    \code{\link{ild_methods}}, \code{\link{ild_compare_pipelines}}, \code{\link{ild_export_provenance}}}
+    \code{\link{ild_methods}}, \code{\link{ild_report}}, \code{\link{ild_compare_pipelines}},
+    \code{\link{ild_export_provenance}}}
   \item{Reproducibility}{\code{\link{ild_manifest}}, \code{\link{ild_bundle}}}
   \item{Utilities and data}{\code{\link{ild_simulate}}, \code{\link{ild_power}}, \code{\link{ema_example}}}
   \item{Person-level}{\code{\link{ild_person_model}}, \code{\link{ild_person_distribution}}}

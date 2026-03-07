@@ -89,6 +89,7 @@ if (!is.null(fit_ar1)) {
 When the effect of a predictor may change over time (e.g. stronger in the morning), use `ild_tvem()` to fit a GAM with a smooth in time and a time-varying coefficient. The plot shows how the effect of the predictor varies over the study timeline; interpret the curve as the estimated effect at each time point (with uncertainty band).
 
 ```{r tvem}
+set.seed(101)
 d2 <- ild_simulate(n_id = 6, n_obs_per = 12, seed = 101)
 d2$x <- rnorm(nrow(d2))
 x2 <- ild_prepare(d2, id = "id", time = "time")

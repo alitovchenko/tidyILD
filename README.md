@@ -1,6 +1,6 @@
 # tidyILD
 
-Tidyverse-native toolkit for **intensive longitudinal data (ILD)**.  
+A **reproducible, tidyverse-style framework** for intensive longitudinal data (ILD) analysis in R, with built-in methodological safeguards, **provenance tracking**, and reporting tools.  
 Author: **Alex Litovchenko**.
 
 ## Install

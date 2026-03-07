@@ -4,12 +4,14 @@
 #' tidyILD: Tidy Intensive Longitudinal Data Analysis
 #'
 #' @description
-#' tidyILD is for intensive longitudinal data (ILD), e.g. ecological momentary
-#' assessment (EMA) or diary studies. It provides a tidy pipeline from raw
-#' data to mixed-effects models with explicit time structure,
-#' within-between decomposition, spacing-aware lags, and diagnostics. Use it
-#' when you have repeated measures per person over time and want consistent
-#' handling of time, gaps, centering, and residual correlation (AR1/CAR1).
+#' tidyILD is a reproducible, tidyverse-style framework for intensive longitudinal
+#' data (ILD) analysis in R, with built-in methodological safeguards, provenance
+#' tracking, and reporting tools. It supports ecological momentary assessment
+#' (EMA) and diary studies with a tidy pipeline from raw data to mixed-effects
+#' models: explicit time structure, within-between decomposition, spacing-aware
+#' lags, and diagnostics. Use it when you have repeated measures per person over
+#' time and want consistent handling of time, gaps, centering, and residual
+#' correlation (AR1/CAR1).
 #'
 #' @details
 #' All ILD structure (`.ild_*` columns and `ild_*` metadata) is created only
@@ -43,7 +45,8 @@
 #'     \code{\link{ild_plot}} (types: fitted, residual_acf), \code{\link{ild_heatmap}},
 #'     \code{\link{ild_spaghetti}}, \code{\link{ild_circadian}}, \code{\link{ild_tvem_plot}}}
 #'   \item{Provenance and methods}{\code{\link{ild_provenance}}, \code{\link{ild_history}},
-#'     \code{\link{ild_methods}}, \code{\link{ild_compare_pipelines}}, \code{\link{ild_export_provenance}}}
+#'     \code{\link{ild_methods}}, \code{\link{ild_report}}, \code{\link{ild_compare_pipelines}},
+#'     \code{\link{ild_export_provenance}}}
 #'   \item{Reproducibility}{\code{\link{ild_manifest}}, \code{\link{ild_bundle}}}
 #'   \item{Utilities and data}{\code{\link{ild_simulate}}, \code{\link{ild_power}}, \code{\link{ema_example}}}
 #'   \item{Person-level}{\code{\link{ild_person_model}}, \code{\link{ild_person_distribution}}}
@@ -61,6 +64,8 @@
 #'     fitted vs observed, residual ACF and Q-Q.
 #'   \item \emph{Within-between decomposition and irregular spacing} ---
 #'     Centering (BP/WP), gap-aware lags, spacing classification.
+#'   \item \emph{Reproducible ILD workflows with tidyILD provenance} ---
+#'     Inspect history, generate methods text, ild_report(), export and compare pipelines.
 #'   \item \emph{Glossary and quick-start checklist} --- Table of main
 #'     functions and a short checklist.
 #' }
