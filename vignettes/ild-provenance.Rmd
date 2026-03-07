@@ -39,7 +39,7 @@ x <- ild_lag(x, y, n = 1, mode = "gap_aware", max_gap = 7200)
 ## 3. Fit model
 
 ```{r fit}
-fit <- ild_lme(y ~ y_bp + y_wp + y_lag1 + (1 | id), data = x, ar1 = FALSE, warn_no_ar1 = FALSE)
+fit <- ild_lme(y ~ y_bp + y_wp + (1 | id), data = x, ar1 = FALSE, warn_no_ar1 = FALSE)
 ```
 
 ## 4. Run diagnostics
@@ -116,7 +116,7 @@ Use `ild_compare_pipelines()` to see how two objects differ (e.g. different gap 
 x2 <- ild_prepare(d, id = "id", time = "time", gap_threshold = 3600)
 x2 <- ild_center(x2, y)
 x2 <- ild_lag(x2, y, n = 1, mode = "index")
-fit2 <- ild_lme(y ~ y_bp + y_wp + y_lag1 + (1 | id), data = x2, ar1 = FALSE, warn_no_ar1 = FALSE)
+fit2 <- ild_lme(y ~ y_bp + y_wp + (1 | id), data = x2, ar1 = FALSE, warn_no_ar1 = FALSE)
 ```
 
 ```{r compare}
