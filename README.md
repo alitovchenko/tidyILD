@@ -86,6 +86,16 @@ diag <- ild_diagnostics(fit); diag; plot_ild_diagnostics(diag)
 
 Documentation and vignettes are built with [pkgdown](https://pkgdown.r-lib.org/). From the package root: `pkgdown::build_site()`. Config: `_pkgdown.yml`.
 
+## Version tags
+
+Release tags follow `vMAJOR.MINOR.PATCH` and are listed in version order with:
+
+```sh
+git tag -l 'v*' --sort=version:refname
+```
+
+Current tags: **v0.0.1**, **v0.2.0**, **v0.3.0** (each annotated message is `tidyILD <version>`).
+
 ## License
 
 MIT.
