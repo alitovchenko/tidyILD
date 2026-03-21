@@ -254,7 +254,18 @@ Each new estimation backend (e.g. KFAS, ctsem) should ship:
 
 ---
 
-## 5. Related files in the source tree
+## 5. Tsibble interoperability
+
+**Status:** Phase 1 — provenance on input; best-effort round-trip via `ild_as_tsibble()`.
+
+- **Conceptual choice (keys):** ILD uses **one** subject identifier column. `tbl_ts` inputs must have **exactly one** key variable. Multiple keys (e.g. crossed factors) are **not** supported; reshape or paste into a single id before `ild_prepare()`.
+- **Provenance:** When `data` is a `tbl_ts`, `ild_prepare()` stores metadata in `attr(x, "tidyILD")$tsibble` (key/index names, interval summary string, `is_regular`, tsibble version). The `tbl_ts` class is still dropped on output; this records formal time-series semantics for reporting and for `ild_as_tsibble()`.
+- **Spacing:** `ild_spacing$tsibble` (when present) links declared tsibble regularity/interval text to empirical `.ild_dt` summaries; they may diverge after sorting, duplicate handling, or row drops.
+- **Round-trip:** `ild_as_tsibble()` passes `regular =` from stored `is_regular` when available so `interval()` often matches the original for **unchanged** data.
+
+---
+
+## 6. Related files in the source tree
 
 | Location | Role |
 |----------|------|

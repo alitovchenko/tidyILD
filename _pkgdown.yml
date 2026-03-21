@@ -26,6 +26,7 @@ articles:
       - ild-analysis-report
       - ild-provenance
       - ild-decomposition-and-spacing
+      - tsibble-interoperability
       - ild-glossary-and-quickstart
       - developer-contracts
 

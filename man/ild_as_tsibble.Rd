@@ -9,16 +9,19 @@ ild_as_tsibble(x, ...)
 \arguments{
 \item{x}{An object that passes [validate_ild()].}
 
-\item{...}{Optional arguments passed to [tsibble::as_tsibble()].}
+\item{...}{Optional arguments passed to [tsibble::as_tsibble()] (e.g.
+override \code{regular}).}
 }
 \value{
 A \code{tbl_ts} object (see \pkg{tsibble}).
 }
 \description{
 Wraps [tsibble::as_tsibble()] using the subject and time column names from
-[ild_meta()] as key and index. Use [ild_prepare()] with a \code{tbl_ts} input
-(omitting \code{id} and \code{time}) for the reverse direction when
-\pkg{tsibble} is installed.
+[ild_meta()] as key and index. When [ild_prepare()] recorded tsibble
+provenance (\code{ild_tsibble_meta()} is non-\code{NULL}), the \code{regular}
+argument is set from the stored \code{is_regular} flag so the reconstructed
+\code{interval} often matches the original for unchanged data. Otherwise
+defaults to \code{regular = TRUE}.
 }
 \examples{
 \donttest{
@@ -29,4 +32,7 @@ if (requireNamespace("tsibble", quietly = TRUE)) {
   class(ts)
 }
 }
+}
+\seealso{
+\href{../doc/tsibble-interoperability.html}{\code{vignette("tsibble-interoperability", package = "tidyILD")}}
 }
