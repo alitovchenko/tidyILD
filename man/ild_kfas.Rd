@@ -55,5 +55,12 @@ Opinionated entry point for **local level** models in v1. Requires the
 \pkg{KFAS} package. One distinct \code{.ild_id} per fit; subset your data first.
 }
 \seealso{
-\code{inst/dev/KFAS_V1_BACKEND.md}, [ild_tidy()], [ild_augment()], [ild_diagnose()]
+\code{inst/dev/KFAS_V1_BACKEND.md}, [ild_tidy()], [ild_augment()], [ild_diagnose()].
+
+\strong{Conceptual vignettes:}
+\itemize{
+  \item \href{../doc/kfas-state-space-modeling.html}{\code{vignette("kfas-state-space-modeling", package = "tidyILD")}}
+  \item \href{../doc/kfas-irregular-timing-spacing.html}{\code{vignette("kfas-irregular-timing-spacing", package = "tidyILD")}}
+  \item \href{../doc/kfas-choosing-backend.html}{\code{vignette("kfas-choosing-backend", package = "tidyILD")}}
+}
 }

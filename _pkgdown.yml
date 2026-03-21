@@ -11,6 +11,24 @@ navbar:
     left: [reference, articles, news]
     right: [github]
 
+# Order: conceptual KFAS vignette first, then spacing, then backend choice; then other articles.
+articles:
+  - title: KFAS (state space)
+    desc: >
+      Read **State-space modeling** first; then irregular timing; then choosing a backend.
+    contents:
+      - kfas-state-space-modeling
+      - kfas-irregular-timing-spacing
+      - kfas-choosing-backend
+  - title: Workflows and reports
+    contents:
+      - tidyILD-workflow
+      - ild-analysis-report
+      - ild-provenance
+      - ild-decomposition-and-spacing
+      - ild-glossary-and-quickstart
+      - developer-contracts
+
 reference:
   - title: Setup and validation
     contents: [ild_prepare, as_ild, is_ild, validate_ild, ild_meta]
