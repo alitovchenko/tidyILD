@@ -32,7 +32,8 @@ Suggests:
   jsonlite,
   yaml,
   tsibble,
-  brms
+  brms,
+  KFAS
 VignetteBuilder: knitr
 Collate:
   'package.R'
@@ -76,6 +77,15 @@ Collate:
   'ild_generics.R'
   'ild_brms.R'
   'ild_brms_s3.R'
+  'ild_kfas_spec.R'
+  'ild_kfas_helpers.R'
+  'ild_kfas.R'
+  'ild_kfas_guardrails.R'
+  'ild_kfas_tidiers.R'
+  'ild_kfas_augment.R'
+  'ild_kfas_diagnose.R'
+  'ild_kfas_plot.R'
+  'ild_kfas_autoplot.R'
   'ild_diagnose_fillers.R'
   'ild_diagnose_methods.R'
   'ild_autoplot_bundle.R'

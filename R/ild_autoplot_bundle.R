@@ -8,25 +8,38 @@ ild_autoplot.ild_diagnostics_bundle <- function(x, section = "residual", type = 
     stop("Expected an ild_diagnostics_bundle.", call. = FALSE)
   }
   section <- match.arg(section, c("residual", "fit", "predictive", "data", "design", "causal"))
+  eng <- x$meta$engine
+  if (is.null(eng) && !is.null(x$fit)) {
+    eng <- x$fit$engine
+  }
+  is_kfas <- identical(eng, "KFAS")
 
   if (identical(section, "residual")) {
     leg <- x$residual$legacy_ild_diagnostics
     if (is.null(type)) {
-      if (!is.null(leg)) {
+      if (!is_kfas && !is.null(leg)) {
         return(plot_ild_diagnostics(leg, ...))
       }
       type <- "acf"
     }
     type <- match.arg(type, c("acf", "qq", "fitted"))
-    switch(type,
-      acf = plot_bundle_residual_acf(x),
-      qq = plot_bundle_residual_qq(x),
-      fitted = plot_bundle_residual_fitted(x)
-    )
+    if (is_kfas) {
+      switch(type,
+        acf = plot_bundle_kfas_residual_acf(x),
+        qq = plot_bundle_kfas_residual_qq(x),
+        fitted = plot_bundle_kfas_residual_fitted(x)
+      )
+    } else {
+      switch(type,
+        acf = plot_bundle_residual_acf(x),
+        qq = plot_bundle_residual_qq(x),
+        fitted = plot_bundle_residual_fitted(x)
+      )
+    }
   } else {
     choices <- switch(section,
       fit = c("convergence"),
-      predictive = c("ppc"),
+      predictive = if (is_kfas) c("forecast", "errors") else c("ppc"),
       data = c("missingness"),
       design = c("coverage"),
       causal = c("weights")
@@ -36,8 +49,15 @@ ild_autoplot.ild_diagnostics_bundle <- function(x, section = "residual", type = 
     }
     type <- match.arg(type, choices)
     switch(section,
-      fit = plot_bundle_fit_convergence(x),
-      predictive = plot_bundle_predictive_ppc(x, ...),
+      fit = if (is_kfas) plot_bundle_kfas_fit_convergence(x) else plot_bundle_fit_convergence(x),
+      predictive = if (is_kfas) {
+        switch(type,
+          forecast = plot_bundle_kfas_predictive_forecast(x),
+          errors = plot_bundle_kfas_predictive_errors(x)
+        )
+      } else {
+        plot_bundle_predictive_ppc(x, ...)
+      },
       data = plot_bundle_data_missingness(x),
       design = plot_bundle_design_coverage(x),
       causal = plot_bundle_causal_weights(x)

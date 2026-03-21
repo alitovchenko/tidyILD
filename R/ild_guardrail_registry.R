@@ -13,17 +13,26 @@ ILD_GUARDRAIL_REGISTRY <- tibble::tibble(
     "GR_IRREGULAR_SPACING_NO_RESID_COR",
     "GR_HIGH_TIMING_GAP_RATE",
     "GR_DROPOUT_LATE_CONCENTRATION",
-    "GR_IPW_WEIGHTS_UNSTABLE"
+    "GR_IPW_WEIGHTS_UNSTABLE",
+    "GR_KFAS_HIGH_IRREGULARITY_FOR_DISCRETE_TIME",
+    "GR_KFAS_SHORT_SERIES_FOR_STATE_SPACE",
+    "GR_KFAS_STATE_DIMENSION_HIGH_FOR_N",
+    "GR_KFAS_DEGENERATE_VARIANCE_ESTIMATE",
+    "GR_KFAS_NONCONVERGENCE",
+    "GR_KFAS_MANY_MISSING_OUTCOME_SEGMENTS",
+    "GR_KFAS_UNMODELED_BETWEEN_PERSON_HETEROGENEITY"
   ),
   section = c(
     "fit", "fit", "fit",
     "design", "data", "data",
-    "missingness", "causal"
+    "missingness", "causal",
+    "design", "data", "fit", "fit", "fit", "data", "fit"
   ),
   severity = c(
     "warning", "warning", "warning",
     "warning", "warning", "info",
-    "warning", "warning"
+    "warning", "warning",
+    "warning", "warning", "warning", "warning", "warning", "info", "warning"
   ),
   default_message = c(
     "Estimated random-effect covariance is singular or near-singular.",
@@ -33,7 +42,14 @@ ILD_GUARDRAIL_REGISTRY <- tibble::tibble(
     "Irregular spacing is present but residual temporal correlation (AR1/CAR1) is not modeled.",
     "A large fraction of time intervals are flagged as gaps.",
     "Missingness on the outcome is more concentrated in the later part of the study timeline.",
-    "Inverse probability weights show extreme variability (possible instability)."
+    "Inverse probability weights show extreme variability (possible instability).",
+    "Interval timing is highly irregular relative to the median step; discrete-time KFAS models assume a consistent time index.",
+    "The observed series is short for the requested state-space complexity.",
+    "Latent state dimension is large relative to series length.",
+    "Estimated state or observation variance is effectively on the boundary (near zero or degenerate).",
+    "Numerical optimization for the state-space model did not report clean convergence.",
+    "The outcome has many separate missing segments in time order.",
+    "Independent single-subject state-space fits are not a substitute for pooled multilevel latent-dynamics models (e.g. ctsem)."
   ),
   default_recommendation = c(
     "Consider simpler random structure, stronger priors (Bayesian), or rescaling predictors.",
@@ -43,7 +59,14 @@ ILD_GUARDRAIL_REGISTRY <- tibble::tibble(
     "Consider ild_lme(..., ar1 = TRUE) or interpret residual autocorrelation diagnostics cautiously.",
     "Review gap_threshold and missingness; lags and spacing-based assumptions may be strained.",
     "Investigate selective dropout (MNAR) and sensitivity analyses; consider IPW or models for missingness.",
-    "Review the missingness model, trim bounds, or stabilize weights before interpreting results."
+    "Review the missingness model, trim bounds, or stabilize weights before interpreting results.",
+    "Align or aggregate to a regular grid, or use continuous-time modeling for irregular spacing.",
+    "Collect more time points or simplify the state specification (e.g. fewer latent components).",
+    "Simplify the model (fewer states) or extend the series before interpreting complex latent structure.",
+    "Rescale the outcome, re-check identification, or consider stronger priors / constraints in KFAS.",
+    "Try different starting values, optimization method, or check the model specification.",
+    "Consider explicit missingness modeling or sensitivity analyses for intermittent observations.",
+    "Do not treat stacked single-ID KFAS fits as a pooled latent model; use hierarchical latent frameworks if that is the estimand."
   )
 )
 

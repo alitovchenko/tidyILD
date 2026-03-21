@@ -1,5 +1,11 @@
 # tidyILD 0.3.0
 
+## KFAS backend (experimental)
+
+- **`ild_kfas()`** (optional **KFAS**): single-subject Gaussian **local level** state-space models; **`ild_tidy()`**, **`ild_augment()`**, **`ild_tidy_states()`**, **`ild_diagnose()`**, **`ild_autoplot()`** methods. **`ild_augment()`** uses **`alphahat`** when **`muhat`** is absent (common under diffuse initialization), so **`.fitted`** and residuals align with the smoothed signal. **`ild_autoplot(ild_diagnostics_bundle)`** when **`meta$engine == "KFAS"`** uses KFAS-specific panels: **`predictive`** + **`forecast`** / **`errors`** (not PPC); **`fit`** + **`convergence`** (MLE text summary); **`residual`** + **`acf`** / **`qq`** / **`fitted`**. Direct **`ild_plot_states()`**, **`ild_plot_filtered_vs_smoothed()`**, **`ild_plot_forecast()`** for discoverability. **`ild_methods()`** / **`ild_report()`** describe KFAS provenance (state spec, family, smoothing, fit context, optional **`fitSSM`** dots). See **`inst/dev/KFAS_V1_BACKEND.md`** for the full v1 design and roadmap (trend, AR(1), regression+state, pooling).
+- **Tests:** **`tests/testthat/helper-kfas-fixtures.R`** (DGP + bundle expectations); **`tests/testthat/test-kfas-extended.R`** — contract depth, local-level **recovery** (variances + smoothed state), **missingness** (documented row dropping + guardrail), extra **guardrails** (high irregularity, many NA segments); **skipped** placeholders for **`local_trend`** / **`ar1_state`** / **`regression_local_level`** recovery and **`GR_KFAS_STATE_DIMENSION_HIGH_FOR_N`** until multi-state specs ship.
+- **`ild_diagnose()`** for **`ild_fit_kfas`** centers **state-space residual diagnostics**: standardized innovations (with `rstandard` / `v`–`F` fallback), ACF, normal QQ correlation, outlier flags, Ljung–Box; rich **`meta`**, **`data`**, **`design`**, **`fit`**, **`predictive`**, **`warnings`**; plus **KFAS-specific guardrails** (`GR_KFAS_*` in **`guardrail_registry()`**). Use **`fit_context = "independent_series_per_id"`** when stacking independent single-ID fits (triggers heterogeneity guardrail).
+
 ## Guardrails (identity & reporting)
 
 - **`print()`** on **`ild_diagnostics_bundle`** prints a **Summary** after slots: counts for warnings/guardrails, highest guardrail severity, and up to five **`rule_id`** values when guardrails are present.

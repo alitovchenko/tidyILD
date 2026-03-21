@@ -88,6 +88,7 @@ ild_provenance_object_type <- function(step) {
     ild_tvem = "ild_model",
     ild_crosslag = "ild_model",
     ild_ipw_refit = "ild_model",
+    ild_kfas = "ild_model",
     ild_diagnostics = "ild_diagnostics",
     ild_power = "ild_power",
     ild_missing_model = "ild_missingness",

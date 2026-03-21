@@ -138,6 +138,57 @@ ild_step_to_sentence <- function(s, context = NULL, robust_se = NULL) {
     }
     return(out)
   }
+  if (step == "ild_kfas") {
+    st <- .def(a$state_spec, "local_level")
+    fam <- .def(a$observation_family, "gaussian")
+    tu <- .def(a$time_units, "time units")
+    fc <- .def(a$fit_context, "single_series")
+    sm <- if (isTRUE(a$smoother)) {
+      "smoothed and filtered state estimates (KFS smoothing)"
+    } else {
+      "filtered state estimates only (smoothing off)"
+    }
+    struct <- if (identical(st, "local_level")) {
+      "local level (random walk plus observation noise)"
+    } else {
+      st
+    }
+    dots_note <- ""
+    if (!is.null(a$fit_ssm_dots) && length(a$fit_ssm_dots) > 0L) {
+      dn <- paste(names(a$fit_ssm_dots), a$fit_ssm_dots, sep = " = ", collapse = "; ")
+      if (nzchar(dn)) dots_note <- paste0(" Additional fitSSM controls: ", dn, ".")
+    }
+    fh <- a$forecast_horizon
+    fh_note <- if (!is.null(fh) && is.finite(fh) && fh >= 1L) {
+      paste0(" Forecast horizon was set to ", fh, " step(s).")
+    } else {
+      ""
+    }
+    out <- paste0(
+      "A Gaussian state-space model was fit using ild_kfas() with outcome ", .def(a$outcome, "outcome"),
+      ", latent structure ", struct, " (", fam, " observations), and time indexing in ", tu, ". ",
+      "KFS used ", sm, ". ",
+      "Fit context: ", fc, " (not pooled across persons unless you explicitly stacked multiple series).",
+      if (isTRUE(a$irregular_time)) {
+        " Irregular observation spacing was acknowledged (irregular_time = TRUE)."
+      } else {
+        " Equal spacing was assumed for the time index after preparation."
+      },
+      fh_note,
+      dots_note
+    )
+    if (!is.null(o$n_obs)) {
+      out <- paste0(out, " (n = ", o$n_obs, " time points")
+      if (!is.null(o$n_id)) out <- paste0(out, ", N = ", o$n_id, " person(s)")
+      out <- paste0(out, ").")
+    } else {
+      out <- paste0(out, ".")
+    }
+    if (!is.null(o$logLik) && is.finite(o$logLik)) {
+      out <- paste0(out, " Log-likelihood: ", round(o$logLik, 2), ".")
+    }
+    return(out)
+  }
   if (step == "ild_diagnostics") {
     types <- a$type
     if (is.null(types) || length(types) == 0) {
@@ -275,7 +326,9 @@ ild_report <- function(fit, export_provenance_path = NULL, robust_se = NULL, ...
       meta$n_id <- length(unique(ild_data[[id_col]]))
     }
   }
-  meta$engine <- if (inherits(fit, "lme")) {
+  meta$engine <- if (inherits(fit, "ild_fit_kfas")) {
+    "KFAS"
+  } else if (inherits(fit, "lme")) {
     "lme"
   } else if (inherits(fit, "lmerMod")) {
     "lmer"
@@ -287,7 +340,13 @@ ild_report <- function(fit, export_provenance_path = NULL, robust_se = NULL, ...
   diag_bundle <- tryCatch(
     ild_diagnose(
       fit,
-      type = if (inherits(fit, "brmsfit")) "all" else c("residual_acf", "qq")
+      type = if (inherits(fit, "brmsfit")) {
+        "all"
+      } else if (inherits(fit, "ild_fit_kfas")) {
+        NULL
+      } else {
+        c("residual_acf", "qq")
+      }
     ),
     error = function(e) NULL
   )
@@ -298,7 +357,11 @@ ild_report <- function(fit, export_provenance_path = NULL, robust_se = NULL, ...
     NULL
   }
   model_table <- tryCatch(
-    if (inherits(fit, "brmsfit")) ild_tidy(fit) else tidy_ild_model(fit, object = FALSE),
+    if (inherits(fit, "brmsfit") || inherits(fit, "ild_fit_kfas")) {
+      ild_tidy(fit)
+    } else {
+      tidy_ild_model(fit, object = FALSE)
+    },
     error = function(e) NULL
   )
   diagnostics_summary <- if (is.null(diag_bundle)) {

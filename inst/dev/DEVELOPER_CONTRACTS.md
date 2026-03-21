@@ -260,6 +260,7 @@ Each new estimation backend (e.g. KFAS, ctsem) should ship:
 |----------|------|
 | `inst/CONTRACTS.md` | Short user-facing mirror of slot/column names. |
 | `inst/dev/backend-adapter-template.R` | Skeleton methods and checklist for new engines (copy-paste starting point). |
+| `inst/dev/KFAS_V1_BACKEND.md` | KFAS / `ild_kfas()` v1 design (Gaussian local level first; full vocabulary staged). |
 | `R/ild_diagnostics_bundle.R` | Bundle constructor and validation. |
 | `R/ild_schema_tidy_augment.R` | Tidy/augment column lists. |
 | `R/ild_guardrail_registry.R` | Guardrail rule ids and evaluation helpers. |

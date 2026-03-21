@@ -48,6 +48,10 @@ augment_ild_model <- function(fit, ...) {
 #' @return Character; name of the response (e.g. "y"). Falls back to "outcome" if not determined.
 #' @noRd
 ild_response_name <- function(fit) {
+  if (inherits(fit, "ild_fit_kfas")) {
+    r <- attr(fit, "ild_response", exact = TRUE)
+    if (!is.null(r)) return(r)
+  }
   if (inherits(fit, "brmsfit")) {
     f <- tryCatch(stats::formula(fit), error = function(e) NULL)
     if (!is.null(f)) {
