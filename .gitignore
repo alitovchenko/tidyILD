@@ -15,3 +15,4 @@ doc/
 .Rcheck/
 tidyILD.Rcheck/
 *.tar.gz
+downloads/

@@ -1,0 +1,377 @@
+# Guardrail registry and evaluation for ild_diagnostics_bundle$guardrails
+# Schema: rule_id, section, severity, triggered, message, recommendation
+
+#' @importFrom tibble tibble
+NULL
+
+ILD_GUARDRAIL_REGISTRY <- tibble::tibble(
+  rule_id = c(
+    "GR_SINGULAR_RANDOM_EFFECTS",
+    "GR_POOR_POSTERIOR_MIXING",
+    "GR_LOW_ESS",
+    "GR_MIXED_PREDICTOR_NOT_DECOMPOSED",
+    "GR_IRREGULAR_SPACING_NO_RESID_COR",
+    "GR_HIGH_TIMING_GAP_RATE",
+    "GR_DROPOUT_LATE_CONCENTRATION",
+    "GR_IPW_WEIGHTS_UNSTABLE"
+  ),
+  section = c(
+    "fit", "fit", "fit",
+    "design", "data", "data",
+    "missingness", "causal"
+  ),
+  severity = c(
+    "warning", "warning", "warning",
+    "warning", "warning", "info",
+    "warning", "warning"
+  ),
+  default_message = c(
+    "Estimated random-effect covariance is singular or near-singular.",
+    "Max R-hat exceeds a conventional mixing threshold.",
+    "Bulk effective sample size is low for at least one fixed-effect parameter.",
+    "Predictor(s) vary within and between persons but are not WP/BP decomposed.",
+    "Irregular spacing is present but residual temporal correlation (AR1/CAR1) is not modeled.",
+    "A large fraction of time intervals are flagged as gaps.",
+    "Missingness on the outcome is more concentrated in the later part of the study timeline.",
+    "Inverse probability weights show extreme variability (possible instability)."
+  ),
+  default_recommendation = c(
+    "Consider simpler random structure, stronger priors (Bayesian), or rescaling predictors.",
+    "Run longer chains, reparameterize, or tighten priors.",
+    "Increase iterations or use stronger priors; interpret posterior means with caution.",
+    "Use ild_center() to create _wp and _bp components to avoid conflation bias.",
+    "Consider ild_lme(..., ar1 = TRUE) or interpret residual autocorrelation diagnostics cautiously.",
+    "Review gap_threshold and missingness; lags and spacing-based assumptions may be strained.",
+    "Investigate selective dropout (MNAR) and sensitivity analyses; consider IPW or models for missingness.",
+    "Review the missingness model, trim bounds, or stabilize weights before interpreting results."
+  )
+)
+
+#' Guardrail rule registry (analysis safety layer)
+#'
+#' Returns the canonical catalog of \strong{guardrail} rules tidyILD may use. Each rule has a
+#' stable \code{rule_id}, \code{section} (bundle slot), \code{severity}, and default
+#' \code{default_message} / \code{default_recommendation} text. When you call
+#' \code{\link{ild_diagnose}}, \strong{triggered} rules appear as rows in
+#' \code{\link{ild_diagnostics_bundle}$guardrails} with \code{message} and
+#' \code{recommendation} possibly customized for the run.
+#'
+#' @return A tibble with columns \code{rule_id}, \code{section}, \code{severity},
+#'   \code{default_message}, \code{default_recommendation}.
+#' @seealso \code{\link{ild_diagnose}}, \code{\link{ild_diagnostics_bundle}}
+#' @export
+guardrail_registry <- function() {
+  ILD_GUARDRAIL_REGISTRY
+}
+
+#' @keywords internal
+#' @noRd
+guardrail_registry_lookup <- function(rule_id) {
+  r <- ILD_GUARDRAIL_REGISTRY
+  m <- match(rule_id, r$rule_id)
+  if (is.na(m)) {
+    return(list(
+      section = "unknown",
+      severity = "info",
+      default_message = "",
+      default_recommendation = ""
+    ))
+  }
+  list(
+    section = r$section[m],
+    severity = r$severity[m],
+    default_message = r$default_message[m],
+    default_recommendation = r$default_recommendation[m]
+  )
+}
+
+#' Numeric rank for guardrail severity (higher = stronger)
+#'
+#' \code{info} < \code{warning}; unknown levels rank lowest (0).
+#' @param severity Character vector of severity labels.
+#' @return Integer vector of same length as \code{severity}.
+#' @keywords internal
+#' @noRd
+guardrail_severity_rank <- function(severity) {
+  s <- tolower(as.character(severity))
+  ifelse(s == "warning", 2L, ifelse(s == "info", 1L, 0L))
+}
+
+#' Highest severity among triggered guardrails
+#'
+#' @param severities Character vector (e.g. from \code{guardrails$severity}).
+#' @return Single severity string (\code{"warning"} or \code{"info"}) or
+#'   \code{NA_character_} if empty.
+#' @keywords internal
+#' @noRd
+guardrail_max_severity <- function(severities) {
+  if (length(severities) == 0L) {
+    return(NA_character_)
+  }
+  sev <- as.character(severities)
+  r <- guardrail_severity_rank(sev)
+  sev[which.max(r)[1]]
+}
+
+#' Structured summary and short narrative for guardrails tibble
+#'
+#' Used by \code{\link{print.ild_diagnostics_bundle}}, \code{\link{ild_report}},
+#' and \code{\link{ild_methods}}. Does not include full \code{message} text.
+#'
+#' @param guardrails A guardrails tibble (e.g. \code{bundle$guardrails}), or an
+#'   \code{\link{ild_diagnostics_bundle}} (uses \code{$guardrails}).
+#' @param max_rule_ids Maximum unique \code{rule_id} values to list in the narrative (default 5).
+#' @return A list: \code{n} (integer), \code{max_severity} (character or \code{NA}),
+#'   \code{rule_ids} (character, unique, order preserved), \code{narrative} (single string, may be empty).
+#' @keywords internal
+#' @noRd
+ild_guardrails_summary <- function(guardrails, max_rule_ids = 5L) {
+  if (inherits(guardrails, "ild_diagnostics_bundle")) {
+    guardrails <- guardrails$guardrails
+  }
+  if (is.null(guardrails) || !tibble::is_tibble(guardrails) || nrow(guardrails) == 0L) {
+    return(list(
+      n = 0L,
+      max_severity = NA_character_,
+      rule_ids = character(0),
+      narrative = ""
+    ))
+  }
+  n <- nrow(guardrails)
+  max_sev <- guardrail_max_severity(guardrails$severity)
+  rids <- unique(as.character(guardrails$rule_id))
+  show_ids <- rids[seq_len(min(length(rids), as.integer(max_rule_ids)))]
+  id_part <- if (length(show_ids) > 0L) {
+    paste(show_ids, collapse = ", ")
+  } else {
+    ""
+  }
+  sev_part <- if (!is.na(max_sev) && nzchar(max_sev)) {
+    sprintf("max severity %s", max_sev)
+  } else {
+    ""
+  }
+  narrative <- if (n > 0L) {
+    paste0(
+      sprintf("%d methodological guardrail%s triggered", n, if (n == 1L) "" else "s"),
+      if (nzchar(sev_part)) paste0(" (", sev_part, ")") else "",
+      if (nzchar(id_part)) paste0(": ", id_part) else "",
+      "."
+    )
+  } else {
+    ""
+  }
+  list(
+    n = as.integer(n),
+    max_severity = max_sev,
+    rule_ids = rids,
+    narrative = narrative
+  )
+}
+
+#' Empty guardrails tibble (canonical schema)
+#' @keywords internal
+#' @noRd
+guardrails_empty_tibble <- function() {
+  tibble::tibble(
+    rule_id = character(),
+    section = character(),
+    severity = character(),
+    triggered = logical(),
+    message = character(),
+    recommendation = character()
+  )
+}
+
+#' Assemble guardrails from evaluated rows (rule_id + trigger + optional overrides)
+#' @keywords internal
+#' @noRd
+guardrail_finalize_rows <- function(rows) {
+  if (length(rows) == 0L) {
+    return(guardrails_empty_tibble())
+  }
+  out_rule <- character()
+  out_sec <- character()
+  out_sev <- character()
+  out_trig <- logical()
+  out_msg <- character()
+  out_rec <- character()
+  for (z in rows) {
+    if (!isTRUE(z$triggered)) next
+    rid <- as.character(z$rule_id)[1]
+    def <- guardrail_registry_lookup(rid)
+    msg <- z$message
+    if (is.null(msg) || (length(msg) == 1L && !nzchar(msg))) {
+      msg <- def$default_message
+    } else {
+      msg <- as.character(msg)[1]
+    }
+    rec <- z$recommendation
+    if (is.null(rec) || (length(rec) == 1L && !nzchar(rec))) {
+      rec <- def$default_recommendation
+    } else {
+      rec <- as.character(rec)[1]
+    }
+    out_rule <- c(out_rule, rid)
+    out_sec <- c(out_sec, def$section)
+    out_sev <- c(out_sev, def$severity)
+    out_trig <- c(out_trig, TRUE)
+    out_msg <- c(out_msg, msg)
+    out_rec <- c(out_rec, rec)
+  }
+  tibble::tibble(
+    rule_id = out_rule,
+    section = out_sec,
+    severity = out_sev,
+    triggered = out_trig,
+    message = out_msg,
+    recommendation = out_rec
+  )
+}
+
+#' Evaluate design / data / causal guardrails from bundle + model
+#' @keywords internal
+#' @noRd
+evaluate_guardrails_contextual <- function(object, data, bundle, engine = c("lmer", "lme", "brms")) {
+  engine <- match.arg(engine)
+  rows <- list()
+  if (!is.null(data) && is_ild(data)) {
+    f <- tryCatch(stats::formula(object), error = function(e) NULL)
+    if (!is.null(f)) {
+      unc <- ild_detect_uncentered_predictors(data, f)
+      if (length(unc) > 0L) {
+        rows[[length(rows) + 1L]] <- list(
+          rule_id = "GR_MIXED_PREDICTOR_NOT_DECOMPOSED",
+          triggered = TRUE,
+          message = sprintf(
+            "Predictor(s) %s vary within and between persons but are not WP/BP decomposed.",
+            paste(paste0("'", unc, "'"), collapse = ", ")
+          ),
+          recommendation = NULL
+        )
+      }
+    }
+    ar1 <- tryCatch(isTRUE(attr(object, "ild_ar1", exact = TRUE)), error = function(e) FALSE)
+    sc <- tryCatch(ild_spacing_class(data), error = function(e) NA_character_)
+    if (!is.na(sc) && sc == "irregular-ish" && !ar1) {
+      rows[[length(rows) + 1L]] <- list(
+        rule_id = "GR_IRREGULAR_SPACING_NO_RESID_COR",
+        triggered = TRUE,
+        message = NULL,
+        recommendation = NULL
+      )
+    }
+    pg <- if (!is.null(bundle$data)) bundle$data$pct_gap else NA_real_
+    if (is.na(pg)) {
+      pg <- tryCatch(ild_summary(data)$pct_gap, error = function(e) NA_real_)
+    }
+    if (is.finite(pg) && pg > 25) {
+      rows[[length(rows) + 1L]] <- list(
+        rule_id = "GR_HIGH_TIMING_GAP_RATE",
+        triggered = TRUE,
+        message = sprintf(
+          "About %.1f%% of intervals are gaps (threshold for rule > 25%%).",
+          pg
+        ),
+        recommendation = NULL
+      )
+    }
+    rn <- tryCatch(ild_response_name(object), error = function(e) NULL)
+    if (!is.null(rn) && rn %in% names(data)) {
+      if (guardrail_dropout_late_heuristic(data, rn)) {
+        rows[[length(rows) + 1L]] <- list(
+          rule_id = "GR_DROPOUT_LATE_CONCENTRATION",
+          triggered = TRUE,
+          message = sprintf(
+            "Outcome '%s' is missing more often in the later half of the pooled timeline than in the earlier half.",
+            rn
+          ),
+          recommendation = NULL
+        )
+      }
+    }
+  }
+  if (!is.null(bundle$causal) && is.list(bundle$causal$weight_summary)) {
+    ws <- bundle$causal$weight_summary
+    mx <- ws$max
+    mn <- ws$min
+    if (is.finite(mx) && is.finite(mn) && mn > 0 && (mx / mn) > 50) {
+      rows[[length(rows) + 1L]] <- list(
+        rule_id = "GR_IPW_WEIGHTS_UNSTABLE",
+        triggered = TRUE,
+        message = sprintf("IPW weight range ratio max/min = %.1f (threshold > 50).", mx / mn),
+        recommendation = NULL
+      )
+    }
+  }
+  guardrail_finalize_rows(rows)
+}
+
+#' @keywords internal
+#' @noRd
+guardrail_dropout_late_heuristic <- function(data, outcome) {
+  if (!outcome %in% names(data)) return(FALSE)
+  ord <- order(data[[".ild_seq"]], seq_len(nrow(data)))
+  miss <- is.na(data[[outcome]])
+  miss <- miss[ord]
+  n <- length(miss)
+  if (n < 20L) return(FALSE)
+  mid <- floor(n / 2)
+  r1 <- mean(miss[seq_len(mid)])
+  r2 <- mean(miss[(mid + 1L):n])
+  r2 > pmax(1.5 * r1, r1 + 0.05, na.rm = TRUE)
+}
+
+#' Evaluate fit-level guardrails (frequentist + Bayesian)
+#' @keywords internal
+#' @noRd
+evaluate_guardrails_fit <- function(object, fit_diag, engine = c("lmer", "lme", "brms")) {
+  engine <- match.arg(engine)
+  rows <- list()
+  if (engine %in% c("lmer", "lme")) {
+    sing <- fit_diag$singular
+    if (!is.na(sing) && isTRUE(sing)) {
+      rows[[length(rows) + 1L]] <- list(
+        rule_id = "GR_SINGULAR_RANDOM_EFFECTS",
+        triggered = TRUE,
+        message = NULL,
+        recommendation = NULL
+      )
+    }
+  }
+  if (engine == "brms") {
+    mx <- fit_diag$max_rhat
+    if (!is.na(mx) && mx > 1.05) {
+      rows[[length(rows) + 1L]] <- list(
+        rule_id = "GR_POOR_POSTERIOR_MIXING",
+        triggered = TRUE,
+        message = sprintf("Max R-hat = %.3f (threshold 1.05).", mx),
+        recommendation = NULL
+      )
+    }
+    ct <- fit_diag$convergence_table
+    if (!is.null(ct) && nrow(ct) > 0L && "ess_bulk" %in% names(ct)) {
+      mness <- suppressWarnings(min(ct$ess_bulk, na.rm = TRUE))
+      if (is.finite(mness) && mness < 100) {
+        rows[[length(rows) + 1L]] <- list(
+          rule_id = "GR_LOW_ESS",
+          triggered = TRUE,
+          message = sprintf("Minimum bulk ESS = %.0f (threshold 100).", mness),
+          recommendation = NULL
+        )
+      }
+    }
+  }
+  guardrail_finalize_rows(rows)
+}
+
+#' @keywords internal
+#' @noRd
+guardrails_bind <- function(...) {
+  parts <- list(...)
+  nonempty <- parts[vapply(parts, function(z) nrow(z) > 0L, logical(1))]
+  if (length(nonempty) == 0L) {
+    return(guardrails_empty_tibble())
+  }
+  dplyr::bind_rows(nonempty)
+}

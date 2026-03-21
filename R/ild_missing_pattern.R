@@ -5,6 +5,13 @@
 #' checking data before modeling. When \code{vars = NULL}, all non-internal
 #' data columns are used (observation presence across variables).
 #'
+#' Also a **section provider** for [ild_diagnose()] (see [ild_diagnostics_utilities]).
+#'
+#' @section Bundle integration:
+#' [ild_diagnose()] passes summaries into \code{data$missing_pattern} (global) and
+#' \code{missingness} (model variables) on the \code{\link{ild_diagnostics_bundle}}.
+#'
+#' @family ild_diagnostics_utilities
 #' @param x An ILD object (see [is_ild()]).
 #' @param vars Optional character vector of variable names to summarize.
 #'   If \code{NULL}, all non-.ild_* data columns are used.
@@ -14,6 +21,7 @@
 #' @return A list with: \code{summary} (tibble: one row per var, columns var, n_obs, n_na, pct_na),
 #'   \code{plot} (ggplot2 object for missingness heatmap), \code{by_id}, \code{overall},
 #'   \code{n_complete}, \code{vars}.
+#' @seealso [ild_diagnose()], [ild_diagnostics_bundle()]
 #' @importFrom dplyr across all_of group_by summarise n_distinct
 #' @importFrom tibble tibble
 #' @export

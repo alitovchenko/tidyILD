@@ -68,7 +68,7 @@ diag <- ild_diagnostics(fit); diag; plot_ild_diagnostics(diag)
 - `ild_plot()` — trajectory, heatmap, gaps, fitted vs observed, residual ACF
 - `ild_heatmap()`, `ild_spaghetti()` — aliases for heatmap and trajectory plots
 - `ild_circadian()` — variable by hour of day (when time is POSIXct)
-- `augment_ild_model()` — tibble with .ild_id, .ild_time, outcome, .fitted, .resid
+- `augment_ild_model()` / `ild_augment()` — tibble per `ild_augment_schema()`: `.outcome`, `.fitted`, `.resid`, `.resid_std` (Pearson when available), `engine`, `model_class`, etc.
 - `tidy_ild_model()` — fixed-effect table (estimate, SE, CI, p); use `se = "robust"` for cluster-robust inference
 - `ild_simulate()` — simulated ILD (n_id, n_time/n_obs_per, ar1, wp_effect, bp_effect, irregular)
 - `ild_power()` — simulation-based power for a fixed effect (ild_simulate → ild_lme → effect recovery)

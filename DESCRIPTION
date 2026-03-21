@@ -1,6 +1,6 @@
 Package: tidyILD
 Title: Tidy Intensive Longitudinal Data Analysis
-Version: 0.2.0
+Version: 0.3.0
 Author: Alex Litovchenko [aut, cre]
 Maintainer: Alex Litovchenko <al4877@columbia.edu>
 Authors@R: person(given = "Alex", family = "Litovchenko", role = c("aut", "cre"), email = "al4877@columbia.edu")
@@ -30,7 +30,9 @@ Suggests:
   broom.mixed,
   clubSandwich,
   jsonlite,
-  yaml
+  yaml,
+  tsibble,
+  brms
 VignetteBuilder: knitr
 Collate:
   'package.R'
@@ -39,6 +41,9 @@ Collate:
   'ild_methods.R'
   'ild_compare_pipelines.R'
   'utils.R'
+  'ild_schema_tidy_augment.R'
+  'ild_tidy_helpers.R'
+  'ild_augment_helpers.R'
   'ild_prepare.R'
   'ild_summary.R'
   'ild_center.R'
@@ -62,9 +67,19 @@ Collate:
   'ild_person_model.R'
   'ild_robust_se.R'
   'ild_model_tidiers.R'
+  'ild_guardrail_registry.R'
+  'ild_diagnostics_bundle.R'
+  'ild_diagnostics_utilities.R'
   'ild_diagnostics.R'
   'ild_manifest.R'
   'ild_plot.R'
+  'ild_generics.R'
+  'ild_brms.R'
+  'ild_brms_s3.R'
+  'ild_diagnose_fillers.R'
+  'ild_diagnose_methods.R'
+  'ild_autoplot_bundle.R'
+  'ild_tsibble.R'
   'ild_circadian.R'
   'ild_simulate.R'
   'ild_power.R'

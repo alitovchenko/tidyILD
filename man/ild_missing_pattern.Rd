@@ -28,3 +28,21 @@ plus an optional heatmap plot. Complements [ild_summary()] and supports
 checking data before modeling. When \code{vars = NULL}, all non-internal
 data columns are used (observation presence across variables).
 }
+\details{
+Also a **section provider** for [ild_diagnose()] (see [ild_diagnostics_utilities]).
+}
+\section{Bundle integration}{
+
+[ild_diagnose()] passes summaries into \code{data$missing_pattern} (global) and
+\code{missingness} (model variables) on the \code{\link{ild_diagnostics_bundle}}.
+}
+
+\seealso{
+[ild_diagnose()], [ild_diagnostics_bundle()]
+
+Other ild_diagnostics_utilities: 
+\code{\link{ild_design_check}()},
+\code{\link{ild_ipw_weights}()},
+\code{\link{ild_missing_model}()}
+}
+\concept{ild_diagnostics_utilities}

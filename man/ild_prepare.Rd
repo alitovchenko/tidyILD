@@ -6,17 +6,21 @@
 \usage{
 ild_prepare(
   data,
-  id,
-  time,
+  id = NULL,
+  time = NULL,
   gap_threshold = Inf,
   duplicate_handling = c("first", "last", "error", "collapse"),
   collapse_fn = NULL
 )
 }
 \arguments{
-\item{data}{A data frame or tibble with at least an id and a time column.}
+\item{data}{A data frame or tibble with at least an id and a time column.
+If \code{id} and \code{time} are both omitted, \code{data} must be a
+\code{tbl_ts} from \pkg{tsibble} (requires a single key column and an index);
+key and index names are inferred (see [ild_as_tsibble()] for the reverse).}
 
-\item{id}{Character. Name of the subject/unit identifier column.}
+\item{id}{Character. Name of the subject/unit identifier column. Omit both
+\code{id} and \code{time} when \code{data} is a tsibble (see above).}
 
 \item{time}{Character. Name of the time column (Date, POSIXct, or numeric).}
 

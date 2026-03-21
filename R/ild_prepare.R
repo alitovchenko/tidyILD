@@ -5,7 +5,11 @@
 #' and metadata. All downstream functions assume the result of `ild_prepare()`.
 #'
 #' @param data A data frame or tibble with at least an id and a time column.
-#' @param id Character. Name of the subject/unit identifier column.
+#'   If \code{id} and \code{time} are both omitted, \code{data} must be a
+#'   \code{tbl_ts} from \pkg{tsibble} (requires a single key column and an index);
+#'   key and index names are inferred (see [ild_as_tsibble()] for the reverse).
+#' @param id Character. Name of the subject/unit identifier column. Omit both
+#'   \code{id} and \code{time} when \code{data} is a tsibble (see above).
 #' @param time Character. Name of the time column (Date, POSIXct, or numeric).
 #' @param gap_threshold Numeric. Time distance above which an interval is
 #'   flagged as a gap (`.ild_gap` TRUE). Same units as the numeric time
@@ -25,8 +29,8 @@
 #' @importFrom tibble as_tibble
 #' @export
 ild_prepare <- function(data,
-                        id,
-                        time,
+                        id = NULL,
+                        time = NULL,
                         gap_threshold = Inf,
                         duplicate_handling = c("first", "last", "error", "collapse"),
                         collapse_fn = NULL) {
@@ -35,6 +39,25 @@ ild_prepare <- function(data,
     stop("When duplicate_handling = 'collapse', provide a named list of functions in collapse_fn (e.g. list(x = mean)).", call. = FALSE)
   }
   if (!is.data.frame(data)) stop("'data' must be a data frame or tibble.", call. = FALSE)
+  if (xor(is.null(id), is.null(time))) {
+    stop("Provide both id and time, or omit both and pass a tsibble (tbl_ts) with one key and an index.", call. = FALSE)
+  }
+  if (is.null(id) && is.null(time)) {
+    if (!requireNamespace("tsibble", quietly = TRUE)) {
+      stop("Package 'tsibble' is required when id and time are omitted. Install it or supply id and time explicitly.", call. = FALSE)
+    }
+    if (!inherits(data, "tbl_ts")) {
+      stop("Provide both id and time, or omit both and pass a tsibble (tbl_ts) with one key and an index.", call. = FALSE)
+    }
+    kv <- tsibble::key_vars(data)
+    iv <- tsibble::index_var(data)
+    if (length(kv) != 1L) {
+      stop("tsibble must have exactly one key column for ild_prepare (subject id); found ", length(kv), ".", call. = FALSE)
+    }
+    id <- kv[1L]
+    time <- iv
+    data <- tibble::as_tibble(data)
+  }
   id <- as.character(id)[1]
   time <- as.character(time)[1]
   if (!id %in% names(data)) stop("Column '", id, "' not found in data.", call. = FALSE)

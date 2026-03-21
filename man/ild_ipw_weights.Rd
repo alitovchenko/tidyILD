@@ -27,6 +27,16 @@ weights: unstabilized \code{w = 1 / p_obs} or stabilized
 Use with [ild_ipw_refit()] for sensitivity analysis. This is diagnostic
 and sensitivity tooling, not a full MNAR solution.
 }
+\details{
+Also a **section provider** for [ild_diagnose()] when \code{.ipw} is present on the
+analysis data (see [ild_diagnostics_utilities]).
+}
+\section{Bundle integration}{
+
+Adds \code{.ipw} to \code{x}. When that column is on the ILD data attached to the fit,
+[ild_diagnose()] fills \code{causal} (weight summaries) on \code{\link{ild_diagnostics_bundle}}.
+}
+
 \examples{
 set.seed(1)
 d <- ild_simulate(n_id = 15, n_obs_per = 8, seed = 1)
@@ -38,3 +48,12 @@ mm <- ild_missing_model(x, "mood", "stress")
 xw <- ild_ipw_weights(x, mm, stabilize = TRUE)
 summary(xw$.ipw)
 }
+\seealso{
+[ild_diagnose()], [ild_diagnostics_bundle()], [ild_missing_model()]
+
+Other ild_diagnostics_utilities: 
+\code{\link{ild_design_check}()},
+\code{\link{ild_missing_model}()},
+\code{\link{ild_missing_pattern}()}
+}
+\concept{ild_diagnostics_utilities}

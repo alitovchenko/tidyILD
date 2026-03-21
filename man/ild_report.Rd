@@ -4,17 +4,19 @@
 \alias{ild_report}
 \title{Assemble a light report from a model fit}
 \usage{
-ild_report(fit, export_provenance_path = NULL, ...)
+ild_report(fit, export_provenance_path = NULL, robust_se = NULL, ...)
 }
 \arguments{
 \item{fit}{A fitted model from [ild_lme()] (or a list with a \code{fit} component, e.g. from [ild_crosslag()]).}
 
 \item{export_provenance_path}{Optional. If provided, [ild_export_provenance()] is called to write provenance to this path; the path is included in the returned list.}
 
+\item{robust_se}{Optional. Passed to [ild_methods()] when building the methods text (e.g. \code{"CR2"} if you used [tidy_ild_model()] with \code{se = "robust"}).}
+
 \item{...}{Unused.}
 }
 \value{
-A list with components: \code{methods} (character), \code{model_table} (tibble or NULL), \code{diagnostics_summary} (list with \code{meta} and \code{summary_text}), \code{provenance} (raw provenance list or NULL), and \code{provenance_export_path} (character or NULL if not exported).
+A list with a stable schema: \code{meta} (list with \code{n_obs}, \code{n_id}, \code{engine} when available), \code{methods}, \code{model_table}, \code{diagnostics_summary} (includes \code{guardrails_narrative} and \code{guardrails} when [ild_diagnose()] succeeds), \code{provenance}, \code{provenance_export_path} (character or NULL). When guardrails are triggered, \code{methods_with_guardrails} repeats the methods paragraph with guardrails appended (same pattern as \code{\link{ild_methods}(fit, bundle = d)}).
 }
 \description{
 Builds a structured list with methods narrative (from [ild_methods()]),
