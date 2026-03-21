@@ -327,9 +327,10 @@ guardrail_dropout_late_heuristic <- function(data, outcome) {
 #' @noRd
 evaluate_guardrails_fit <- function(object, fit_diag, engine = c("lmer", "lme", "brms")) {
   engine <- match.arg(engine)
+  fd <- fit_bundle_flat_for_guardrails(fit_diag, engine = engine)
   rows <- list()
   if (engine %in% c("lmer", "lme")) {
-    sing <- fit_diag$singular
+    sing <- fd$singular
     if (!is.na(sing) && isTRUE(sing)) {
       rows[[length(rows) + 1L]] <- list(
         rule_id = "GR_SINGULAR_RANDOM_EFFECTS",
@@ -340,7 +341,7 @@ evaluate_guardrails_fit <- function(object, fit_diag, engine = c("lmer", "lme", 
     }
   }
   if (engine == "brms") {
-    mx <- fit_diag$max_rhat
+    mx <- fd$max_rhat
     if (!is.na(mx) && mx > 1.05) {
       rows[[length(rows) + 1L]] <- list(
         rule_id = "GR_POOR_POSTERIOR_MIXING",
@@ -349,7 +350,7 @@ evaluate_guardrails_fit <- function(object, fit_diag, engine = c("lmer", "lme", 
         recommendation = NULL
       )
     }
-    ct <- fit_diag$convergence_table
+    ct <- fd$convergence_table
     if (!is.null(ct) && nrow(ct) > 0L && "ess_bulk" %in% names(ct)) {
       mness <- suppressWarnings(min(ct$ess_bulk, na.rm = TRUE))
       if (is.finite(mness) && mness < 100) {

@@ -60,7 +60,7 @@ test_that("ild_diagnose.brmsfit returns ild_diagnostics_bundle", {
   )
   diag <- ild_diagnose(fit, type = "convergence")
   expect_s3_class(diag, "ild_diagnostics_bundle")
-  expect_true(!is.null(diag$fit$convergence_table))
+  expect_true(!is.null(diag$fit$convergence$convergence_table))
 })
 
 test_that("ild_methods mentions priors and sampler for ild_brms", {

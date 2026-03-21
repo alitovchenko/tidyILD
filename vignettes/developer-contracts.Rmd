@@ -21,6 +21,7 @@ md_path <- if (file.exists("../inst/dev/DEVELOPER_CONTRACTS.md")) {
 
 This vignette embeds the **developer contract** shipped with the package.
 Use it when adding engines (KFAS, ctsem, …) or evolving `ild_tidy()` / `ild_augment()` / `ild_diagnose()`.
+For a **code skeleton** (S3 stubs, bundle assembly, guardrails, provenance, tests), see `inst/dev/backend-adapter-template.R` in the source tree.
 
 ```{r contracts, results='asis'}
 if (!nzchar(md_path) || !file.exists(md_path)) {

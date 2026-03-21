@@ -2,6 +2,112 @@
 # Standalone section providers are documented under ?ild_diagnostics_utilities
 # (ild_design_check, ild_missing_pattern, ild_missing_model, ild_ipw_weights).
 
+#' Flatten nested \code{fit} slice for guardrails and legacy callers
+#' @param engine Optional engine label (\code{"lmer"}, \code{"lme"}, \code{"brms"}) when
+#'   \code{fit$engine} is missing (e.g. unit-test fixtures).
+#' @keywords internal
+#' @noRd
+fit_bundle_flat_for_guardrails <- function(fit, engine = NULL) {
+  if (is.null(fit) || !is.list(fit)) {
+    return(list(
+      singular = NA,
+      max_rhat = NA_real_,
+      convergence_table = NULL,
+      ild_posterior = NULL
+    ))
+  }
+  eng <- engine %||% fit$engine
+  if (identical(eng, "brms")) {
+    conv <- fit$convergence
+    if (inherits(conv, "data.frame")) {
+      conv <- list(convergence_table = conv, max_rhat = fit$max_rhat)
+    }
+    if (is.null(conv) || length(conv) == 0L) {
+      conv <- list(
+        convergence_table = fit$convergence_table,
+        max_rhat = fit$max_rhat
+      )
+    }
+    ps <- fit$posterior_summary$ild_posterior %||% fit$ild_posterior
+    list(
+      singular = NA,
+      max_rhat = conv$max_rhat %||% fit$max_rhat,
+      convergence_table = conv$convergence_table %||% fit$convergence_table,
+      ild_posterior = ps
+    )
+  } else {
+    conv <- fit$convergence
+    if (inherits(conv, "data.frame")) {
+      conv <- list(singular = fit$singular, converged = fit$converged, optimizer_messages = fit$optimizer_messages)
+    }
+    if (is.null(conv) || length(conv) == 0L) {
+      conv <- list(singular = fit$singular, converged = fit$converged, optimizer_messages = fit$optimizer_messages)
+    }
+    list(
+      singular = conv$singular %||% fit$singular,
+      max_rhat = NA_real_,
+      convergence_table = NULL,
+      ild_posterior = NULL
+    )
+  }
+}
+
+#' Enrich \code{data} / \code{design} with parallel semantic blocks (cohort, per_id, timing, imbalance).
+#' @keywords internal
+#' @noRd
+enrich_bundle_semantic_sections <- function(bundle) {
+  if (!is.null(bundle$data)) {
+    d <- bundle$data
+    if (is.null(d$per_id) && !is.null(d$obs_per_id)) {
+      bundle$data$per_id <- d$obs_per_id
+    }
+    if (is.null(d$imbalance) && !is.null(d$obs_per_id)) {
+      bundle$data$imbalance <- d$obs_per_id
+    }
+    if (is.null(d$timing)) {
+      bundle$data$timing <- list(
+        spacing_class = d$spacing_class,
+        n_gaps = d$n_gaps,
+        pct_gap = d$pct_gap,
+        median_dt_sec = d$median_dt_sec,
+        iqr_dt_sec = d$iqr_dt_sec,
+        time_range = d$time_range
+      )
+    }
+    if (is.null(d$distribution)) {
+      bundle$data$distribution <- list(
+        outcome_summaries = d$outcome_summaries,
+        missingness_rates = d$missingness_rates
+      )
+    }
+  }
+  if (!is.null(bundle$design)) {
+    g <- bundle$design
+    if (!is.null(bundle$data$cohort)) {
+      bundle$design$cohort <- bundle$data$cohort
+    }
+    if (!is.null(bundle$data$obs_per_id)) {
+      bundle$design$per_id <- bundle$data$obs_per_id
+    }
+    if (is.null(g$timing) && !is.null(g$time_coverage)) {
+      bundle$design$timing <- list(
+        time_coverage = g$time_coverage,
+        spacing_class = g$spacing_class
+      )
+    }
+    if (is.null(g$imbalance) && !is.null(g$occasion_imbalance)) {
+      bundle$design$imbalance <- g$occasion_imbalance
+    }
+  }
+  bundle
+}
+
+#' @keywords internal
+#' @noRd
+`%||%` <- function(x, y) {
+  if (is.null(x)) y else x
+}
+
 #' Data-layer diagnostics (ILD object)
 #' @param outcome_vars Optional character vector of column names for \code{outcome_summaries} and \code{missingness_rates}.
 #' @keywords internal
@@ -115,29 +221,34 @@ fill_diagnostics_design <- function(data, vars = NULL) {
 #' @keywords internal
 #' @noRd
 fill_diagnostics_fit_lmerMod <- function(fit) {
+  rescor_note <- "lme4::lmer has no Gaussian AR1/CAR1 residual correlation; use nlme::lme via ild_lme(ar1 = TRUE)."
   out <- list(
     engine = "lmer",
-    singular = NA,
-    converged = NA,
-    optimizer_messages = character(),
-    optinfo = NULL,
-    reml = NA,
-    optimizer = NA_character_,
-    theta_summary = NULL,
-    X_rank = NA_integer_,
+    convergence = list(
+      singular = NA,
+      converged = NA,
+      optimizer_messages = character()
+    ),
+    rank = list(fixed_effects_X = NA_integer_),
+    optimizer = list(
+      reml = NA,
+      name = NA_character_,
+      optinfo = NULL
+    ),
     residual_correlation = list(
       modeled = FALSE,
       structure = "none",
-      note = "lme4::lmer has no Gaussian AR1/CAR1 residual correlation; use nlme::lme via ild_lme(ar1 = TRUE)."
-    )
+      note = rescor_note
+    ),
+    random_effects_structure = list(theta = NULL)
   )
   if (!inherits(fit, "lmerMod")) return(out)
-  out$singular <- lme4::isSingular(fit)
-  out$reml <- tryCatch(lme4::getME(fit, "is_REML"), error = function(e) NA)
-  out$optimizer <- tryCatch(as.character(fit@optinfo$optimizer)[1L], error = function(e) NA_character_)
+  out$convergence$singular <- lme4::isSingular(fit)
+  out$optimizer$reml <- tryCatch(lme4::getME(fit, "is_REML"), error = function(e) NA)
+  out$optimizer$name <- tryCatch(as.character(fit@optinfo$optimizer)[1L], error = function(e) NA_character_)
   th <- tryCatch(lme4::getME(fit, "theta"), error = function(e) NULL)
   if (!is.null(th) && length(th) > 0L) {
-    out$theta_summary <- list(
+    out$random_effects_structure$theta <- list(
       length = length(th),
       min = min(th, na.rm = TRUE),
       max = max(th, na.rm = TRUE)
@@ -145,16 +256,16 @@ fill_diagnostics_fit_lmerMod <- function(fit) {
   }
   X <- tryCatch(lme4::getME(fit, "X"), error = function(e) NULL)
   if (!is.null(X) && nrow(X) > 0L) {
-    out$X_rank <- tryCatch(qr(X)$rank, error = function(e) NA_integer_)
+    out$rank$fixed_effects_X <- tryCatch(qr(X)$rank, error = function(e) NA_integer_)
   }
   ar1 <- isTRUE(attr(fit, "ild_ar1", exact = TRUE))
   out$residual_correlation <- list(
     modeled = ar1,
     structure = if (ar1) "ild_ar1_attr" else "none",
-    note = out$residual_correlation$note
+    note = rescor_note
   )
   opt <- fit@optinfo
-  out$optinfo <- list(
+  out$optimizer$optinfo <- list(
     conv = opt$conv,
     finopt = opt$finopt
   )
@@ -162,13 +273,13 @@ fill_diagnostics_fit_lmerMod <- function(fit) {
   if (!is.null(cv)) {
     if (is.list(cv)) {
       nums <- suppressWarnings(as.numeric(unlist(cv, use.names = FALSE)))
-      out$converged <- length(nums) > 0L && all(nums == 0, na.rm = TRUE)
+      out$convergence$converged <- length(nums) > 0L && all(nums == 0, na.rm = TRUE)
     } else {
-      out$converged <- isTRUE(as.integer(cv)[1L] == 0L)
+      out$convergence$converged <- isTRUE(as.integer(cv)[1L] == 0L)
     }
   }
   if (length(opt$warnings) > 0L) {
-    out$optimizer_messages <- vapply(
+    out$convergence$optimizer_messages <- vapply(
       opt$warnings,
       function(w) tryCatch(conditionMessage(w), error = function(e) "warning"),
       character(1L)
@@ -183,19 +294,24 @@ fill_diagnostics_fit_lmerMod <- function(fit) {
 fill_diagnostics_fit_lme <- function(fit) {
   out <- list(
     engine = "lme",
-    singular = NA,
-    converged = NA,
-    optimizer_messages = character(),
-    apVar_ok = NA,
-    residual_correlation = list(modeled = FALSE, class = NA_character_, coef_corStruct = NULL)
+    convergence = list(
+      singular = NA,
+      converged = NA,
+      apVar_ok = NA,
+      optimizer_messages = character()
+    ),
+    rank = list(fixed_effects_X = NA_integer_),
+    optimizer = list(note = "nlme::lme — see model object for optimization details."),
+    residual_correlation = list(modeled = FALSE, class = NA_character_, coef_corStruct = NULL),
+    random_effects_structure = list(note = "See VarCorr(model) and random effects in summary().")
   )
   if (!inherits(fit, "lme")) return(out)
-  out$converged <- TRUE
-  out$apVar_ok <- !is.null(fit$apVar) && !any(is.na(fit$apVar))
+  out$convergence$converged <- TRUE
+  out$convergence$apVar_ok <- !is.null(fit$apVar) && !any(is.na(fit$apVar))
   if (!is.null(fit$apVar) && any(is.na(fit$apVar))) {
-    out$singular <- TRUE
+    out$convergence$singular <- TRUE
   } else {
-    out$singular <- FALSE
+    out$convergence$singular <- FALSE
   }
   corr_class <- attr(fit, "ild_correlation_class", exact = TRUE)
   coef_cs <- tryCatch(
@@ -227,17 +343,25 @@ fill_diagnostics_fit_brms <- function(fit) {
       ess_tail = as.numeric(sf[["Tail_ESS"]])
     )
   }
+  mx <- ild_brms_max_rhat(fit)
   list(
     engine = "brms",
-    ild_posterior = ps,
-    convergence_table = conv_tbl,
-    max_rhat = ild_brms_max_rhat(fit),
-    n_divergent = ps$n_divergent,
-    n_max_treedepth_hits = ps$n_max_treedepth_hits,
+    convergence = list(
+      convergence_table = conv_tbl,
+      max_rhat = mx
+    ),
+    sampler = list(
+      n_divergent = ps$n_divergent,
+      n_max_treedepth_hits = ps$n_max_treedepth_hits,
+      chains = ps$chains,
+      iter = ps$iter,
+      warmup = ps$warmup
+    ),
     residual_correlation = list(
       modeled = NA,
       note = "See brms family/residual structure and posterior predictive checks for residual behavior."
-    )
+    ),
+    posterior_summary = list(ild_posterior = ps)
   )
 }
 
@@ -284,9 +408,15 @@ fill_diagnostics_residual_brms <- function(fit) {
 fill_diagnostics_predictive_frequentist <- function(object, data) {
   aug <- tryCatch(augment_ild_model(object), error = function(e) NULL)
   if (is.null(aug)) return(NULL)
+  om <- fill_diagnostics_predictive_obs_metrics(aug)
+  eng <- if (inherits(object, "lme")) "lme" else "lmer"
   c(
-    list(engine = if (inherits(object, "lme")) "lme" else "lmer"),
-    fill_diagnostics_predictive_obs_metrics(aug)
+    list(
+      engine = eng,
+      obs_metrics = om,
+      simulation_checks = list(ppc = NULL)
+    ),
+    om
   )
 }
 
@@ -318,7 +448,15 @@ fill_diagnostics_predictive_obs_metrics <- function(aug) {
 #' @noRd
 fill_diagnostics_predictive_brms_augment_only <- function(fit) {
   aug <- tryCatch(ild_augment(fit), error = function(e) NULL)
-  c(list(engine = "brms"), fill_diagnostics_predictive_obs_metrics(aug))
+  om <- fill_diagnostics_predictive_obs_metrics(aug)
+  c(
+    list(
+      engine = "brms",
+      obs_metrics = om,
+      simulation_checks = list(ppc = NULL)
+    ),
+    om
+  )
 }
 
 #' Predictive layer — brms (PPC summary)
@@ -327,9 +465,15 @@ fill_diagnostics_predictive_brms_augment_only <- function(fit) {
 fill_diagnostics_predictive_brms <- function(fit, ppc_ndraws) {
   ppc <- ild_brms_ppc_summary(fit, ndraws = ppc_ndraws)
   aug <- tryCatch(ild_augment(fit), error = function(e) NULL)
+  om <- fill_diagnostics_predictive_obs_metrics(aug)
   c(
-    list(engine = "brms", ppc = ppc),
-    fill_diagnostics_predictive_obs_metrics(aug)
+    list(
+      engine = "brms",
+      obs_metrics = om,
+      simulation_checks = list(ppc = ppc),
+      ppc = ppc
+    ),
+    om
   )
 }
 
@@ -461,7 +605,7 @@ collect_freq_warnings_guardrails <- function(fit, fit_diag) {
 #' @noRd
 collect_brms_warnings_guardrails <- function(fit, fit_diag) {
   warns <- list()
-  ps <- fit_diag$ild_posterior
+  ps <- fit_diag$posterior_summary$ild_posterior %||% fit_diag$ild_posterior
   if (!is.null(ps) && !is.na(ps$n_divergent) && ps$n_divergent > 0L) {
     warns[[length(warns) + 1L]] <- list(
       source = "stan",
@@ -485,14 +629,18 @@ build_diagnostics_bundle_summary <- function(bundle) {
     parts <- c(parts, sprintf("Engine: %s.", bundle$meta$engine))
   }
   if (!is.null(bundle$fit)) {
-    if (!is.null(bundle$fit$singular) && !is.na(bundle$fit$singular) && bundle$fit$singular) {
+    ff <- bundle$fit
+    sing <- ff$convergence$singular %||% ff$singular
+    if (!is.null(sing) && !is.na(sing) && isTRUE(sing)) {
       parts <- c(parts, "Singular / problematic fit variance structure reported.")
     }
-    if (!is.null(bundle$fit$X_rank) && !is.na(bundle$fit$X_rank)) {
-      parts <- c(parts, sprintf("Fixed-effects design rank (X): %s.", bundle$fit$X_rank))
+    xrk <- ff$rank$fixed_effects_X %||% ff$X_rank
+    if (!is.null(xrk) && !is.na(xrk)) {
+      parts <- c(parts, sprintf("Fixed-effects design rank (X): %s.", xrk))
     }
-    if (!is.null(bundle$fit$max_rhat) && is.finite(bundle$fit$max_rhat)) {
-      parts <- c(parts, sprintf("Max R-hat: %.3f.", bundle$fit$max_rhat))
+    mr <- ff$convergence$max_rhat %||% ff$max_rhat
+    if (!is.null(mr) && is.finite(mr)) {
+      parts <- c(parts, sprintf("Max R-hat: %.3f.", mr))
     }
   }
   if (!is.null(bundle$data$obs_per_id)) {
@@ -518,9 +666,9 @@ build_diagnostics_bundle_summary <- function(bundle) {
       d$meta$engine, d$meta$n_obs
     ))
   }
-  if (!is.null(bundle$predictive) && is.list(bundle$predictive$ppc) &&
-        is.null(bundle$predictive$ppc$error)) {
-    p <- bundle$predictive$ppc
+  ppc_raw <- bundle$predictive$simulation_checks$ppc %||% bundle$predictive$ppc
+  if (!is.null(bundle$predictive) && is.list(ppc_raw) && is.null(ppc_raw$error)) {
+    p <- ppc_raw
     parts <- c(parts, sprintf(
       "PPC: |mean_obs - mean_rep| = %.4f; |sd_obs - sd_rep| = %.4f.",
       p$mean_abs_diff, p$sd_abs_diff

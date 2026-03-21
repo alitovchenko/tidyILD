@@ -135,6 +135,8 @@ Typical content: `columns_found`, `weight_summary` (`min`, `max`, `mean`) when `
 - **`ild_methods(..., bundle = NULL)`:** Optional `bundle` from `ild_diagnose(fit)`; when `nrow(bundle$guardrails) > 0`, appends one sentence after provenance: *Methodological cautions (tidyILD guardrails): …*
 - **New rules:** Each new `rule_id` added to `ILD_GUARDRAIL_REGISTRY` must have a **deterministic regression test** that asserts the rule can still be triggered (see `tests/testthat/test-guardrails-triggers.R` and fit-level tests via `evaluate_guardrails_fit()` with a constructed `fit_diag` when full `ild_diagnose()` is impractical).
 
+**Contract regression (semantics, not only shape):** `tests/testthat/helper-contract-fixtures.R` builds stable seeded scenarios (regular vs irregular spacing, IPW instability, late dropout with merged contextual guardrails, merged singular / brms fit-level guardrails). `tests/testthat/test-contract-regression.R` checks dense bundle sections, expected `rule_id`s, `ild_tidy` / `ild_augment` required columns, core `ild_autoplot()` routes, and guardrail-aware `ild_methods(..., bundle)` text. The brms scenario uses `skip_on_cran()` because it fits a small `brms` model.
+
 ### 1.11 `summary_text`
 
 Character vector of short narrative lines for reporting (`ild_report`, printing). Not a substitute for structured sections.
@@ -219,6 +221,8 @@ The observed response is always **`.outcome`** (no duplicate formula-named colum
 
 ## 4. Backend adapter checklist
 
+**Skeleton:** `inst/dev/backend-adapter-template.R` — commented R patterns for `ild_tidy`, `ild_augment`, `ild_diagnose`, guardrails, provenance, tests, and docs (not sourced by the package; copy into `R/` when implementing).
+
 Each new estimation backend (e.g. KFAS, ctsem) should ship:
 
 ### 4.1 S3 methods (operational generics)
@@ -255,6 +259,7 @@ Each new estimation backend (e.g. KFAS, ctsem) should ship:
 | Location | Role |
 |----------|------|
 | `inst/CONTRACTS.md` | Short user-facing mirror of slot/column names. |
+| `inst/dev/backend-adapter-template.R` | Skeleton methods and checklist for new engines (copy-paste starting point). |
 | `R/ild_diagnostics_bundle.R` | Bundle constructor and validation. |
 | `R/ild_schema_tidy_augment.R` | Tidy/augment column lists. |
 | `R/ild_guardrail_registry.R` | Guardrail rule ids and evaluation helpers. |

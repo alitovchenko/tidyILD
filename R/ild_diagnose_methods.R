@@ -79,6 +79,7 @@ ild_diagnose.lmerMod <- function(object,
     evaluate_guardrails_contextual(object, data, bundle, engine = "lmer")
   )
   bundle$summary_text <- build_diagnostics_bundle_summary(bundle)
+  bundle <- enrich_bundle_semantic_sections(bundle)
   attr(bundle, "ild_fit") <- object
   attr(bundle, "ild_data") <- data
   bundle
@@ -147,6 +148,7 @@ ild_diagnose.lme <- function(object,
     evaluate_guardrails_contextual(object, data, bundle, engine = "lme")
   )
   bundle$summary_text <- build_diagnostics_bundle_summary(bundle)
+  bundle <- enrich_bundle_semantic_sections(bundle)
   attr(bundle, "ild_fit") <- object
   attr(bundle, "ild_data") <- data
   bundle
@@ -229,6 +231,7 @@ ild_diagnose.brmsfit <- function(object,
     build_diagnostics_bundle_summary(bundle),
     build_diagnostics_bundle_summary_brms(bundle, types)
   )
+  bundle <- enrich_bundle_semantic_sections(bundle)
   attr(bundle, "ild_fit") <- object
   attr(bundle, "ild_data") <- data
   bundle
@@ -238,7 +241,7 @@ ild_diagnose.brmsfit <- function(object,
 #' @noRd
 build_diagnostics_bundle_summary_brms <- function(bundle, types) {
   parts <- character()
-  ps <- bundle$fit$ild_posterior
+  ps <- bundle$fit$posterior_summary$ild_posterior %||% bundle$fit$ild_posterior
   if ("sampler" %in% types && !is.null(ps)) {
     parts <- c(parts, sprintf(
       "Sampler: %s chains, iter = %s, warmup = %s, divergent = %s.",
@@ -246,8 +249,8 @@ build_diagnostics_bundle_summary_brms <- function(bundle, types) {
       if (is.na(ps$n_divergent)) "NA" else ps$n_divergent
     ))
   }
-  if ("convergence" %in% types && !is.null(bundle$fit$convergence_table)) {
-    ct <- bundle$fit$convergence_table
+  ct <- bundle$fit$convergence$convergence_table %||% bundle$fit$convergence_table
+  if ("convergence" %in% types && !is.null(ct)) {
     if (nrow(ct) > 0L) {
       mx <- suppressWarnings(max(ct$rhat, na.rm = TRUE))
       parts <- c(parts, sprintf("Max R-hat (fixed): %.3f.", mx))

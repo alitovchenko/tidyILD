@@ -12,6 +12,7 @@
 - **`ild_autoplot()`** for **`ild_diagnostics_bundle`** is **section-first**: use `section` and `type` (e.g. `residual` + `acf` / `qq` / `fitted`; `fit` + `convergence`; `predictive` + `ppc` for brms; `data` + `missingness`; `design` + `coverage`; `causal` + `weights`). With `section = "residual"` and `type = NULL`, legacy bundles still return the full named list from `plot_ild_diagnostics()` when `residual$legacy_ild_diagnostics` is present. **`ild_diagnose()`** sets `attr(bundle, "ild_fit")` and `attr(bundle, "ild_data")` for plotting.
 - **`?ild_diagnostics_utilities`**: umbrella help topic describing **standalone** use and **bundle section** roles for `ild_design_check()`, `ild_missing_pattern()`, `ild_missing_model()`, and `ild_ipw_weights()` alongside `ild_diagnose()` / `ild_diagnostics_bundle`.
 - **Developer package standards:** normative spec in **`inst/dev/DEVELOPER_CONTRACTS.md`** and vignette **`vignette("developer-contracts", package = "tidyILD")`** (diagnostics bundle sections, tidy/augment semantics, backend adapter checklist).
+- **Contract regression tests** (`tests/testthat/test-contract-regression.R`, `tests/testthat/helper-contract-fixtures.R`): seeded scenarios assert bundle section density, expected guardrail `rule_id`s, **`ild_tidy` / `ild_augment`** columns, **`ild_autoplot`** routes, and guardrail-aware **`ild_methods(..., bundle)`** (see developer contracts).
 
 ## `ild_tidy()` schema migration
 

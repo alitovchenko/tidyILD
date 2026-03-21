@@ -109,7 +109,7 @@ plot_bundle_fit_convergence <- function(x) {
   eng <- if (!is.null(fd$engine)) fd$engine else x$meta$engine
 
   if (identical(eng, "brms")) {
-    ct <- fd$convergence_table
+    ct <- fd$convergence$convergence_table %||% fd$convergence_table
     if (is.null(ct) || nrow(ct) == 0L) {
       return(
         ggplot2::ggplot() +
@@ -128,13 +128,17 @@ plot_bundle_fit_convergence <- function(x) {
       ggplot2::theme_minimal()
   }
 
+  fd_conv <- fd$convergence
+  sing <- if (!is.null(fd_conv)) fd_conv$singular else fd$singular
+  conv <- if (!is.null(fd_conv)) fd_conv$converged else fd$converged
+  om <- if (!is.null(fd_conv)) fd_conv$optimizer_messages else fd$optimizer_messages
   txt <- paste(
     c(
       sprintf("Engine: %s", if (!is.null(fd$engine)) fd$engine else eng),
-      sprintf("Singular: %s", fd$singular),
-      sprintf("Converged: %s", fd$converged),
-      if (length(fd$optimizer_messages) > 0L) {
-        paste("Optimizer:", paste(fd$optimizer_messages, collapse = "; "))
+      sprintf("Singular: %s", sing),
+      sprintf("Converged: %s", conv),
+      if (length(om) > 0L) {
+        paste("Optimizer:", paste(om, collapse = "; "))
       } else {
         "Optimizer: (none)"
       }
