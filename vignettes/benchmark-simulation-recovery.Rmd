@@ -1,0 +1,131 @@
+---
+title: "Simulation benchmarks: recovery and power"
+author: "tidyILD authors"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Simulation benchmarks: recovery and power}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 6,
+  fig.height = 4
+)
+```
+
+This article shows how to use **`ild_simulate()`** and **`ild_power(..., return_sims = TRUE)`** to assess **parameter recovery** for a fixed effect under the package’s bundled Gaussian mixed-model simulation setup, and how that connects to **empirical power**. It is an **illustrative benchmark** for that DGP—not a proof that every tidyILD method is validated for all data.
+
+**Power** answers: “How often do we reject the null when the effect is present?” **Recovery** answers: “How close are point estimates (and intervals) to the known coefficient across repeated simulations?” Both use the same replication loop inside **`ild_power()`**.
+
+## What `ild_simulate()` encodes
+
+The base outcome **`y`** (before `ild_power()` adds a predictor) is built as follows:
+
+- **Between-person**: independent random intercepts per `id` (scale **`bp_effect`**).
+- **Within-person**: optional AR(1) structure on de-trended within-person series when **`ar1`** is set; otherwise i.i.d. Gaussian noise (scale **`wp_effect`**).
+- **Time**: a mild linear-in-time component plus **`time`** as `POSIXct` from a regular grid (with optional jitter if **`irregular = TRUE`**).
+
+The formula you fit should match this structure (e.g. random intercept for `id`). Recovery in this vignette focuses on a **single fixed effect** added by **`ild_power()`** on top of that DGP (see below).
+
+## Fixed-effect recovery with `ild_power(..., return_sims = TRUE)`
+
+For each replication, **`ild_power()`**:
+
+1. Simulates data with **`ild_simulate()`**.
+2. Adds a standard normal predictor **`x`** and sets **`y <- y + effect_size * x`** so the **true** coefficient of **`x`** is **`effect_size`** (call it β).
+3. Runs **`ild_prepare()`** and **`ild_lme()`** with your formula.
+4. Records the Wald-based estimate and standard error for the test term.
+
+With **`return_sims = TRUE`**, you get a tibble of per-replication **`estimate`**, **`std_error`**, **`p_value`**, and **`converged`**. From that, you can summarize **bias**, **RMSE**, and **nominal Wald interval coverage** (using a normal approximation \(\hat\beta \pm z_{1-\alpha/2} \cdot \mathrm{SE}\)).
+
+```{r recovery-run}
+library(tidyILD)
+library(dplyr)
+library(ggplot2)
+
+truth <- 0.35
+n_sim <- 200L
+
+set.seed(2026)
+res <- ild_power(
+  formula = y ~ x + (1 | id),
+  n_sim = n_sim,
+  n_id = 25L,
+  n_obs_per = 12L,
+  effect_size = truth,
+  seed = 2026L,
+  return_sims = TRUE,
+  verbose = FALSE
+)
+
+sim <- res$sim_results |> dplyr::filter(converged)
+```
+
+```{r recovery-metrics}
+z <- stats::qnorm(0.975)
+sim <- sim |>
+  dplyr::mutate(
+    lo = estimate - z * std_error,
+    hi = estimate + z * std_error,
+    covers = !is.na(std_error) & std_error > 0 & truth >= lo & truth <= hi
+  )
+
+bias <- mean(sim$estimate - truth, na.rm = TRUE)
+rmse <- sqrt(mean((sim$estimate - truth)^2, na.rm = TRUE))
+coverage <- mean(sim$covers, na.rm = TRUE)
+
+tibble::tibble(
+  truth = truth,
+  n_converged = nrow(sim),
+  mean_estimate = mean(sim$estimate, na.rm = TRUE),
+  bias = bias,
+  rmse = rmse,
+  nominal_95_coverage = coverage
+)
+```
+
+Across replications, the mean estimate should be near **β**, bias near 0, RMSE positive but modest if the model is well specified, and **coverage** near the nominal level (e.g. 0.95) for large **`n_sim`**—subject to Monte Carlo noise when **`n_sim`** is moderate.
+
+```{r recovery-plot, fig.alt = "Histogram of simulation estimates of the fixed effect"}
+ggplot2::ggplot(sim, ggplot2::aes(x = estimate)) +
+  ggplot2::geom_histogram(fill = "steelblue", color = "white", bins = 20) +
+  ggplot2::geom_vline(xintercept = truth, linetype = 2, linewidth = 0.8) +
+  ggplot2::labs(
+    x = "Estimated coefficient for x",
+    y = "Count",
+    title = "Sampling distribution of fixed-effect estimates",
+    subtitle = sprintf("True beta = %s (vertical line)", truth)
+  )
+```
+
+## From recovery to power
+
+The same object **`res`** already contains **empirical power**: the fraction of converged runs with **`p_value < alpha`**.
+
+```{r power-link}
+tibble::tibble(
+  power = res$power,
+  n_reject = res$n_reject,
+  n_converged = res$n_converged,
+  alpha = res$alpha
+)
+```
+
+**Interpretation:** **Recovery** summarizes the **sampling distribution** of \(\hat\beta\). **Power** summarizes how often that distribution leads to rejection at **`alpha`**. A large effect with low variance yields good recovery *and* high power; a small effect may show acceptable recovery (unbiased estimates) but low power at a fixed sample size.
+
+## Limitations and scope
+
+- **One estimand**: this path targets a **single fixed effect** in a linear mixed model fit with **`ild_lme()`**, matching the current **`ild_power()`** implementation.
+- **Inference**: for **`lme4`** fits, **`ild_power()`** uses a **Wald z-approximation** when **p-values** are unavailable from the engine; that is appropriate for this illustration but not identical to likelihood-ratio tests.
+- **Not covered here**: recovery of **variance components**, **AR** parameters, **brms** / **KFAS** backends, or misspecified models—those are natural extensions but out of scope for this vignette.
+
+## See also
+
+- **`vignette("tidyILD-workflow", package = "tidyILD")`** — end-to-end pipeline.
+- **`?ild_power`** — simulation-based power.
+- **`?ild_simulate`** — base data generator.

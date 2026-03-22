@@ -21,8 +21,11 @@ articles:
       - kfas-irregular-timing-spacing
       - kfas-choosing-backend
   - title: Workflows and reports
+    desc: >
+      Start with **tidyILD-workflow**; **benchmark-simulation-recovery** shows recovery/power under the bundled simulation DGP.
     contents:
       - tidyILD-workflow
+      - benchmark-simulation-recovery
       - ild-analysis-report
       - ild-provenance
       - ild-decomposition-and-spacing

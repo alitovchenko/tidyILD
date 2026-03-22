@@ -91,3 +91,7 @@ res <- ild_power(
 res$power
 res$n_reject
 }
+\seealso{
+\href{../doc/benchmark-simulation-recovery.html}{\code{vignette("benchmark-simulation-recovery", package = "tidyILD")}}
+  (parameter recovery with \code{return_sims = TRUE}).
+}

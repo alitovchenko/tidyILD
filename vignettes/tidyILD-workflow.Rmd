@@ -90,3 +90,5 @@ bundle <- ild_bundle(fit1, manifest = manifest, label = "model_ar1")
 # saveRDS(bundle, "run.rds")  # one file with result + manifest + label
 names(bundle)
 ```
+
+For **simulation-based recovery and power** under the bundled `ild_simulate()` DGP, see `vignette("benchmark-simulation-recovery", package = "tidyILD")`.
