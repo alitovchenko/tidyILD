@@ -106,7 +106,7 @@ ild_kfas_extract_level_state <- function(kfs) {
 #' @noRd
 ild_kfas_residual_diagnostics <- function(kfs, y) {
   rlang::check_installed("KFAS", reason = "KFAS residual diagnostics")
-  innov <- tryCatch(as.numeric(KFAS::rstandard(kfs)), error = function(e) NULL)
+  innov <- tryCatch(as.numeric(stats::rstandard(kfs)), error = function(e) NULL)
   if (is.null(innov) || length(innov) == 0L) {
     # Fallback: scale one-step prediction errors by their variances (Gaussian)
     v <- tryCatch(as.numeric(kfs$v), error = function(e) NULL)

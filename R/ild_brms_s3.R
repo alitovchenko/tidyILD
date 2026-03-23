@@ -73,12 +73,12 @@ ild_augment.brmsfit <- function(x, summary = TRUE, ...) {
   y <- stats::model.response(mf)
   n <- nrow(data)
   if (isTRUE(summary)) {
-    fi <- fitted(x, summary = TRUE, ...)
+    fi <- stats::fitted(x, summary = TRUE, ...)
     est <- fi[, "Estimate", drop = TRUE]
     lo <- fi[, "Q2.5", drop = TRUE]
     hi <- fi[, "Q97.5", drop = TRUE]
   } else {
-    fi <- fitted(x, summary = FALSE, ...)
+    fi <- stats::fitted(x, summary = FALSE, ...)
     est <- apply(fi, 2L, mean)
     lo <- apply(fi, 2L, stats::quantile, probs = 0.025)
     hi <- apply(fi, 2L, stats::quantile, probs = 0.975)

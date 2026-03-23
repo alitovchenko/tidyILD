@@ -22,7 +22,7 @@ ild_augment.ild_fit_kfas <- function(x, ...) {
   resid <- ex$resid
   rs <- ex$resid_std
   rs_k <- tryCatch(
-    as.numeric(KFAS::rstandard(x$kfs)),
+    as.numeric(stats::rstandard(x$kfs)),
     error = function(e) NULL
   )
   if (!is.null(rs_k) && length(rs_k) == length(y)) {

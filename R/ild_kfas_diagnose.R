@@ -24,7 +24,7 @@ ild_diagnose.ild_fit_kfas <- function(object,
   y <- if (is.numeric(y)) y else suppressWarnings(as.numeric(y))
   res_diag <- ild_kfas_residual_diagnostics(kfs, y)
 
-  innov <- tryCatch(as.numeric(KFAS::rstandard(kfs)), error = function(e) NULL)
+  innov <- tryCatch(as.numeric(stats::rstandard(kfs)), error = function(e) NULL)
   ex <- ild_kfas_extract_augment(kfs, y, TRUE)
   mae <- mean(abs(ex$resid), na.rm = TRUE)
   rmse <- sqrt(mean(ex$resid^2, na.rm = TRUE))

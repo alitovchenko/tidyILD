@@ -40,7 +40,6 @@ ild_plot_states <- function(x, state_index = 1L, ...) {
 #' Compares one-step filtered state (\code{att}) with smoothed (\code{alphahat}) when available.
 #'
 #' @param x An object from [ild_kfas()].
-#' @param ... Passed to [ggplot2::labs()].
 #' @return A \code{ggplot} object.
 #' @export
 ild_plot_filtered_vs_smoothed <- function(x) {
@@ -91,7 +90,7 @@ ild_plot_filtered_vs_smoothed <- function(x) {
 #' ahead forecast via \pkg{KFAS}; otherwise returns an informative empty panel.
 #'
 #' @param x An object from [ild_kfas()].
-#' @param ... Passed to [KFAS::predict] when forecasting is available.
+#' @param ... Passed to \code{\link[stats]{predict}} for the fitted \pkg{KFAS} model when forecasting is available.
 #' @return A \code{ggplot} object.
 #' @export
 ild_plot_forecast <- function(x, ...) {
@@ -116,7 +115,7 @@ ild_plot_forecast <- function(x, ...) {
     )
   }
   pred <- tryCatch(
-    KFAS::predict(x$kfas_model, n.ahead = as.integer(fh), ...),
+    stats::predict(x$kfas_model, n.ahead = as.integer(fh), ...),
     error = function(e) NULL
   )
   if (is.null(pred)) {
@@ -146,7 +145,7 @@ plot_bundle_kfas_residual_acf <- function(x) {
   if (!is.null(ac) && is.list(ac) && !is.null(ac$lag) && !is.null(ac$acf)) {
     df <- data.frame(lag = ac$lag, acf = ac$acf, stringsAsFactors = FALSE)
   } else if (inherits(fit, "ild_fit_kfas")) {
-    innov <- tryCatch(as.numeric(KFAS::rstandard(fit$kfs)), error = function(e) NULL)
+    innov <- tryCatch(as.numeric(stats::rstandard(fit$kfs)), error = function(e) NULL)
     if (is.null(innov) || length(innov) < 2L) {
       v <- fit$kfs$v
       Fv <- fit$kfs$F
@@ -183,7 +182,7 @@ plot_bundle_kfas_residual_qq <- function(x) {
   if (!inherits(fit, "ild_fit_kfas")) {
     stop("KFAS Q-Q requires bundle from ild_diagnose(ild_kfas_fit).", call. = FALSE)
   }
-  innov <- tryCatch(as.numeric(KFAS::rstandard(fit$kfs)), error = function(e) NULL)
+  innov <- tryCatch(as.numeric(stats::rstandard(fit$kfs)), error = function(e) NULL)
   if (is.null(innov)) {
     v <- fit$kfs$v
     Fv <- fit$kfs$F
@@ -286,7 +285,7 @@ plot_bundle_kfas_predictive_errors <- function(x) {
     stop("KFAS errors plot requires bundle from ild_diagnose(ild_kfas_fit).", call. = FALSE)
   }
   rlang::check_installed("KFAS")
-  innov <- tryCatch(as.numeric(KFAS::rstandard(fit$kfs)), error = function(e) NULL)
+  innov <- tryCatch(as.numeric(stats::rstandard(fit$kfs)), error = function(e) NULL)
   if (is.null(innov)) {
     v <- fit$kfs$v
     Fv <- fit$kfs$F

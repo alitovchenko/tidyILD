@@ -8,8 +8,6 @@ ild_plot_filtered_vs_smoothed(x)
 }
 \arguments{
 \item{x}{An object from [ild_kfas()].}
-
-\item{...}{Passed to [ggplot2::labs()].}
 }
 \value{
 A \code{ggplot} object.

@@ -9,7 +9,7 @@ ild_plot_forecast(x, ...)
 \arguments{
 \item{x}{An object from [ild_kfas()].}
 
-\item{...}{Passed to [KFAS::predict] when forecasting is available.}
+\item{...}{Passed to \code{\link[stats]{predict}} for the fitted \pkg{KFAS} model when forecasting is available.}
 }
 \value{
 A \code{ggplot} object.

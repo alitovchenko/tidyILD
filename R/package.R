@@ -123,4 +123,5 @@
 #'
 #' @docType package
 #' @name tidyILD-package
+#' @importFrom stats fitted predict rstandard
 NULL

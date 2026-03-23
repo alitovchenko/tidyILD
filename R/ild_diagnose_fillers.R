@@ -217,7 +217,7 @@ fill_diagnostics_design <- function(data, vars = NULL) {
   )
 }
 
-#' Fit diagnostics — lmerMod
+#' Fit diagnostics -- lmerMod
 #' @keywords internal
 #' @noRd
 fill_diagnostics_fit_lmerMod <- function(fit) {
@@ -288,7 +288,7 @@ fill_diagnostics_fit_lmerMod <- function(fit) {
   out
 }
 
-#' Fit diagnostics — nlme lme
+#' Fit diagnostics -- nlme lme
 #' @keywords internal
 #' @noRd
 fill_diagnostics_fit_lme <- function(fit) {
@@ -301,7 +301,7 @@ fill_diagnostics_fit_lme <- function(fit) {
       optimizer_messages = character()
     ),
     rank = list(fixed_effects_X = NA_integer_),
-    optimizer = list(note = "nlme::lme — see model object for optimization details."),
+    optimizer = list(note = "nlme::lme -- see model object for optimization details."),
     residual_correlation = list(modeled = FALSE, class = NA_character_, coef_corStruct = NULL),
     random_effects_structure = list(note = "See VarCorr(model) and random effects in summary().")
   )
@@ -327,7 +327,7 @@ fill_diagnostics_fit_lme <- function(fit) {
   out
 }
 
-#' Fit diagnostics — brms (uses attr ild_posterior)
+#' Fit diagnostics -- brms (uses attr ild_posterior)
 #' @keywords internal
 #' @noRd
 fill_diagnostics_fit_brms <- function(fit) {
@@ -365,7 +365,7 @@ fill_diagnostics_fit_brms <- function(fit) {
   )
 }
 
-#' Residual diagnostics — frequentist (embeds legacy [ild_diagnostics()] for plotting)
+#' Residual diagnostics -- frequentist (embeds legacy [ild_diagnostics()] for plotting)
 #' @keywords internal
 #' @noRd
 fill_diagnostics_residual_frequentist <- function(object, data, type, by_id) {
@@ -389,7 +389,7 @@ fill_diagnostics_residual_frequentist <- function(object, data, type, by_id) {
   )
 }
 
-#' Residual layer — brms (lighter; legacy ACF not computed here)
+#' Residual layer--  brms (lighter; legacy ACF not computed here)
 #' @keywords internal
 #' @noRd
 fill_diagnostics_residual_brms <- function(fit) {
@@ -402,7 +402,7 @@ fill_diagnostics_residual_brms <- function(fit) {
   out
 }
 
-#' Predictive layer — frequentist (observed vs fitted summaries)
+#' Predictive layer -- frequentist (observed vs fitted summaries)
 #' @keywords internal
 #' @noRd
 fill_diagnostics_predictive_frequentist <- function(object, data) {
@@ -443,7 +443,7 @@ fill_diagnostics_predictive_obs_metrics <- function(aug) {
   )
 }
 
-#' Predictive layer — brms augment-only (no PPC)
+#' Predictive layer -- brms augment-only (no PPC)
 #' @keywords internal
 #' @noRd
 fill_diagnostics_predictive_brms_augment_only <- function(fit) {
@@ -459,7 +459,7 @@ fill_diagnostics_predictive_brms_augment_only <- function(fit) {
   )
 }
 
-#' Predictive layer — brms (PPC summary)
+#' Predictive layer -- brms (PPC summary)
 #' @keywords internal
 #' @noRd
 fill_diagnostics_predictive_brms <- function(fit, ppc_ndraws) {

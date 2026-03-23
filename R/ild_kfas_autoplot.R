@@ -23,7 +23,7 @@ ild_autoplot.ild_fit_kfas <- function(x, type = c("states", "innovations", "sign
   }
 
   if (type == "innovations") {
-    r <- tryCatch(KFAS::rstandard(kfs), error = function(e) NULL)
+    r <- tryCatch(stats::rstandard(kfs), error = function(e) NULL)
     if (is.null(r)) {
       stop("Could not extract standardized innovations from KFS output.", call. = FALSE)
     }

@@ -1,4 +1,4 @@
-# Canonical diagnostics bundle (Phase 1 contract — structure only; engines populate later)
+# Canonical diagnostics bundle (Phase 1 contract -- structure only; engines populate later)
 
 #' Top-level slot names for an ILD diagnostics bundle (internal contract)
 #' @keywords internal
@@ -170,9 +170,9 @@ print.ild_diagnostics_bundle <- function(x, ...) {
     show <- rids[seq_len(min(length(rids), 5L))]
     cat(
       "; highest severity: ",
-      if (!is.na(max_sev) && nzchar(max_sev)) max_sev else "—",
+      if (!is.na(max_sev) && nzchar(max_sev)) max_sev else "-",
       "\n  key rule_id(s): ",
-      if (length(show) > 0L) paste(show, collapse = ", ") else "—",
+      if (length(show) > 0L) paste(show, collapse = ", ") else "-",
       "\n",
       sep = ""
     )

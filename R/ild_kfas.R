@@ -14,8 +14,8 @@
 #'   \code{"hours"}). Stored in provenance; required for clear reporting.
 #' @param irregular_time Logical; if \code{TRUE}, skips the irregular-spacing warning.
 #' @param smoother Logical; passed to \code{KFS()} smoothing (default \code{TRUE}).
-#' @param forecast_horizon Integer; when \code{> 0}, passed to \code{KFAS::predict()} in
-#'   \code{\link{ild_plot_forecast}()} and stored in \code{mapping$forecast_horizon}.
+#' @param forecast_horizon Integer; when \code{> 0}, used by \code{\link{ild_plot_forecast}()}
+#'   with \code{\link[stats]{predict}} on the fitted model and stored in \code{mapping$forecast_horizon}.
 #' @param fit_context \code{"single_series"} (default) or \code{"independent_series_per_id"}
 #'   when you have fit the **same** state-space template separately for multiple persons
 #'   and must not interpret results as a pooled multilevel latent model. The latter
