@@ -27,6 +27,7 @@ Suggests:
   testthat (>= 3.0.0),
   roxygen2,
   knitr,
+  rmarkdown,
   broom.mixed,
   clubSandwich,
   jsonlite,
