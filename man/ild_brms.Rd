@@ -45,3 +45,6 @@ use with [ild_tidy()], [ild_augment()], [ild_diagnose()], and [ild_methods()].
 \details{
 Requires packages \pkg{brms} and a Stan backend (\pkg{rstan} or \pkg{cmdstanr}).
 }
+\seealso{
+[ild_fit()] with \code{backend = "brms"} is equivalent to \code{ild_brms()}.
+}

@@ -23,8 +23,9 @@
 #' A minimal workflow: simulate or load data, prepare with
 #' \code{\link{ild_prepare}}, inspect with \code{\link{ild_summary}}, apply
 #' \code{\link{ild_center}} and \code{\link{ild_lag}}, fit with
-#' \code{\link{ild_lme}}, then \code{\link{ild_diagnostics}} or
-#' \code{\link{ild_plot}}. See the examples below.
+#' \code{\link{ild_lme}} or \code{\link{ild_fit}} (same engines plus optional
+#' \code{backend = "brms"}), then \code{\link{ild_diagnostics}} or
+#' \code{\link{ild_plot}}. State-space: \code{\link{ild_kfas}}. See the examples below.
 #'
 #' @section Function index by topic:
 #' \describe{
@@ -43,7 +44,8 @@
 #'   \item{Within-person and lags}{\code{\link{ild_center}}, \code{\link{ild_center_plot}},
 #'     \code{\link{ild_decomposition}}, \code{\link{ild_lag}}, \code{\link{ild_check_lags}},
 #'     \code{\link{ild_crosslag}}, \code{\link{ild_align}}}
-#'   \item{Modeling}{\code{\link{ild_fit}}, \code{\link{ild_lme}}, \code{\link{ild_brms}} (Bayesian),
+#'   \item{Modeling}{\code{\link{ild_fit}} (unified: lme4, nlme, brms), \code{\link{ild_lme}},
+#'     \code{\link{ild_brms}} (Bayesian), \code{\link{ild_kfas}} (KFAS state-space; not via \code{ild_fit}),
 #'     \code{\link{ild_person_model}},
 #'     \code{\link{ild_tvem}} (time-varying effects)}
 #'   \item{Diagnostics and visualization}{\code{\link{ild_diagnose}} (\code{\link{ild_diagnostics_bundle}}),

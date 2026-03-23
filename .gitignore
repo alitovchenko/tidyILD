@@ -16,3 +16,4 @@ doc/
 tidyILD.Rcheck/
 *.tar.gz
 downloads/
+vignettes/*.html

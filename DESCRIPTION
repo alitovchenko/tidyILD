@@ -93,6 +93,7 @@ Collate:
   'ild_circadian.R'
   'ild_simulate.R'
   'ild_power.R'
+  'ild_recovery_metrics.R'
   'data.R'
   'broom.R'
 RoxygenNote: 7.3.3

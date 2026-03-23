@@ -1,30 +1,77 @@
 # Unified S3 API for fitting, tidying, augmentation, diagnostics, and plotting
-# Backends: lme4 and nlme via ild_lme(); future engines can add methods.
+# Backends: lme4/nlme via ild_lme(); brms via ild_brms(). State-space: use ild_kfas().
 
 #' Fit a mixed model to ILD data (unified entry point)
 #'
-#' Thin wrapper around [ild_lme()] that selects the estimation backend explicitly.
-#' \code{backend = "lme4"} fits with [lme4::lmer()] (no residual autocorrelation).
-#' \code{backend = "nlme"} fits with [nlme::lme()] and AR1/CAR1 residual structure.
-#' Provenance records \code{backend} and package versions like direct [ild_lme()] calls.
+#' Façade that selects the estimation backend explicitly. Equivalent to calling
+#' [ild_lme()] for \code{"lme4"} / \code{"nlme"}, or [ild_brms()] for \code{"brms"}.
+#' Named functions remain the primary APIs for full documentation and examples.
 #'
-#' @param formula Passed to [ild_lme()].
+#' **State-space models** are not mixed-model formulas: use [ild_kfas()] directly;
+#' see \code{vignette("kfas-choosing-backend", package = "tidyILD")}.
+#'
+#' To pass \code{backend} to \code{brms::brm()} (e.g. \code{"rstan"} vs \code{"cmdstanr"}), use
+#' [ild_brms()] directly: \code{ild_fit()} reserves \code{backend} for the tidyILD engine
+#' (\code{"lme4"}, \code{"nlme"}, \code{"brms"}).
+#'
+#' @param formula Passed to [ild_lme()] or [ild_brms()].
 #' @param data An ILD object (see [is_ild()]).
-#' @param backend Character. \code{"lme4"} (default) or \code{"nlme"}.
-#' @param correlation_class,random,warn_no_ar1,warn_uncentered Passed to [ild_lme()] when \code{backend = "nlme"}.
-#' @param ... Passed to [ild_lme()] / [lme4::lmer()] or [nlme::lme()].
-#' @return A fitted model with \code{ild_data} and \code{ild_provenance} attributes (see [ild_lme()]).
+#' @param backend Character. \code{"lme4"} (default, [lme4::lmer()]), \code{"nlme"}
+#'   ([nlme::lme()] with AR1/CAR1 residual structure), or \code{"brms"} ([brms::brm()]).
+#' @param correlation_class,random,warn_no_ar1 Passed to [ild_lme()] when
+#'   \code{backend} is \code{"lme4"} or \code{"nlme"}. Ignored when \code{backend = "brms"},
+#'   except \code{correlation_class} must be \code{"auto"} for \code{"brms"} (non-\code{"auto"}
+#'   values are for residual correlation under \code{nlme} only and will error).
+#' @param warn_uncentered Passed to [ild_lme()] or [ild_brms()].
+#' @param prior,prior_template Passed to [ild_brms()] when \code{backend = "brms"}.
+#'   For \code{"lme4"} / \code{"nlme"}, \code{prior} must be \code{NULL} and
+#'   \code{prior_template} must remain the default (\code{"default"}); otherwise an error
+#'   is raised so mistaken cross-backend arguments are not silently ignored.
+#' @param ... Passed to [ild_lme()] / [lme4::lmer()] / [nlme::lme()] or [ild_brms()].
+#' @return A fitted model: \code{lmerMod} / \code{lme} from [ild_lme()], or \code{brmsfit}
+#'   from [ild_brms()], each with the same attributes as those functions document.
+#' @seealso [ild_kfas()] for KFAS state-space models (not available via \code{ild_fit()}).
 #' @export
 ild_fit <- function(formula,
                     data,
-                    backend = c("lme4", "nlme"),
+                    backend = c("lme4", "nlme", "brms"),
                     correlation_class = c("auto", "AR1", "CAR1"),
                     random = ~ 1 | .ild_id,
                     warn_no_ar1 = TRUE,
                     warn_uncentered = TRUE,
+                    prior = NULL,
+                    prior_template = c("default", "weakly_informative", "minimal_shrinkage"),
                     ...) {
   validate_ild(data)
   backend <- match.arg(backend)
+  prior_template_resolved <- match.arg(prior_template)
+
+  if (backend == "brms") {
+    cc <- match.arg(correlation_class, c("auto", "AR1", "CAR1"))
+    if (cc != "auto") {
+      stop(
+        "correlation_class is only used when backend = \"nlme\". ",
+        "For brms, use ild_fit(..., backend = \"brms\") without AR1/CAR1 options, or use ild_brms() directly.",
+        call. = FALSE
+      )
+    }
+    return(ild_brms(
+      formula = formula,
+      data = data,
+      prior = prior,
+      prior_template = prior_template_resolved,
+      warn_uncentered = warn_uncentered,
+      ...
+    ))
+  }
+
+  if (!is.null(prior)) {
+    stop("prior is only used when backend = \"brms\". Use ild_fit(..., backend = \"brms\") or ild_brms().", call. = FALSE)
+  }
+  if (prior_template_resolved != "default") {
+    stop("prior_template is only used when backend = \"brms\". Use ild_fit(..., backend = \"brms\") or ild_brms().", call. = FALSE)
+  }
+
   if (backend == "lme4") {
     return(ild_lme(
       formula, data,

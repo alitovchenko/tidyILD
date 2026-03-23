@@ -7,31 +7,55 @@
 ild_fit(
   formula,
   data,
-  backend = c("lme4", "nlme"),
+  backend = c("lme4", "nlme", "brms"),
   correlation_class = c("auto", "AR1", "CAR1"),
   random = ~1 | .ild_id,
   warn_no_ar1 = TRUE,
   warn_uncentered = TRUE,
+  prior = NULL,
+  prior_template = c("default", "weakly_informative", "minimal_shrinkage"),
   ...
 )
 }
 \arguments{
-\item{formula}{Passed to [ild_lme()].}
+\item{formula}{Passed to [ild_lme()] or [ild_brms()].}
 
 \item{data}{An ILD object (see [is_ild()]).}
 
-\item{backend}{Character. \code{"lme4"} (default) or \code{"nlme"}.}
+\item{backend}{Character. \code{"lme4"} (default, [lme4::lmer()]), \code{"nlme"}
+([nlme::lme()] with AR1/CAR1 residual structure), or \code{"brms"} ([brms::brm()]).}
 
-\item{correlation_class, random, warn_no_ar1, warn_uncentered}{Passed to [ild_lme()] when \code{backend = "nlme"}.}
+\item{correlation_class, random, warn_no_ar1}{Passed to [ild_lme()] when
+\code{backend} is \code{"lme4"} or \code{"nlme"}. Ignored when \code{backend = "brms"},
+except \code{correlation_class} must be \code{"auto"} for \code{"brms"} (non-\code{"auto"}
+values are for residual correlation under \code{nlme} only and will error).}
 
-\item{...}{Passed to [ild_lme()] / [lme4::lmer()] or [nlme::lme()].}
+\item{warn_uncentered}{Passed to [ild_lme()] or [ild_brms()].}
+
+\item{prior, prior_template}{Passed to [ild_brms()] when \code{backend = "brms"}.
+For \code{"lme4"} / \code{"nlme"}, \code{prior} must be \code{NULL} and
+\code{prior_template} must remain the default (\code{"default"}); otherwise an error
+is raised so mistaken cross-backend arguments are not silently ignored.}
+
+\item{...}{Passed to [ild_lme()] / [lme4::lmer()] / [nlme::lme()] or [ild_brms()].}
 }
 \value{
-A fitted model with \code{ild_data} and \code{ild_provenance} attributes (see [ild_lme()]).
+A fitted model: \code{lmerMod} / \code{lme} from [ild_lme()], or \code{brmsfit}
+  from [ild_brms()], each with the same attributes as those functions document.
 }
 \description{
-Thin wrapper around [ild_lme()] that selects the estimation backend explicitly.
-\code{backend = "lme4"} fits with [lme4::lmer()] (no residual autocorrelation).
-\code{backend = "nlme"} fits with [nlme::lme()] and AR1/CAR1 residual structure.
-Provenance records \code{backend} and package versions like direct [ild_lme()] calls.
+Façade that selects the estimation backend explicitly. Equivalent to calling
+[ild_lme()] for \code{"lme4"} / \code{"nlme"}, or [ild_brms()] for \code{"brms"}.
+Named functions remain the primary APIs for full documentation and examples.
+}
+\details{
+**State-space models** are not mixed-model formulas: use [ild_kfas()] directly;
+see \code{vignette("kfas-choosing-backend", package = "tidyILD")}.
+
+To pass \code{backend} to \code{brms::brm()} (e.g. \code{"rstan"} vs \code{"cmdstanr"}), use
+[ild_brms()] directly: \code{ild_fit()} reserves \code{backend} for the tidyILD engine
+(\code{"lme4"}, \code{"nlme"}, \code{"brms"}).
+}
+\seealso{
+[ild_kfas()] for KFAS state-space models (not available via \code{ild_fit()}).
 }

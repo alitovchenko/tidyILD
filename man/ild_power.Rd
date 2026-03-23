@@ -92,6 +92,7 @@ res$power
 res$n_reject
 }
 \seealso{
-\href{../doc/benchmark-simulation-recovery.html}{\code{vignette("benchmark-simulation-recovery", package = "tidyILD")}}
-  (parameter recovery with \code{return_sims = TRUE}).
+[ild_recovery_metrics()] to summarize bias, RMSE, and coverage from
+  \code{return_sims}. \href{../doc/benchmark-simulation-recovery.html}{\code{vignette("benchmark-simulation-recovery", package = "tidyILD")}}
+  (worked example).
 }
