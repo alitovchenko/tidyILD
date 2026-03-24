@@ -1,5 +1,9 @@
 # tidyILD 0.3.0
 
+## MSM bootstrap inference (weighted `lmer`)
+
+- **`ild_msm_bootstrap()`**: person-level cluster bootstrap for **`lmer`** fits after **`ild_ipw_refit()`** (or formula + ILD + weight column); **`weight_policy`** **`fixed_weights`** vs **`reestimate_weights`** with user **`weights_fn`**. **`tidy_ild_msm_bootstrap()`** returns **`ild_tidy_schema`** rows with **`interval_type = "bootstrap_percentile"`**. Umbrella topic **`?ild_msm_inference`** (bootstrap vs sandwich vs Bayes guidance). Provenance step **`ild_msm_bootstrap`**.
+
 ## IPTW / IPCW / joint MSM weights
 
 - **`ild_iptw_msm_weights()`**: **sequential** MSM IPTW for time-varying binary `A_t`—per-occasion `glm`, stabilized factors, cumulative `.ipw_treat` within person; attributes `ild_iptw_msm_fits` / `ild_iptw_msm_numerator_fits`. Contrasts with pooled **`ild_iptw_weights()`**.

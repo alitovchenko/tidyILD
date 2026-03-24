@@ -20,6 +20,9 @@ required columns; \code{conf_low} / \code{conf_high} replace legacy \code{ci_low
 \code{interval_type}, \code{engine}, \code{model_class}.
 
 **Optional:** \code{rhat}, \code{ess_bulk}, \code{ess_tail}, \code{pd}, \code{rope_low}, \code{rope_high}.
+
+**\code{interval_type}:** Frequentist rows are typically \code{Wald} (model or robust; see \code{\link{tidy_ild_model}}).
+Bootstrap output from \code{\link{tidy_ild_msm_bootstrap}} uses \code{bootstrap_percentile} (equal-tailed over replicate coefficients).
 }
 \seealso{
 \code{\link{ild_augment_schema}}, \code{\link{ild_diagnostics_bundle}}.

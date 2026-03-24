@@ -51,6 +51,9 @@ With \code{object = TRUE}, returns an object of class \code{tidyild_model} (meta
 With \code{se = "model"} (default), standard errors and CIs come from the fitted
 model. With \code{se = "robust"}, cluster-robust (sandwich) SEs are used;
 CIs and p-values are based on a Wald normal approximation. Install the
-\pkg{clubSandwich} package to use robust SEs.
+\pkg{clubSandwich} package to use robust SEs. For **IPW / MSM** weighted \code{lmer}
+fits ([ild_ipw_refit()]), robust SEs do not account for estimated weights; use
+[ild_msm_bootstrap()] and [tidy_ild_msm_bootstrap()] when you need bootstrap CIs;
+see [ild_msm_inference].
 }
 

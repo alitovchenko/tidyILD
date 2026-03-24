@@ -26,6 +26,7 @@
 #'   \item{\code{\link{ild_iptw_weights}}, \code{\link{ild_iptw_msm_weights}}, \code{\link{ild_ipcw_weights}}, \code{\link{ild_joint_msm_weights}}}{MSM-style
 #'     inverse-probability weights for \strong{treatment} (pooled or sequential \eqn{A_t}) and \strong{monotone censoring}, combined into \code{.ipw}.
 #'     Distinct from outcome missingness IPW above.}
+#'   \item{\code{\link{ild_msm_bootstrap}}, \code{\link{tidy_ild_msm_bootstrap}}}{Person-level bootstrap for weighted \code{lmer} after \code{\link{ild_ipw_refit}}; see \code{\link{ild_msm_inference}}.}
 #' }
 #'
 #' @seealso \code{\link{ild_diagnose}}, \code{\link{ild_diagnostics_bundle}}, \code{\link{ild_diagnostics}}

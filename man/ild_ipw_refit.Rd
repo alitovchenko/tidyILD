@@ -22,7 +22,8 @@ from a fit (or the data to fit when \code{fit_or_formula} is a formula).}
 }
 \value{
 A fitted model (lmerMod) with \code{attr(..., "ild_data")} set so that
-  [tidy_ild_model()] and [ild_diagnostics()] work.
+  [tidy_ild_model()] and [ild_diagnostics()] work. For inference under estimated
+  weights, see [ild_msm_bootstrap()] and [ild_msm_inference].
 }
 \description{
 Takes a fit from [ild_lme()] (or a formula and data) and refits the model

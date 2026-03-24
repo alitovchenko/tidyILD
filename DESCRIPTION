@@ -67,6 +67,7 @@ Collate:
   'ild_ipcw_weights.R'
   'ild_joint_msm_weights.R'
   'ild_ipw_refit.R'
+  'ild_msm_bootstrap.R'
   'ild_tvem.R'
   'ild_tvem_plot.R'
   'ild_check_lags.R'

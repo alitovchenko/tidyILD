@@ -14,7 +14,8 @@
 #' @param ar1 Logical. Must be \code{FALSE} for IPW refit (nlme weighted refit not supported).
 #' @param ... Passed to [ild_lme()] or \code{lme4::lmer()}.
 #' @return A fitted model (lmerMod) with \code{attr(..., "ild_data")} set so that
-#'   [tidy_ild_model()] and [ild_diagnostics()] work.
+#'   [tidy_ild_model()] and [ild_diagnostics()] work. For inference under estimated
+#'   weights, see [ild_msm_bootstrap()] and [ild_msm_inference].
 #' @export
 #' @examples
 #' set.seed(1)

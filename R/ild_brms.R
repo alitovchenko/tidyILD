@@ -124,6 +124,7 @@ ild_brms_n_treedepth_hits <- function(fit, max_td = NA_integer_) {
 #'     \item{\code{ild_provenance}}{Standard tidyILD analysis provenance.}
 #'   }
 #' @seealso [ild_fit()] with \code{backend = "brms"} is equivalent to \code{ild_brms()}.
+#'   For IPW/MSM workflows, full Bayesian joint MSM is not in tidyILD; see [ild_msm_inference].
 #' @importFrom stats formula
 #' @export
 ild_brms <- function(formula,
