@@ -519,13 +519,16 @@ fill_diagnostics_causal <- function(data, causal_detail = FALSE) {
   wcols <- grep("^\\.ipw|ipw_weight|\\.w_", names(data), value = TRUE, ignore.case = TRUE)
   if (length(wcols) == 0L) return(NULL)
   out <- list(columns_found = wcols)
-  if (".ipw" %in% names(data)) {
-    w <- data[[".ipw"]]
-    out$weight_summary <- list(
+  .summ_w <- function(w) {
+    list(
       min = min(w, na.rm = TRUE),
       max = max(w, na.rm = TRUE),
       mean = mean(w, na.rm = TRUE)
     )
+  }
+  if (".ipw" %in% names(data)) {
+    w <- data[[".ipw"]]
+    out$weight_summary <- .summ_w(w)
     if (isTRUE(causal_detail)) {
       wf <- w[is.finite(w)]
       if (length(wf) > 0L) {
@@ -533,6 +536,28 @@ fill_diagnostics_causal <- function(data, causal_detail = FALSE) {
         out$weight_detail <- list(
           quantiles = qs,
           sum_w = sum(wf, na.rm = TRUE)
+        )
+      }
+    }
+  }
+  if (".ipw_treat" %in% names(data)) {
+    out$weight_summary_treat <- .summ_w(data[[".ipw_treat"]])
+    if (isTRUE(causal_detail)) {
+      wf <- data[[".ipw_treat"]][is.finite(data[[".ipw_treat"]])]
+      if (length(wf) > 0L) {
+        out$weight_detail_treat <- list(
+          quantiles = stats::quantile(wf, probs = c(0.05, 0.25, 0.5, 0.75, 0.95), na.rm = TRUE, names = TRUE)
+        )
+      }
+    }
+  }
+  if (".ipw_censor" %in% names(data)) {
+    out$weight_summary_censor <- .summ_w(data[[".ipw_censor"]])
+    if (isTRUE(causal_detail)) {
+      wf <- data[[".ipw_censor"]][is.finite(data[[".ipw_censor"]])]
+      if (length(wf) > 0L) {
+        out$weight_detail_censor <- list(
+          quantiles = stats::quantile(wf, probs = c(0.05, 0.25, 0.5, 0.75, 0.95), na.rm = TRUE, names = TRUE)
         )
       }
     }

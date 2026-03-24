@@ -47,7 +47,7 @@ test_that("ild_autoplot bundle: causal weights errors without .ipw", {
   x <- ild_center(x, y)
   fit <- ild_lme(y ~ y_bp + y_wp + (1 | id), data = x, ar1 = FALSE, warn_no_ar1 = FALSE)
   b <- ild_diagnose(fit, data = x)
-  expect_error(ild_autoplot(b, section = "causal", type = "weights"), ".ipw")
+  expect_error(ild_autoplot(b, section = "causal", type = "weights"), "IPW")
 })
 
 test_that("ild_autoplot bundle: causal weights with .ipw", {

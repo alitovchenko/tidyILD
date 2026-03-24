@@ -1,5 +1,13 @@
 # tidyILD 0.3.0
 
+## IPTW / IPCW / joint MSM weights
+
+- **`ild_iptw_weights()`**: logistic **treatment** propensity weights (`.ipw_treat`); binary treatment only in this version.
+- **`ild_ipcw_weights()`**: discrete-time **IPCW** for **monotone dropout** (`.ipw_censor`), pooled logistic on an internal `drop_next` indicator.
+- **`ild_joint_msm_weights()`**: multiplies `.ipw_treat` × `.ipw_censor` into `.ipw` (optional mean-1 scaling and trimming) for **`ild_ipw_refit()`** / **`ild_diagnose()`**.
+- **Diagnostics:** `fill_diagnostics_causal()` summarizes component weights; **`ild_autoplot(..., section = "causal")`** facets joint vs. IPTW vs. IPCW when present; new guardrail **`GR_MSM_COMPONENT_WEIGHTS_UNSTABLE`** (same max/min ratio idea as joint IPW).
+- **`ild_ipw_helpers.R`**: shared trim / attribute restore used by IPW and MSM weight steps.
+
 ## KFAS backend (experimental)
 
 - **`ild_kfas()`** (optional **KFAS**): single-subject Gaussian **local level** state-space models; **`ild_tidy()`**, **`ild_augment()`**, **`ild_tidy_states()`**, **`ild_diagnose()`**, **`ild_autoplot()`** methods. **`ild_augment()`** uses **`alphahat`** when **`muhat`** is absent (common under diffuse initialization), so **`.fitted`** and residuals align with the smoothed signal. **`ild_autoplot(ild_diagnostics_bundle)`** when **`meta$engine == "KFAS"`** uses KFAS-specific panels: **`predictive`** + **`forecast`** / **`errors`** (not PPC); **`fit`** + **`convergence`** (MLE text summary); **`residual`** + **`acf`** / **`qq`** / **`fitted`**. Direct **`ild_plot_states()`**, **`ild_plot_filtered_vs_smoothed()`**, **`ild_plot_forecast()`** for discoverability. **`ild_methods()`** / **`ild_report()`** describe KFAS provenance (state spec, family, smoothing, fit context, optional **`fitSSM`** dots). See **`inst/dev/KFAS_V1_BACKEND.md`** for the full v1 design and roadmap (trend, AR(1), regression+state, pooling).

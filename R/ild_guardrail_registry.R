@@ -14,6 +14,7 @@ ILD_GUARDRAIL_REGISTRY <- tibble::tibble(
     "GR_HIGH_TIMING_GAP_RATE",
     "GR_DROPOUT_LATE_CONCENTRATION",
     "GR_IPW_WEIGHTS_UNSTABLE",
+    "GR_MSM_COMPONENT_WEIGHTS_UNSTABLE",
     "GR_KFAS_HIGH_IRREGULARITY_FOR_DISCRETE_TIME",
     "GR_KFAS_SHORT_SERIES_FOR_STATE_SPACE",
     "GR_KFAS_STATE_DIMENSION_HIGH_FOR_N",
@@ -25,13 +26,13 @@ ILD_GUARDRAIL_REGISTRY <- tibble::tibble(
   section = c(
     "fit", "fit", "fit",
     "design", "data", "data",
-    "missingness", "causal",
+    "missingness", "causal", "causal",
     "design", "data", "fit", "fit", "fit", "data", "fit"
   ),
   severity = c(
     "warning", "warning", "warning",
     "warning", "warning", "info",
-    "warning", "warning",
+    "warning", "warning", "warning",
     "warning", "warning", "warning", "warning", "warning", "info", "warning"
   ),
   default_message = c(
@@ -43,6 +44,7 @@ ILD_GUARDRAIL_REGISTRY <- tibble::tibble(
     "A large fraction of time intervals are flagged as gaps.",
     "Missingness on the outcome is more concentrated in the later part of the study timeline.",
     "Inverse probability weights show extreme variability (possible instability).",
+    "IPTW or IPCW component weights show extreme variability (possible instability).",
     "Interval timing is highly irregular relative to the median step; discrete-time KFAS models assume a consistent time index.",
     "The observed series is short for the requested state-space complexity.",
     "Latent state dimension is large relative to series length.",
@@ -60,6 +62,7 @@ ILD_GUARDRAIL_REGISTRY <- tibble::tibble(
     "Review gap_threshold and missingness; lags and spacing-based assumptions may be strained.",
     "Investigate selective dropout (MNAR) and sensitivity analyses; consider IPW or models for missingness.",
     "Review the missingness model, trim bounds, or stabilize weights before interpreting results.",
+    "Review treatment and censoring models, trim bounds, or stabilize weights before interpreting MSM results.",
     "Align or aggregate to a regular grid, or use continuous-time modeling for irregular spacing.",
     "Collect more time points or simplify the state specification (e.g. fewer latent components).",
     "Simplify the model (fewer states) or extend the series before interpreting complex latent structure.",
@@ -325,6 +328,29 @@ evaluate_guardrails_contextual <- function(object, data, bundle, engine = c("lme
         message = sprintf("IPW weight range ratio max/min = %.1f (threshold > 50).", mx / mn),
         recommendation = NULL
       )
+    }
+  }
+  if (!is.null(data) && is_ild(data)) {
+    .wm_ratio <- function(w) {
+      wf <- w[is.finite(w) & w > 0]
+      if (length(wf) < 2L) return(NA_real_)
+      max(wf) / min(wf)
+    }
+    for (cn in c(".ipw_treat", ".ipw_censor")) {
+      if (cn %in% names(data)) {
+        r <- .wm_ratio(data[[cn]])
+        if (is.finite(r) && r > 50) {
+          rows[[length(rows) + 1L]] <- list(
+            rule_id = "GR_MSM_COMPONENT_WEIGHTS_UNSTABLE",
+            triggered = TRUE,
+            message = sprintf(
+              "Component %s weight range ratio max/min = %.1f (threshold > 50).",
+              cn, r
+            ),
+            recommendation = NULL
+          )
+        }
+      }
     }
   }
   guardrail_finalize_rows(rows)

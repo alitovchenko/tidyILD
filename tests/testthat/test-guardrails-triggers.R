@@ -61,6 +61,17 @@ test_that("ild_diagnose triggers GR_IPW_WEIGHTS_UNSTABLE", {
   expect_true(any(b$guardrails$rule_id == "GR_IPW_WEIGHTS_UNSTABLE"))
 })
 
+test_that("evaluate_guardrails_contextual triggers GR_MSM_COMPONENT_WEIGHTS_UNSTABLE", {
+  d <- ild_simulate(n_id = 6, n_obs_per = 5, seed = 7003)
+  x <- ild_prepare(d, id = "id", time = "time")
+  x <- ild_center(x, y)
+  w <- rep(c(1, 60), length.out = nrow(x))
+  x$.ipw_treat <- w
+  fit <- ild_lme(y ~ y_bp + y_wp + (1 | id), data = x, ar1 = FALSE, warn_no_ar1 = FALSE)
+  gr <- tidyILD:::evaluate_guardrails_contextual(fit, x, ild_diagnostics_bundle(), engine = "lmer")
+  expect_true(any(gr$rule_id == "GR_MSM_COMPONENT_WEIGHTS_UNSTABLE"))
+})
+
 test_that("evaluate_guardrails_contextual triggers GR_DROPOUT_LATE_CONCENTRATION", {
   d <- ild_simulate(n_id = 4, n_obs_per = 6, seed = 7004)
   x <- ild_prepare(d, id = "id", time = "time")

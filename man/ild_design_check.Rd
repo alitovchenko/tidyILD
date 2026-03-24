@@ -44,7 +44,10 @@ ild_design_check(x, vars = "y")
 [ild_diagnose()], [ild_diagnostics_bundle()]
 
 Other ild_diagnostics_utilities: 
+\code{\link{ild_ipcw_weights}()},
+\code{\link{ild_iptw_weights}()},
 \code{\link{ild_ipw_weights}()},
+\code{\link{ild_joint_msm_weights}()},
 \code{\link{ild_missing_model}()},
 \code{\link{ild_missing_pattern}()}
 }

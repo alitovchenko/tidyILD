@@ -271,20 +271,31 @@ plot_bundle_causal_weights <- function(x) {
   if (is.null(dat)) {
     stop("Weights plot requires attr(bundle, \"ild_data\"). Re-run ild_diagnose().", call. = FALSE)
   }
-  if (!(".ipw" %in% names(dat))) {
+  parts <- list()
+  if (".ipw" %in% names(dat)) parts[["joint (.ipw)"]] <- dat[[".ipw"]]
+  if (".ipw_treat" %in% names(dat)) parts[["IPTW (.ipw_treat)"]] <- dat[[".ipw_treat"]]
+  if (".ipw_censor" %in% names(dat)) parts[["IPCW (.ipw_censor)"]] <- dat[[".ipw_censor"]]
+  if (length(parts) == 0L) {
     stop(
-      "No `.ipw` column in ild_data. Use ild_ipw_weights() or add IPW columns first.",
+      "No IPW columns in ild_data. Use ild_ipw_weights(), ild_iptw_weights() + ild_ipcw_weights() + ild_joint_msm_weights(), or add weight columns first.",
       call. = FALSE
     )
   }
-  w <- dat[[".ipw"]]
-  w <- w[is.finite(w)]
-  if (length(w) == 0L) {
-    stop("No finite .ipw values to plot.", call. = FALSE)
+  rows <- list()
+  for (nm in names(parts)) {
+    w <- parts[[nm]]
+    w <- w[is.finite(w)]
+    if (length(w) > 0L) {
+      rows[[length(rows) + 1L]] <- data.frame(source = nm, w = w)
+    }
   }
-  df <- data.frame(w = w)
+  if (length(rows) == 0L) {
+    stop("No finite weight values to plot.", call. = FALSE)
+  }
+  df <- do.call(rbind, rows)
   ggplot2::ggplot(df, ggplot2::aes(x = .data$w)) +
-    ggplot2::geom_histogram(bins = min(30L, max(10L, length(unique(w)))), fill = "gray40", color = "white") +
-    ggplot2::labs(x = "Weight", y = "Count", title = "Causal / IPW weights (.ipw)") +
+    ggplot2::geom_histogram(bins = min(30L, max(10L, length(unique(df$w)))), fill = "gray40", color = "white") +
+    ggplot2::facet_wrap(~ source, scales = "free_y", ncol = 1) +
+    ggplot2::labs(x = "Weight", y = "Count", title = "Causal / IPW weights") +
     ggplot2::theme_minimal()
 }

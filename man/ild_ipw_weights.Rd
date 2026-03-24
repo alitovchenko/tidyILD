@@ -49,10 +49,14 @@ xw <- ild_ipw_weights(x, mm, stabilize = TRUE)
 summary(xw$.ipw)
 }
 \seealso{
-[ild_diagnose()], [ild_diagnostics_bundle()], [ild_missing_model()]
+[ild_diagnose()], [ild_diagnostics_bundle()], [ild_missing_model()],
+  [ild_iptw_weights()], [ild_ipcw_weights()], [ild_joint_msm_weights()]
 
 Other ild_diagnostics_utilities: 
 \code{\link{ild_design_check}()},
+\code{\link{ild_ipcw_weights}()},
+\code{\link{ild_iptw_weights}()},
+\code{\link{ild_joint_msm_weights}()},
 \code{\link{ild_missing_model}()},
 \code{\link{ild_missing_pattern}()}
 }
