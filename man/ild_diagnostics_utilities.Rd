@@ -24,8 +24,8 @@ fitted model, so the package presents one coherent diagnostics story: a top-leve
   \item{\code{\link{ild_ipw_weights}}}{Adds \code{.ipw} (and related steps in the IPW workflow).
     When those columns are present on the ILD data attached to the fit, \code{ild_diagnose}
     fills the bundle \strong{causal} slot with weight summaries.}
-  \item{\code{\link{ild_iptw_weights}}, \code{\link{ild_ipcw_weights}}, \code{\link{ild_joint_msm_weights}}}{MSM-style
-    inverse-probability weights for \strong{treatment} and \strong{monotone censoring}, combined into \code{.ipw}.
+  \item{\code{\link{ild_iptw_weights}}, \code{\link{ild_iptw_msm_weights}}, \code{\link{ild_ipcw_weights}}, \code{\link{ild_joint_msm_weights}}}{MSM-style
+    inverse-probability weights for \strong{treatment} (pooled or sequential \eqn{A_t}) and \strong{monotone censoring}, combined into \code{.ipw}.
     Distinct from outcome missingness IPW above.}
 }
 }

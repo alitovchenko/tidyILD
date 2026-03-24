@@ -13,7 +13,7 @@ ild_joint_msm_weights(
 }
 \arguments{
 \item{x}{An ILD object containing \code{.ipw_treat} and \code{.ipw_censor}
-(from [ild_iptw_weights()] and [ild_ipcw_weights()]).}
+(from [ild_iptw_weights()] or [ild_iptw_msm_weights()], and [ild_ipcw_weights()]).}
 
 \item{stabilize}{Character. \code{"none"}: \code{w_treat * w_censor} only.
 \code{"mean1"} (default): divide joint weights by their mean so the mean is 1
@@ -50,11 +50,12 @@ x <- ild_joint_msm_weights(x)
 summary(x$.ipw)
 }
 \seealso{
-[ild_iptw_weights()], [ild_ipcw_weights()], [ild_ipw_refit()]
+[ild_iptw_weights()], [ild_iptw_msm_weights()], [ild_ipcw_weights()], [ild_ipw_refit()]
 
 Other ild_diagnostics_utilities: 
 \code{\link{ild_design_check}()},
 \code{\link{ild_ipcw_weights}()},
+\code{\link{ild_iptw_msm_weights}()},
 \code{\link{ild_iptw_weights}()},
 \code{\link{ild_ipw_weights}()},
 \code{\link{ild_missing_model}()},

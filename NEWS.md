@@ -2,7 +2,8 @@
 
 ## IPTW / IPCW / joint MSM weights
 
-- **`ild_iptw_weights()`**: logistic **treatment** propensity weights (`.ipw_treat`); binary treatment only in this version.
+- **`ild_iptw_msm_weights()`**: **sequential** MSM IPTW for time-varying binary `A_t`—per-occasion `glm`, stabilized factors, cumulative `.ipw_treat` within person; attributes `ild_iptw_msm_fits` / `ild_iptw_msm_numerator_fits`. Contrasts with pooled **`ild_iptw_weights()`**.
+- **`ild_iptw_weights()`**: logistic **pooled** treatment propensity weights (`.ipw_treat`); binary treatment only in this version.
 - **`ild_ipcw_weights()`**: discrete-time **IPCW** for **monotone dropout** (`.ipw_censor`), pooled logistic on an internal `drop_next` indicator.
 - **`ild_joint_msm_weights()`**: multiplies `.ipw_treat` × `.ipw_censor` into `.ipw` (optional mean-1 scaling and trimming) for **`ild_ipw_refit()`** / **`ild_diagnose()`**.
 - **Diagnostics:** `fill_diagnostics_causal()` summarizes component weights; **`ild_autoplot(..., section = "causal")`** facets joint vs. IPTW vs. IPCW when present; new guardrail **`GR_MSM_COMPONENT_WEIGHTS_UNSTABLE`** (same max/min ratio idea as joint IPW).

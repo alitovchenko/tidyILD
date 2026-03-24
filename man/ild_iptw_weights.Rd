@@ -33,10 +33,12 @@ ild_iptw_weights(
   \code{ild_iptw_fit} (the fitted \code{glm} object).
 }
 \description{
-Fits a **treatment** propensity model (logistic regression) and computes
-stabilized or unstabilized IPTW weights. This targets assignment to treatment
-\eqn{A} given covariates, unlike [ild_missing_model()] + [ild_ipw_weights()]
-which target **outcome missingness** (observation / MAR-style IPW).
+Fits a **single pooled** treatment propensity model (logistic regression)
+over all person-occasions and computes stabilized or unstabilized IPTW weights
+(one factor per row). Use this for a **time-invariant** treatment or descriptive
+pooling. For **time-varying** \eqn{A_t} with a sequential MSM estimand, use
+[ild_iptw_msm_weights()] instead. Outcome missingness IPW is
+[ild_missing_model()] + [ild_ipw_weights()].
 }
 \details{
 **Assumptions:** Positivity (\eqn{0 < P(A|X) < 1}), correct specification of
@@ -59,11 +61,13 @@ x <- ild_iptw_weights(x, treatment = "trt", predictors = "stress")
 summary(x$.ipw_treat)
 }
 \seealso{
-[ild_ipcw_weights()], [ild_joint_msm_weights()], [ild_ipw_refit()]
+[ild_iptw_msm_weights()], [ild_ipcw_weights()], [ild_joint_msm_weights()],
+  [ild_ipw_refit()]
 
 Other ild_diagnostics_utilities: 
 \code{\link{ild_design_check}()},
 \code{\link{ild_ipcw_weights}()},
+\code{\link{ild_iptw_msm_weights}()},
 \code{\link{ild_ipw_weights}()},
 \code{\link{ild_joint_msm_weights}()},
 \code{\link{ild_missing_model}()},

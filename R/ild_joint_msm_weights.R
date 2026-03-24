@@ -10,7 +10,7 @@
 #'
 #' @family ild_diagnostics_utilities
 #' @param x An ILD object containing \code{.ipw_treat} and \code{.ipw_censor}
-#'   (from [ild_iptw_weights()] and [ild_ipcw_weights()]).
+#'   (from [ild_iptw_weights()] or [ild_iptw_msm_weights()], and [ild_ipcw_weights()]).
 #' @param stabilize Character. \code{"none"}: \code{w_treat * w_censor} only.
 #'   \code{"mean1"} (default): divide joint weights by their mean so the mean is 1
 #'   (helps comparability with stabilized components).
@@ -18,7 +18,7 @@
 #'   (default \code{c(0.01, 0.99)}).
 #' @param joint_name Character. Name of the combined weight column (default \code{".ipw"}).
 #' @return \code{x} with \code{joint_name} set; component columns unchanged.
-#' @seealso [ild_iptw_weights()], [ild_ipcw_weights()], [ild_ipw_refit()]
+#' @seealso [ild_iptw_weights()], [ild_iptw_msm_weights()], [ild_ipcw_weights()], [ild_ipw_refit()]
 #' @export
 #' @examples
 #' set.seed(4)

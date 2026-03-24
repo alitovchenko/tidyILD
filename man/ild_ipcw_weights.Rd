@@ -43,8 +43,8 @@ probabilities are accumulated within person (product over follow-up) to yield
 }
 \section{Bundle integration}{
 
-Adds \code{.ipw_censor}. Combine with [ild_iptw_weights()] via
-[ild_joint_msm_weights()].
+Adds \code{.ipw_censor}. Combine with [ild_iptw_weights()] or
+[ild_iptw_msm_weights()] via [ild_joint_msm_weights()].
 }
 
 \examples{
@@ -60,6 +60,7 @@ summary(x$.ipw_censor)
 
 Other ild_diagnostics_utilities: 
 \code{\link{ild_design_check}()},
+\code{\link{ild_iptw_msm_weights}()},
 \code{\link{ild_iptw_weights}()},
 \code{\link{ild_ipw_weights}()},
 \code{\link{ild_joint_msm_weights}()},

@@ -55,6 +55,7 @@ summary(xw$.ipw)
 Other ild_diagnostics_utilities: 
 \code{\link{ild_design_check}()},
 \code{\link{ild_ipcw_weights}()},
+\code{\link{ild_iptw_msm_weights}()},
 \code{\link{ild_iptw_weights}()},
 \code{\link{ild_joint_msm_weights}()},
 \code{\link{ild_missing_model}()},

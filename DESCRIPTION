@@ -63,6 +63,7 @@ Collate:
   'ild_ipw_helpers.R'
   'ild_ipw_weights.R'
   'ild_iptw_weights.R'
+  'ild_iptw_msm_weights.R'
   'ild_ipcw_weights.R'
   'ild_joint_msm_weights.R'
   'ild_ipw_refit.R'

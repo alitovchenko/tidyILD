@@ -81,7 +81,7 @@ ild_plot(fit1, type = "fitted")
 
 ## MSM-style weights (IPTW and IPCW) — optional
 
-For a **marginal structural model**–style sensitivity analysis, you can build **inverse probability of treatment** weights (`ild_iptw_weights()`), **inverse probability of censoring** weights for **monotone dropout** (`ild_ipcw_weights()`), multiply them into a joint analysis weight with `ild_joint_msm_weights()`, then refit with `ild_ipw_refit()`. This path targets **treatment assignment** and **loss-to-follow-up**; it is distinct from **outcome missingness** IPW (`ild_missing_model()` + `ild_ipw_weights()`). Assumptions (positivity, correct models) and variance (e.g. bootstrap) are not handled automatically—treat as sensitivity tooling.
+For a **marginal structural model**–style sensitivity analysis, you can build **inverse probability of treatment** weights: either **pooled** (`ild_iptw_weights()`) or **sequential MSM** for time-varying `A_t` (`ild_iptw_msm_weights()` after building history with `ild_lag()`), then **inverse probability of censoring** weights for **monotone dropout** (`ild_ipcw_weights()`), multiply into a joint analysis weight with `ild_joint_msm_weights()`, and refit with `ild_ipw_refit()`. This path targets **treatment assignment** and **loss-to-follow-up**; it is distinct from **outcome missingness** IPW (`ild_missing_model()` + `ild_ipw_weights()`). Assumptions (positivity, correct models) and variance (e.g. bootstrap) are not handled automatically—treat as sensitivity tooling.
 
 ```{r msm_weights, eval = FALSE}
 # Example skeleton (not run in the vignette build)
@@ -91,6 +91,8 @@ x2$trt <- rbinom(nrow(x2), 1L, 0.45)
 x2 <- ild_prepare(x2, id = "id", time = "time")
 x2 <- ild_center(x2, y)
 x2 <- ild_iptw_weights(x2, treatment = "trt", predictors = "stress")
+# Sequential A_t: x2 <- ild_lag(x2, stress); x2 <- ild_lag(x2, trt); ...
+# x2 <- ild_iptw_msm_weights(x2, treatment = "trt", history = ~ stress_lag1 + trt_lag1)
 x2 <- ild_ipcw_weights(x2, predictors = "stress")
 x2 <- ild_joint_msm_weights(x2)
 fit_msm <- ild_lme(y ~ y_bp + y_wp + stress + (1 | id), data = x2,

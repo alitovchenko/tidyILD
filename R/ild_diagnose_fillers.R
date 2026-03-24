@@ -562,6 +562,25 @@ fill_diagnostics_causal <- function(data, causal_detail = FALSE) {
       }
     }
   }
+  if (isTRUE(causal_detail) && ".ipw_treat" %in% names(data) && ".ild_seq" %in% names(data) &&
+      !is.null(attr(data, "ild_iptw_msm_fits", exact = TRUE))) {
+    wt <- data[[".ipw_treat"]]
+    sq <- data[[".ild_seq"]]
+    uq <- sort(unique(as.numeric(sq)))
+    occ_summ <- vector("list", length(uq))
+    names(occ_summ) <- as.character(uq)
+    for (tt in uq) {
+      wm <- wt[as.numeric(sq) == tt & is.finite(wt)]
+      if (length(wm) > 0L) {
+        occ_summ[[as.character(tt)]] <- list(
+          min = min(wm, na.rm = TRUE),
+          max = max(wm, na.rm = TRUE),
+          mean = mean(wm, na.rm = TRUE)
+        )
+      }
+    }
+    out$msm_treat_weight_by_occasion <- occ_summ
+  }
   out
 }
 

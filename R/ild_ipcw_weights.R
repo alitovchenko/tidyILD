@@ -15,8 +15,8 @@
 #' **Assumptions:** Monotone censoring, positivity, correct censoring model.
 #'
 #' @section Bundle integration:
-#' Adds \code{.ipw_censor}. Combine with [ild_iptw_weights()] via
-#' [ild_joint_msm_weights()].
+#' Adds \code{.ipw_censor}. Combine with [ild_iptw_weights()] or
+#' [ild_iptw_msm_weights()] via [ild_joint_msm_weights()].
 #'
 #' @family ild_diagnostics_utilities
 #' @param x An ILD object (see [is_ild()]).
