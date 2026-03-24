@@ -82,7 +82,7 @@ ild_iptw_msm_weights <- function(x,
 
   pred_names <- if (inherits(history, "formula")) {
     tryCatch(
-      stats::labels(stats::terms(history)),
+      attr(stats::terms(history), "term.labels"),
       error = function(e) character(0)
     )
   } else {
