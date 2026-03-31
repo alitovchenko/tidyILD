@@ -189,6 +189,23 @@ ild_step_to_sentence <- function(s, context = NULL, robust_se = NULL) {
     }
     return(out)
   }
+  if (step == "ild_ctsem") {
+    out <- paste0(
+      "A continuous-time latent-dynamics model was fit using ild_ctsem() with outcome ",
+      .def(a$outcome, "outcome"),
+      ", fit type ", .def(a$model_type, "ctsem default"),
+      ", id column ", .def(a$id_col, ".ild_id"),
+      ", and time column ", .def(a$time_col, ".ild_time_num"),
+      "."
+    )
+    if (!is.null(o$n_obs) && !is.null(o$n_id)) {
+      out <- paste0(out, " (n = ", o$n_obs, ", N = ", o$n_id, " persons).")
+    }
+    if (!is.null(o$converged) && !is.na(o$converged)) {
+      out <- paste0(out, " Converged: ", o$converged, ".")
+    }
+    return(out)
+  }
   if (step == "ild_diagnostics") {
     types <- a$type
     if (is.null(types) || length(types) == 0) {
@@ -328,6 +345,8 @@ ild_report <- function(fit, export_provenance_path = NULL, robust_se = NULL, ...
   }
   meta$engine <- if (inherits(fit, "ild_fit_kfas")) {
     "KFAS"
+  } else if (inherits(fit, "ild_fit_ctsem")) {
+    "ctsem"
   } else if (inherits(fit, "lme")) {
     "lme"
   } else if (inherits(fit, "lmerMod")) {
@@ -343,6 +362,8 @@ ild_report <- function(fit, export_provenance_path = NULL, robust_se = NULL, ...
       type = if (inherits(fit, "brmsfit")) {
         "all"
       } else if (inherits(fit, "ild_fit_kfas")) {
+        NULL
+      } else if (inherits(fit, "ild_fit_ctsem")) {
         NULL
       } else {
         c("residual_acf", "qq")

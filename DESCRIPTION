@@ -36,7 +36,8 @@ Suggests:
   yaml,
   tsibble,
   brms,
-  KFAS
+  KFAS,
+  ctsem
 VignetteBuilder: knitr
 Collate:
   'package.R'
@@ -89,6 +90,8 @@ Collate:
   'ild_generics.R'
   'ild_brms.R'
   'ild_brms_s3.R'
+  'ild_ctsem.R'
+  'ild_ctsem_s3.R'
   'ild_kfas_spec.R'
   'ild_kfas_helpers.R'
   'ild_kfas.R'

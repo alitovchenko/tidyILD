@@ -13,11 +13,12 @@ ild_autoplot.ild_diagnostics_bundle <- function(x, section = "residual", type = 
     eng <- x$fit$engine
   }
   is_kfas <- identical(eng, "KFAS")
+  is_ctsem <- identical(eng, "ctsem")
 
   if (identical(section, "residual")) {
     leg <- x$residual$legacy_ild_diagnostics
     if (is.null(type)) {
-      if (!is_kfas && !is.null(leg)) {
+      if (!is_kfas && !is_ctsem && !is.null(leg)) {
         return(plot_ild_diagnostics(leg, ...))
       }
       type <- "acf"
@@ -29,6 +30,12 @@ ild_autoplot.ild_diagnostics_bundle <- function(x, section = "residual", type = 
         qq = plot_bundle_kfas_residual_qq(x),
         fitted = plot_bundle_kfas_residual_fitted(x)
       )
+    } else if (is_ctsem) {
+      switch(type,
+        acf = plot_bundle_ctsem_residual_acf(x),
+        qq = plot_bundle_ctsem_residual_qq(x),
+        fitted = plot_bundle_ctsem_residual_fitted(x)
+      )
     } else {
       switch(type,
         acf = plot_bundle_residual_acf(x),
@@ -39,7 +46,7 @@ ild_autoplot.ild_diagnostics_bundle <- function(x, section = "residual", type = 
   } else {
     choices <- switch(section,
       fit = c("convergence"),
-      predictive = if (is_kfas) c("forecast", "errors") else c("ppc"),
+      predictive = if (is_kfas) c("forecast", "errors") else if (is_ctsem) c("errors") else c("ppc"),
       data = c("missingness"),
       design = c("coverage"),
       causal = c("weights", "overlap")
@@ -55,6 +62,8 @@ ild_autoplot.ild_diagnostics_bundle <- function(x, section = "residual", type = 
           forecast = plot_bundle_kfas_predictive_forecast(x),
           errors = plot_bundle_kfas_predictive_errors(x)
         )
+      } else if (is_ctsem) {
+        plot_bundle_ctsem_predictive_errors(x)
       } else {
         plot_bundle_predictive_ppc(x, ...)
       },
@@ -149,6 +158,27 @@ plot_bundle_fit_convergence <- function(x) {
       ggplot2::coord_flip() +
       ggplot2::labs(x = NULL, y = "R-hat", title = "Convergence (fixed effects)") +
       ggplot2::theme_minimal()
+  }
+  if (identical(eng, "ctsem")) {
+    conv <- fd$convergence
+    txt <- paste(
+      c(
+        "Engine: ctsem",
+        sprintf("Converged: %s", conv$converged),
+        sprintf("Convergence code: %s", conv$convergence_code),
+        sprintf("State dimension: %s", fd$state_dimension),
+        if (is.finite(fd$log_likelihood)) sprintf("LogLik: %.2f", fd$log_likelihood) else "LogLik: NA"
+      ),
+      collapse = "\n"
+    )
+    return(
+      ggplot2::ggplot() +
+        ggplot2::annotate("text", x = 0.5, y = 0.5, label = txt, hjust = 0.5, vjust = 0.5) +
+        ggplot2::theme_void() +
+        ggplot2::labs(title = "Convergence (ctsem)") +
+        ggplot2::xlim(0, 1) +
+        ggplot2::ylim(0, 1)
+    )
   }
 
   fd_conv <- fd$convergence
@@ -317,4 +347,77 @@ plot_bundle_causal_overlap <- function(x, treatment, source = "auto", ...) {
     stop("Overlap plot requires attr(bundle, \"ild_data\"). Re-run ild_diagnose().", call. = FALSE)
   }
   ild_msm_overlap_plot(dat, treatment = treatment, source = source)
+}
+
+#' @keywords internal
+#' @noRd
+plot_bundle_ctsem_residual_acf <- function(x) {
+  acf_tbl <- x$residual$acf
+  if (is.null(acf_tbl) || nrow(acf_tbl) == 0L) {
+    stop("ctsem residual ACF diagnostics are unavailable in this bundle.", call. = FALSE)
+  }
+  ggplot2::ggplot(acf_tbl, ggplot2::aes(x = .data$lag, y = .data$acf)) +
+    ggplot2::geom_col() +
+    ggplot2::geom_hline(yintercept = 0, linetype = 2) +
+    ggplot2::labs(title = "ctsem residual ACF", x = "Lag", y = "ACF") +
+    ggplot2::theme_minimal()
+}
+
+#' @keywords internal
+#' @noRd
+plot_bundle_ctsem_residual_qq <- function(x) {
+  fit <- attr(x, "ild_fit", exact = TRUE)
+  if (is.null(fit)) {
+    stop("ctsem residual QQ plot requires attr(bundle, \"ild_fit\").", call. = FALSE)
+  }
+  ag <- ild_augment(fit)
+  ggplot2::ggplot(ag, ggplot2::aes(sample = .data$.resid_std)) +
+    ggplot2::stat_qq() +
+    ggplot2::stat_qq_line() +
+    ggplot2::labs(title = "ctsem standardized residual QQ plot", x = "Theoretical", y = "Sample") +
+    ggplot2::theme_minimal()
+}
+
+#' @keywords internal
+#' @noRd
+plot_bundle_ctsem_residual_fitted <- function(x) {
+  fit <- attr(x, "ild_fit", exact = TRUE)
+  if (is.null(fit)) {
+    stop("ctsem fitted diagnostics require attr(bundle, \"ild_fit\").", call. = FALSE)
+  }
+  ag <- ild_augment(fit)
+  ggplot2::ggplot(ag, ggplot2::aes(x = .data$.fitted, y = .data$.resid)) +
+    ggplot2::geom_point(alpha = 0.5) +
+    ggplot2::geom_hline(yintercept = 0, linetype = 2) +
+    ggplot2::labs(title = "ctsem residuals vs fitted", x = "Fitted", y = "Residual") +
+    ggplot2::theme_minimal()
+}
+
+#' @keywords internal
+#' @noRd
+plot_bundle_ctsem_predictive_errors <- function(x) {
+  om <- x$predictive$obs_metrics
+  if (is.null(om)) {
+    return(
+      ggplot2::ggplot() +
+        ggplot2::theme_void() +
+        ggplot2::labs(title = "ctsem predictive errors unavailable")
+    )
+  }
+  txt <- paste(
+    c(
+      sprintf("Engine: ctsem"),
+      sprintf("n: %s", om$n),
+      sprintf("MAE: %.3f", om$mean_abs_error),
+      sprintf("RMSE: %.3f", om$rmse),
+      sprintf("Mean residual: %.3f", om$mean_residual)
+    ),
+    collapse = "\n"
+  )
+  ggplot2::ggplot() +
+    ggplot2::annotate("text", x = 0.5, y = 0.5, label = txt, hjust = 0.5, vjust = 0.5) +
+    ggplot2::theme_void() +
+    ggplot2::labs(title = "ctsem predictive error summary") +
+    ggplot2::xlim(0, 1) +
+    ggplot2::ylim(0, 1)
 }

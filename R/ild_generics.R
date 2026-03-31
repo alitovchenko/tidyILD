@@ -1,5 +1,6 @@
 # Unified S3 API for fitting, tidying, augmentation, diagnostics, and plotting
-# Backends: lme4/nlme via ild_lme(); brms via ild_brms(). State-space: use ild_kfas().
+# Backends: lme4/nlme via ild_lme(); brms via ild_brms().
+# State-space / latent dynamics wrappers: use ild_kfas() or ild_ctsem().
 
 #' Fit a mixed model to ILD data (unified entry point)
 #'
@@ -7,7 +8,8 @@
 #' [ild_lme()] for \code{"lme4"} / \code{"nlme"}, or [ild_brms()] for \code{"brms"}.
 #' Named functions remain the primary APIs for full documentation and examples.
 #'
-#' **State-space models** are not mixed-model formulas: use [ild_kfas()] directly;
+#' **State-space / latent-dynamics models** are not mixed-model formulas:
+#' use [ild_kfas()] or [ild_ctsem()] directly;
 #' see \code{vignette("kfas-choosing-backend", package = "tidyILD")}.
 #'
 #' To pass \code{backend} to \code{brms::brm()} (e.g. \code{"rstan"} vs \code{"cmdstanr"}), use
@@ -30,7 +32,8 @@
 #' @param ... Passed to [ild_lme()] / [lme4::lmer()] / [nlme::lme()] or [ild_brms()].
 #' @return A fitted model: \code{lmerMod} / \code{lme} from [ild_lme()], or \code{brmsfit}
 #'   from [ild_brms()], each with the same attributes as those functions document.
-#' @seealso [ild_kfas()] for KFAS state-space models (not available via \code{ild_fit()}).
+#' @seealso [ild_kfas()] and [ild_ctsem()] for state-space / latent-dynamics
+#'   backends (not available via \code{ild_fit()}).
 #' @export
 ild_fit <- function(formula,
                     data,
@@ -171,7 +174,8 @@ ild_augment.default <- function(x, ...) {
 #' Engine-agnostic diagnostics façade
 #'
 #' Returns a single \code{\link{ild_diagnostics_bundle}} for \code{lmerMod}, \code{lme},
-#' and \code{brmsfit} (from [ild_lme()] / [ild_brms()]). Sections are parallel across engines;
+#' \code{brmsfit}, \code{ild_fit_kfas}, and \code{ild_fit_ctsem}.
+#' Sections are parallel across engines;
 #' see \code{?ild_diagnostics_bundle}. Residual ACF/Q-Q for frequentist models are stored in
 #' \code{residual$legacy_ild_diagnostics} for [plot_ild_diagnostics()]. For raw residual-only
 #' computation without the bundle, call [ild_diagnostics()] directly.
@@ -215,7 +219,9 @@ ild_diagnose <- function(object, ...) {
 #' @param x A bundle, \code{ild_diagnostics} object, or a fitted model with \code{ild_data}.
 #' @param type When \code{x} is \code{lmerMod} or \code{lme}: passed to [ild_plot()]
 #'   (default \code{"fitted_vs_actual"}). When \code{x} is \code{brmsfit}: \code{"pp_check"}
-#'   or \code{"fitted_vs_actual"}. When \code{x} is \code{\link{ild_diagnostics_bundle}}:
+#'   or \code{"fitted_vs_actual"}. When \code{x} is \code{ild_fit_ctsem}:
+#'   \code{"fitted_vs_actual"}, \code{"residual_time"}, or \code{"qq"}.
+#'   When \code{x} is \code{\link{ild_diagnostics_bundle}}:
 #'   plot \code{type} within \code{section} — for \code{section = "residual"} one of
 #'   \code{"acf"}, \code{"qq"}, \code{"fitted"}; for \code{section = "causal"} one of
 #'   \code{"weights"} (histograms of IPW columns) or \code{"overlap"} (propensity densities;

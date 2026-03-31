@@ -77,3 +77,27 @@ test_that("contract: brms bundle + merged poor mixing / low ESS guardrails", {
   m <- ild_methods(fx$fit, bundle = fx$bundle)
   expect_true(grepl("Methodological cautions (tidyILD guardrails)", m, fixed = TRUE))
 })
+
+test_that("contract: ctsem backend satisfies tidy/augment/bundle contracts", {
+  skip_if_not_installed("ctsem")
+  x <- ctsem_fixture_data(seed = 9410L, n_id = 1L, n_obs_per = 45L)
+  fit <- suppressWarnings(
+    ild_ctsem(
+      data = x,
+      outcome = "y",
+      model_type = "stanct",
+      iter = 200,
+      chains = 1
+    )
+  )
+  td <- ild_tidy(fit)
+  expect_true(all(contract_tidy_required() %in% names(td)))
+  ag <- ild_augment(fit)
+  expect_true(all(contract_augment_required() %in% names(ag)))
+  b <- ild_diagnose(fit)
+  expect_s3_class(b, "ild_diagnostics_bundle")
+  expect_no_error(validate_ild_diagnostics_bundle(b))
+  expect_s3_class(ild_autoplot(b, section = "fit", type = "convergence"), "ggplot")
+  m <- ild_methods(fit, bundle = b)
+  expect_true(grepl("ild_ctsem", m, fixed = TRUE) || grepl("continuous-time", m, fixed = TRUE))
+})

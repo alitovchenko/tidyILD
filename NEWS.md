@@ -41,6 +41,14 @@
 - **Tests:** **`tests/testthat/helper-kfas-fixtures.R`** (DGP + bundle expectations); **`tests/testthat/test-kfas-extended.R`** — contract depth, local-level **recovery** (variances + smoothed state), **missingness** (documented row dropping + guardrail), extra **guardrails** (high irregularity, many NA segments); **skipped** placeholders for **`local_trend`** / **`ar1_state`** / **`regression_local_level`** recovery and **`GR_KFAS_STATE_DIMENSION_HIGH_FOR_N`** until multi-state specs ship.
 - **`ild_diagnose()`** for **`ild_fit_kfas`** centers **state-space residual diagnostics**: standardized innovations (with `rstandard` / `v`–`F` fallback), ACF, normal QQ correlation, outlier flags, Ljung–Box; rich **`meta`**, **`data`**, **`design`**, **`fit`**, **`predictive`**, **`warnings`**; plus **KFAS-specific guardrails** (`GR_KFAS_*` in **`guardrail_registry()`**). Use **`fit_context = "independent_series_per_id"`** when stacking independent single-ID fits (triggers heterogeneity guardrail).
 
+## ctsem backend (first-class wrapper, v1)
+
+- **`ild_ctsem()`**: first-class continuous-time latent-dynamics wrapper with tidyILD provenance and ILD metadata attachment.
+- **S3 backend parity:** `ild_tidy.ild_fit_ctsem()`, `ild_augment.ild_fit_ctsem()`, `ild_diagnose.ild_fit_ctsem()`, and `ild_autoplot.ild_fit_ctsem()` integrate ctsem fits into tidy/augment/diagnostics workflows.
+- **Diagnostics bundle integration:** ctsem fits now populate `ild_diagnostics_bundle` with residual/predictive summaries and section-first autoplot compatibility.
+- **ctsem guardrails:** added `GR_CTSEM_NONCONVERGENCE`, `GR_CTSEM_UNSTABLE_DYNAMICS`, and `GR_CTSEM_SHORT_SERIES_FOR_COMPLEX_DYNAMICS` with deterministic trigger coverage.
+- **New vignette:** `vignette("ctsem-continuous-time-dynamics", package = "tidyILD")`.
+
 ## Guardrails (identity & reporting)
 
 - **`print()`** on **`ild_diagnostics_bundle`** prints a **Summary** after slots: counts for warnings/guardrails, highest guardrail severity, and up to five **`rule_id`** values when guardrails are present.

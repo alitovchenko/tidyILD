@@ -23,19 +23,24 @@ ILD_GUARDRAIL_REGISTRY <- tibble::tibble(
     "GR_KFAS_DEGENERATE_VARIANCE_ESTIMATE",
     "GR_KFAS_NONCONVERGENCE",
     "GR_KFAS_MANY_MISSING_OUTCOME_SEGMENTS",
-    "GR_KFAS_UNMODELED_BETWEEN_PERSON_HETEROGENEITY"
+    "GR_KFAS_UNMODELED_BETWEEN_PERSON_HETEROGENEITY",
+    "GR_CTSEM_NONCONVERGENCE",
+    "GR_CTSEM_UNSTABLE_DYNAMICS",
+    "GR_CTSEM_SHORT_SERIES_FOR_COMPLEX_DYNAMICS"
   ),
   section = c(
     "fit", "fit", "fit",
     "design", "data", "data",
     "missingness", "causal", "causal", "causal", "causal",
-    "design", "data", "fit", "fit", "fit", "data", "fit"
+    "design", "data", "fit", "fit", "fit", "data", "fit",
+    "fit", "fit", "data"
   ),
   severity = c(
     "warning", "warning", "warning",
     "warning", "warning", "info",
     "warning", "warning", "warning", "info", "info",
-    "warning", "warning", "warning", "warning", "warning", "info", "warning"
+    "warning", "warning", "warning", "warning", "warning", "info", "warning",
+    "warning", "warning", "warning"
   ),
   default_message = c(
     "Estimated random-effect covariance is singular or near-singular.",
@@ -55,7 +60,10 @@ ILD_GUARDRAIL_REGISTRY <- tibble::tibble(
     "Estimated state or observation variance is effectively on the boundary (near zero or degenerate).",
     "Numerical optimization for the state-space model did not report clean convergence.",
     "The outcome has many separate missing segments in time order.",
-    "Independent single-subject state-space fits are not a substitute for pooled multilevel latent-dynamics models (e.g. ctsem)."
+    "Independent single-subject state-space fits are not a substitute for pooled multilevel latent-dynamics models (e.g. ctsem).",
+    "ctsem optimization did not report clean convergence.",
+    "Estimated continuous-time dynamics appear unstable or implausibly large.",
+    "The observed series may be too short for the requested continuous-time latent dynamics complexity."
   ),
   default_recommendation = c(
     "Consider simpler random structure, stronger priors (Bayesian), or rescaling predictors.",
@@ -75,7 +83,10 @@ ILD_GUARDRAIL_REGISTRY <- tibble::tibble(
     "Rescale the outcome, re-check identification, or consider stronger priors / constraints in KFAS.",
     "Try different starting values, optimization method, or check the model specification.",
     "Consider explicit missingness modeling or sensitivity analyses for intermittent observations.",
-    "Do not treat stacked single-ID KFAS fits as a pooled latent model; use hierarchical latent frameworks if that is the estimand."
+    "Do not treat stacked single-ID KFAS fits as a pooled latent model; use hierarchical latent frameworks if that is the estimand.",
+    "Try alternative starting values, simplify the ctsem model, or inspect time scaling and identification.",
+    "Rescale time/outcome or constrain unstable drift parameters before interpretation.",
+    "Collect more observations per person or simplify latent dynamics before strong inferences."
   )
 )
 
@@ -264,7 +275,7 @@ guardrail_finalize_rows <- function(rows) {
 #' Evaluate design / data / causal guardrails from bundle + model
 #' @keywords internal
 #' @noRd
-evaluate_guardrails_contextual <- function(object, data, bundle, engine = c("lmer", "lme", "brms")) {
+evaluate_guardrails_contextual <- function(object, data, bundle, engine = c("lmer", "lme", "brms", "ctsem")) {
   engine <- match.arg(engine)
   rows <- list()
   if (!is.null(data) && is_ild(data)) {
@@ -391,6 +402,22 @@ evaluate_guardrails_contextual <- function(object, data, bundle, engine = c("lme
       )
     }
   }
+  if (identical(engine, "ctsem") && !is.null(data) && is_ild(data)) {
+    st_dim <- tryCatch(as.numeric(bundle$fit$state_dimension)[1L], error = function(e) NA_real_)
+    n <- nrow(data)
+    min_n <- if (is.finite(st_dim) && st_dim > 1) 40 else 25
+    if (is.finite(n) && n < min_n) {
+      rows[[length(rows) + 1L]] <- list(
+        rule_id = "GR_CTSEM_SHORT_SERIES_FOR_COMPLEX_DYNAMICS",
+        triggered = TRUE,
+        message = sprintf(
+          "n = %d observations; recommend at least %d for this ctsem complexity.",
+          n, min_n
+        ),
+        recommendation = NULL
+      )
+    }
+  }
   guardrail_finalize_rows(rows)
 }
 
@@ -412,7 +439,7 @@ guardrail_dropout_late_heuristic <- function(data, outcome) {
 #' Evaluate fit-level guardrails (frequentist + Bayesian)
 #' @keywords internal
 #' @noRd
-evaluate_guardrails_fit <- function(object, fit_diag, engine = c("lmer", "lme", "brms")) {
+evaluate_guardrails_fit <- function(object, fit_diag, engine = c("lmer", "lme", "brms", "ctsem")) {
   engine <- match.arg(engine)
   fd <- fit_bundle_flat_for_guardrails(fit_diag, engine = engine)
   rows <- list()
@@ -448,6 +475,27 @@ evaluate_guardrails_fit <- function(object, fit_diag, engine = c("lmer", "lme", 
           recommendation = NULL
         )
       }
+    }
+  }
+  if (engine == "ctsem") {
+    conv <- tryCatch(fit_diag$convergence$converged, error = function(e) NA)
+    if (!is.na(conv) && !isTRUE(conv)) {
+      rows[[length(rows) + 1L]] <- list(
+        rule_id = "GR_CTSEM_NONCONVERGENCE",
+        triggered = TRUE,
+        message = NULL,
+        recommendation = NULL
+      )
+    }
+    # Heuristic instability signal: very large absolute drift entries.
+    drift_max <- tryCatch(as.numeric(fit_diag$drift_abs_max)[1L], error = function(e) NA_real_)
+    if (is.finite(drift_max) && drift_max > 5) {
+      rows[[length(rows) + 1L]] <- list(
+        rule_id = "GR_CTSEM_UNSTABLE_DYNAMICS",
+        triggered = TRUE,
+        message = sprintf("Maximum absolute drift estimate = %.2f (heuristic threshold > 5).", drift_max),
+        recommendation = NULL
+      )
     }
   }
   guardrail_finalize_rows(rows)

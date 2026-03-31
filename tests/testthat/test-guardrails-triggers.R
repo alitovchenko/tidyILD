@@ -28,6 +28,42 @@ test_that("evaluate_guardrails_fit triggers GR_POOR_POSTERIOR_MIXING and GR_LOW_
   expect_true(any(gr_ess$rule_id == "GR_LOW_ESS"))
 })
 
+test_that("evaluate_guardrails_fit/contextual trigger ctsem guardrails", {
+  gr_fit <- tidyILD:::evaluate_guardrails_fit(
+    structure(list(), class = "ild_fit_ctsem"),
+    list(
+      convergence = list(converged = FALSE),
+      drift_abs_max = 6
+    ),
+    engine = "ctsem"
+  )
+  expect_true(any(gr_fit$rule_id == "GR_CTSEM_NONCONVERGENCE"))
+  expect_true(any(gr_fit$rule_id == "GR_CTSEM_UNSTABLE_DYNAMICS"))
+
+  d <- ild_simulate(n_id = 1, n_obs_per = 12, seed = 7110)
+  x <- ild_prepare(d, id = "id", time = "time")
+  b <- ild_diagnostics_bundle(
+    fit = list(state_dimension = 2),
+    data = list(pct_gap = NA_real_),
+    design = list(),
+    residual = list(),
+    predictive = list(),
+    missingness = list(),
+    causal = list(),
+    meta = list(),
+    warnings = tibble::tibble(),
+    guardrails = tidyILD:::guardrails_empty_tibble(),
+    summary_text = character()
+  )
+  gr_ctx <- tidyILD:::evaluate_guardrails_contextual(
+    structure(list(), class = "ild_fit_ctsem"),
+    x,
+    b,
+    engine = "ctsem"
+  )
+  expect_true(any(gr_ctx$rule_id == "GR_CTSEM_SHORT_SERIES_FOR_COMPLEX_DYNAMICS"))
+})
+
 test_that("ild_diagnose triggers GR_MIXED_PREDICTOR_NOT_DECOMPOSED", {
   d <- ild_simulate(n_id = 8, n_obs_per = 5, seed = 7001)
   d$stress <- as.numeric(scale(rnorm(nrow(d)))) +

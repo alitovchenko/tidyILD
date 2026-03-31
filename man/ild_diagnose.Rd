@@ -7,6 +7,7 @@
 \alias{ild_diagnose.lmerMod}
 \alias{ild_diagnose.lme}
 \alias{ild_diagnose.brmsfit}
+\alias{ild_diagnose.ild_fit_ctsem}
 \alias{ild_diagnose.default}
 \title{Engine-agnostic diagnostics façade}
 \usage{
@@ -63,6 +64,22 @@ ild_diagnose(object, ...)
   ...
 )
 
+\method{ild_diagnose}{ild_fit_ctsem}(
+  object,
+  data = NULL,
+  type = NULL,
+  by_id = NULL,
+  missing_model = FALSE,
+  missing_model_predictors = NULL,
+  causal_detail = FALSE,
+  balance = FALSE,
+  balance_treatment = NULL,
+  balance_covariates = NULL,
+  balance_weights_col = ".ipw_treat",
+  balance_by_occasion = FALSE,
+  ...
+)
+
 \method{ild_diagnose}{default}(object, ...)
 }
 \arguments{
@@ -101,7 +118,8 @@ An \code{\link{ild_diagnostics_bundle}}.
 }
 \description{
 Returns a single \code{\link{ild_diagnostics_bundle}} for \code{lmerMod}, \code{lme},
-and \code{brmsfit} (from [ild_lme()] / [ild_brms()]). Sections are parallel across engines;
+\code{brmsfit}, \code{ild_fit_kfas}, and \code{ild_fit_ctsem}.
+Sections are parallel across engines;
 see \code{?ild_diagnostics_bundle}. Residual ACF/Q-Q for frequentist models are stored in
 \code{residual$legacy_ild_diagnostics} for [plot_ild_diagnostics()]. For raw residual-only
 computation without the bundle, call [ild_diagnostics()] directly.

@@ -49,7 +49,8 @@ Façade that selects the estimation backend explicitly. Equivalent to calling
 Named functions remain the primary APIs for full documentation and examples.
 }
 \details{
-**State-space models** are not mixed-model formulas: use [ild_kfas()] directly;
+**State-space / latent-dynamics models** are not mixed-model formulas:
+use [ild_kfas()] or [ild_ctsem()] directly;
 see \code{vignette("kfas-choosing-backend", package = "tidyILD")}.
 
 To pass \code{backend} to \code{brms::brm()} (e.g. \code{"rstan"} vs \code{"cmdstanr"}), use
@@ -57,5 +58,6 @@ To pass \code{backend} to \code{brms::brm()} (e.g. \code{"rstan"} vs \code{"cmds
 (\code{"lme4"}, \code{"nlme"}, \code{"brms"}).
 }
 \seealso{
-[ild_kfas()] for KFAS state-space models (not available via \code{ild_fit()}).
+[ild_kfas()] and [ild_ctsem()] for state-space / latent-dynamics
+  backends (not available via \code{ild_fit()}).
 }

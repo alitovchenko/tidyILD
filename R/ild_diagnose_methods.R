@@ -299,13 +299,76 @@ build_diagnostics_bundle_summary_brms <- function(bundle, types) {
 }
 
 #' @rdname ild_diagnose
+#' @method ild_diagnose ild_fit_ctsem
+#' @export
+ild_diagnose.ild_fit_ctsem <- function(object,
+                                       data = NULL,
+                                       type = NULL,
+                                       by_id = NULL,
+                                       missing_model = FALSE,
+                                       missing_model_predictors = NULL,
+                                       causal_detail = FALSE,
+                                       balance = FALSE,
+                                       balance_treatment = NULL,
+                                       balance_covariates = NULL,
+                                       balance_weights_col = ".ipw_treat",
+                                       balance_by_occasion = FALSE,
+                                       ...) {
+  rlang::check_installed("ctsem", reason = "to diagnose ild_ctsem fits")
+  data <- if (is.null(data)) attr(object, "ild_data", exact = TRUE) else data
+  if (is.null(data)) {
+    stop("ild_diagnose() for ild_fit_ctsem requires data or attr(fit, \"ild_data\").", call. = FALSE)
+  }
+  validate_ild(data)
+  rn <- attr(object, "ild_response", exact = TRUE)
+  outcome_vars <- if (!is.null(rn) && rn %in% names(data)) rn else character()
+  fd <- fill_diagnostics_fit_ctsem(object)
+  miss <- fill_diagnostics_missingness_section(data, vars = outcome_vars)
+  bundle <- ild_diagnostics_bundle(
+    meta = list(
+      engine = "ctsem",
+      n_obs = nrow(data),
+      n_id = length(unique(data[[".ild_id"]]))
+    ),
+    data = fill_diagnostics_data(data, outcome_vars = outcome_vars),
+    design = fill_diagnostics_design(data, vars = NULL),
+    fit = fd,
+    residual = fill_diagnostics_residual_ctsem(object, data),
+    predictive = fill_diagnostics_predictive_ctsem(object),
+    missingness = miss,
+    causal = fill_diagnostics_causal(
+      data,
+      causal_detail = causal_detail,
+      balance = balance,
+      balance_treatment = balance_treatment,
+      balance_covariates = balance_covariates,
+      balance_weights_col = balance_weights_col,
+      balance_by_occasion = balance_by_occasion
+    ),
+    warnings = tibble::tibble(),
+    guardrails = guardrails_empty_tibble(),
+    summary_text = character()
+  )
+  bundle$design$occasion_imbalance <- bundle$data$obs_per_id
+  bundle$guardrails <- guardrails_bind(
+    evaluate_guardrails_fit(object, fd, engine = "ctsem"),
+    evaluate_guardrails_contextual(object, data, bundle, engine = "ctsem")
+  )
+  bundle$summary_text <- build_diagnostics_bundle_summary(bundle)
+  bundle <- enrich_bundle_semantic_sections(bundle)
+  attr(bundle, "ild_fit") <- object
+  attr(bundle, "ild_data") <- data
+  bundle
+}
+
+#' @rdname ild_diagnose
 #' @method ild_diagnose default
 #' @export
 ild_diagnose.default <- function(object, ...) {
   stop(
     "No ild_diagnose() method for class ",
     paste(class(object), collapse = ", "),
-    ". Use lmerMod, lme, or brmsfit from ild_lme() / ild_brms().",
+    ". Use lmerMod, lme, brmsfit, ild_fit_kfas, or ild_fit_ctsem.",
     call. = FALSE
   )
 }

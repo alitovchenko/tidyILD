@@ -67,6 +67,7 @@ diag <- ild_diagnostics(fit); diag; plot_ild_diagnostics(diag)
 - `ild_msm_balance()`, `ild_ipw_ess()`, `ild_msm_overlap_plot()` — weighted balance, effective sample size, and overlap diagnostics
 - `ild_msm_diagnose()` + `ild_msm_contrast_over_time()` — one-call diagnostics bridge and time-indexed post-fit contrasts
 - `ild_msm_simulate_scenario()` + `ild_msm_recovery()` — causal simulation and recovery harness with scenario-grid validation
+- `ild_ctsem()` — continuous-time latent-dynamics backend with `ild_tidy()`, `ild_augment()`, `ild_diagnose()`, and `ild_autoplot()`
 - `ild_tvem()` — time-varying effects (GAM); `ild_tvem_plot()` for the coefficient curve
 - `ild_person_model()` — fit model per person (N-of-1); `ild_person_distribution()` — plot distribution of estimates
 - `ild_diagnostics()` — residual ACF, residuals vs fitted/time (use `print()` for summary)
@@ -85,6 +86,7 @@ diag <- ild_diagnostics(fit); diag; plot_ild_diagnostics(diag)
 
 - **From raw data to model**: full pipeline with `ild_prepare()` through `ild_lme()` and `ild_plot()`.
 - **MSM identification and recovery**: assumptions, estimand-first MSM workflow, strict/degraded inference behavior, and scenario-grid recovery checks.
+- **Continuous-time dynamics with ctsem**: `ild_ctsem()` workflow, diagnostics, and guardrails for ctsem fits.
 - **Short analysis report**: fit, tidy fixed effects, fitted vs observed, residual ACF and Q-Q.
 - **Within-between decomposition and irregular spacing**: centering and gap-aware lags.
 - **Glossary and quick-start**: function glossary and checklist.

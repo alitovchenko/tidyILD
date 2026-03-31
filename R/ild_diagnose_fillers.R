@@ -3,7 +3,7 @@
 # (ild_design_check, ild_missing_pattern, ild_missing_model, ild_ipw_weights).
 
 #' Flatten nested \code{fit} slice for guardrails and legacy callers
-#' @param engine Optional engine label (\code{"lmer"}, \code{"lme"}, \code{"brms"}) when
+#' @param engine Optional engine label (\code{"lmer"}, \code{"lme"}, \code{"brms"}, \code{"ctsem"}) when
 #'   \code{fit$engine} is missing (e.g. unit-test fixtures).
 #' @keywords internal
 #' @noRd
@@ -34,6 +34,16 @@ fit_bundle_flat_for_guardrails <- function(fit, engine = NULL) {
       max_rhat = conv$max_rhat %||% fit$max_rhat,
       convergence_table = conv$convergence_table %||% fit$convergence_table,
       ild_posterior = ps
+    )
+  } else if (identical(eng, "ctsem")) {
+    conv <- fit$convergence
+    list(
+      singular = NA,
+      max_rhat = NA_real_,
+      convergence_table = NULL,
+      ild_posterior = NULL,
+      converged = tryCatch(conv$converged, error = function(e) NA),
+      drift_abs_max = fit$drift_abs_max %||% NA_real_
     )
   } else {
     conv <- fit$convergence
@@ -472,6 +482,89 @@ fill_diagnostics_predictive_brms <- function(fit, ppc_ndraws) {
       obs_metrics = om,
       simulation_checks = list(ppc = ppc),
       ppc = ppc
+    ),
+    om
+  )
+}
+
+#' Fit layer -- ctsem
+#' @keywords internal
+#' @noRd
+fill_diagnostics_fit_ctsem <- function(object) {
+  fit <- object$ct_fit
+  conv <- tryCatch(fit$optimization$convergence, error = function(e) NA_integer_)
+  if (!is.finite(conv)) conv <- tryCatch(fit$opt$convergence, error = function(e) NA_integer_)
+  ll <- tryCatch(as.numeric(stats::logLik(fit)[1L]), error = function(e) NA_real_)
+  drift_abs_max <- tryCatch({
+    dr <- suppressWarnings(as.numeric(fit$DRIFT))
+    dr <- dr[is.finite(dr)]
+    if (length(dr) == 0L) NA_real_ else max(abs(dr))
+  }, error = function(e) NA_real_)
+  list(
+    engine = "ctsem",
+    convergence = list(
+      converged = if (is.finite(conv)) isTRUE(conv == 0L) else .ild_ctsem_is_converged(object),
+      convergence_code = conv,
+      note = "Convergence extracted from ctsem optimization slots when available."
+    ),
+    optimizer = list(
+      note = "See ct_fit object for optimizer details."
+    ),
+    log_likelihood = ll,
+    state_dimension = tryCatch(as.integer(ncol(fit$DRIFT)), error = function(e) NA_integer_),
+    drift_abs_max = drift_abs_max,
+    residual_correlation = list(
+      modeled = TRUE,
+      structure = "continuous_time_state_dynamics",
+      note = "Temporal dependence is represented through continuous-time latent dynamics."
+    )
+  )
+}
+
+#' Residual layer -- ctsem
+#' @keywords internal
+#' @noRd
+fill_diagnostics_residual_ctsem <- function(object, data) {
+  aug <- tryCatch(ild_augment(object), error = function(e) NULL)
+  if (is.null(aug)) {
+    return(list(engine = "ctsem", legacy_ild_diagnostics = NULL))
+  }
+  acf_obj <- tryCatch(stats::acf(aug$.resid, plot = FALSE, na.action = na.pass), error = function(e) NULL)
+  acf_tbl <- if (!is.null(acf_obj)) {
+    tibble::tibble(lag = as.numeric(acf_obj$lag), acf = as.numeric(acf_obj$acf))
+  } else {
+    tibble::tibble(lag = numeric(), acf = numeric())
+  }
+  qq_cor <- tryCatch(
+    stats::cor(
+      stats::qnorm(stats::ppoints(sum(is.finite(aug$.resid_std)))),
+      sort(aug$.resid_std[is.finite(aug$.resid_std)])
+    ),
+    error = function(e) NA_real_
+  )
+  list(
+    engine = "ctsem",
+    residual_sd = stats::sd(aug$.resid, na.rm = TRUE),
+    acf = acf_tbl,
+    qq = list(correlation = qq_cor),
+    legacy_ild_diagnostics = NULL
+  )
+}
+
+#' Predictive layer -- ctsem
+#' @keywords internal
+#' @noRd
+fill_diagnostics_predictive_ctsem <- function(object) {
+  aug <- tryCatch(ild_augment(object), error = function(e) NULL)
+  if (is.null(aug)) {
+    return(list(engine = "ctsem", obs_metrics = NULL, simulation_checks = list(ppc = NULL)))
+  }
+  om <- fill_diagnostics_predictive_obs_metrics(aug)
+  c(
+    list(
+      engine = "ctsem",
+      obs_metrics = om,
+      simulation_checks = list(ppc = NULL)
     ),
     om
   )
