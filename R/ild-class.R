@@ -230,5 +230,5 @@ restore_ild_attrs <- function(from, to) {
 
 # Satisfy R CMD check (tidy eval and rlang)
 if (getRversion() >= "2.15.1") {
-  utils::globalVariables(c(".data", ".ild_time_num", ":="))
+  utils::globalVariables(c(".data", ".ild_time_num", ":=", "y"))
 }

@@ -514,10 +514,16 @@ fill_diagnostics_missingness_section <- function(data, vars = NULL) {
 #' Causal / IPW slice when weight columns present
 #' @keywords internal
 #' @noRd
-fill_diagnostics_causal <- function(data, causal_detail = FALSE) {
+fill_diagnostics_causal <- function(data,
+                                    causal_detail = FALSE,
+                                    balance = FALSE,
+                                    balance_treatment = NULL,
+                                    balance_covariates = NULL,
+                                    balance_weights_col = ".ipw_treat",
+                                    balance_by_occasion = FALSE) {
   if (is.null(data) || !is_ild(data)) return(NULL)
   wcols <- grep("^\\.ipw|ipw_weight|\\.w_", names(data), value = TRUE, ignore.case = TRUE)
-  if (length(wcols) == 0L) return(NULL)
+  if (length(wcols) == 0L && !isTRUE(balance)) return(NULL)
   out <- list(columns_found = wcols)
   .summ_w <- function(w) {
     list(
@@ -580,6 +586,23 @@ fill_diagnostics_causal <- function(data, causal_detail = FALSE) {
       }
     }
     out$msm_treat_weight_by_occasion <- occ_summ
+  }
+  if (isTRUE(balance) && length(balance_covariates) > 0L && !is.null(balance_treatment) &&
+      balance_treatment %in% names(data) && balance_weights_col %in% names(data)) {
+    out$balance <- list(
+      table = ild_msm_balance(
+        data,
+        treatment = balance_treatment,
+        covariates = balance_covariates,
+        weights_col = balance_weights_col,
+        by_occasion = balance_by_occasion
+      ),
+      ess = ild_ipw_ess(
+        data,
+        weights_col = balance_weights_col,
+        by_occasion = balance_by_occasion
+      )
+    )
   }
   out
 }

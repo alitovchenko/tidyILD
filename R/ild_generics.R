@@ -188,6 +188,12 @@ ild_augment.default <- function(x, ...) {
 #' @param missing_model If \code{TRUE}, fit \code{\link{ild_missing_model}} for the response (optional; can be slow). Requires at least one predictor.
 #' @param missing_model_predictors Character vector for \code{ild_missing_model}; default \code{NULL} uses formula predictors.
 #' @param causal_detail If \code{TRUE}, add extra quantile summaries for \code{.ipw} when present.
+#' @param balance If \code{TRUE}, add weighted covariate balance (SMD) and ESS to \code{causal$balance}
+#'   when \code{balance_covariates} and \code{balance_treatment} are set.
+#' @param balance_treatment Character. Binary treatment column for balance (required if \code{balance = TRUE}).
+#' @param balance_covariates Character vector of covariate columns for SMDs (required if \code{balance = TRUE}).
+#' @param balance_weights_col Weights column for balance (default \code{".ipw_treat"}; use \code{".ipw"} for joint MSM).
+#' @param balance_by_occasion If \code{TRUE}, balance and ESS are stratified by \code{.ild_seq}.
 #' @param ... Reserved.
 #' @return An \code{\link{ild_diagnostics_bundle}}.
 #' @seealso \code{\link{ild_autoplot}}, \code{\link{ild_diagnostics_bundle}},
@@ -211,9 +217,11 @@ ild_diagnose <- function(object, ...) {
 #'   (default \code{"fitted_vs_actual"}). When \code{x} is \code{brmsfit}: \code{"pp_check"}
 #'   or \code{"fitted_vs_actual"}. When \code{x} is \code{\link{ild_diagnostics_bundle}}:
 #'   plot \code{type} within \code{section} — for \code{section = "residual"} one of
-#'   \code{"acf"}, \code{"qq"}, \code{"fitted"}; other sections use a single type each
-#'   (\code{"convergence"}, \code{"ppc"}, \code{"missingness"}, \code{"coverage"},
-#'   \code{"weights"}). Use \code{type = NULL} with \code{section = "residual"} and
+#'   \code{"acf"}, \code{"qq"}, \code{"fitted"}; for \code{section = "causal"} one of
+#'   \code{"weights"} (histograms of IPW columns) or \code{"overlap"} (propensity densities;
+#'   pass \code{treatment = "..."}). Other sections use a single type each
+#'   (\code{"convergence"}, \code{"ppc"}, \code{"missingness"}, \code{"coverage"}).
+#'   Use \code{type = NULL} with \code{section = "residual"} and
 #'   legacy residual diagnostics to obtain the full named list from [plot_ild_diagnostics()];
 #'   otherwise \code{NULL} picks a default per section.
 #' @param section For \code{\link{ild_diagnostics_bundle}} only: \code{"residual"},

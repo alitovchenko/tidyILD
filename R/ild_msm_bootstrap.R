@@ -21,7 +21,8 @@
 #'     prefer explicit joint/sensitivity designs and specialized causal packages for Bayes MSM.
 #' }
 #' @seealso [ild_msm_bootstrap()], [tidy_ild_msm_bootstrap()], [ild_ipw_refit()],
-#'   [ild_robust_se()], [tidy_ild_model()], [ild_brms()]
+#'   [ild_robust_se()], [tidy_ild_model()], [ild_brms()], [ild_msm_estimand()],
+#'   [ild_msm_fit()]
 #' @keywords internal
 NULL
 

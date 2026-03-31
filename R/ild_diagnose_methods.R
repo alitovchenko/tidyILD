@@ -26,6 +26,11 @@ ild_diagnose.lmerMod <- function(object,
                                  missing_model = FALSE,
                                  missing_model_predictors = NULL,
                                  causal_detail = FALSE,
+                                 balance = FALSE,
+                                 balance_treatment = NULL,
+                                 balance_covariates = NULL,
+                                 balance_weights_col = ".ipw_treat",
+                                 balance_by_occasion = FALSE,
                                  ...) {
   if (is.null(data)) data <- attr(object, "ild_data", exact = TRUE)
   if (is.null(data)) stop("Provide ILD data or refit with ild_lme() so the model has ild_data.", call. = FALSE)
@@ -68,7 +73,15 @@ ild_diagnose.lmerMod <- function(object,
     residual = fill_diagnostics_residual_frequentist(object, data, type, by_id),
     predictive = fill_diagnostics_predictive_frequentist(object, data),
     missingness = miss,
-    causal = fill_diagnostics_causal(data, causal_detail = causal_detail),
+    causal = fill_diagnostics_causal(
+      data,
+      causal_detail = causal_detail,
+      balance = balance,
+      balance_treatment = balance_treatment,
+      balance_covariates = balance_covariates,
+      balance_weights_col = balance_weights_col,
+      balance_by_occasion = balance_by_occasion
+    ),
     warnings = wg$warnings,
     guardrails = guardrails_empty_tibble(),
     summary_text = character()
@@ -95,6 +108,11 @@ ild_diagnose.lme <- function(object,
                              missing_model = FALSE,
                              missing_model_predictors = NULL,
                              causal_detail = FALSE,
+                             balance = FALSE,
+                             balance_treatment = NULL,
+                             balance_covariates = NULL,
+                             balance_weights_col = ".ipw_treat",
+                             balance_by_occasion = FALSE,
                              ...) {
   if (is.null(data)) data <- attr(object, "ild_data", exact = TRUE)
   if (is.null(data)) stop("Provide ILD data or refit with ild_lme() so the model has ild_data.", call. = FALSE)
@@ -137,7 +155,15 @@ ild_diagnose.lme <- function(object,
     residual = fill_diagnostics_residual_frequentist(object, data, type, by_id),
     predictive = fill_diagnostics_predictive_frequentist(object, data),
     missingness = miss,
-    causal = fill_diagnostics_causal(data, causal_detail = causal_detail),
+    causal = fill_diagnostics_causal(
+      data,
+      causal_detail = causal_detail,
+      balance = balance,
+      balance_treatment = balance_treatment,
+      balance_covariates = balance_covariates,
+      balance_weights_col = balance_weights_col,
+      balance_by_occasion = balance_by_occasion
+    ),
     warnings = wg$warnings,
     guardrails = guardrails_empty_tibble(),
     summary_text = character()
@@ -165,6 +191,11 @@ ild_diagnose.brmsfit <- function(object,
                                  missing_model = FALSE,
                                  missing_model_predictors = NULL,
                                  causal_detail = FALSE,
+                                 balance = FALSE,
+                                 balance_treatment = NULL,
+                                 balance_covariates = NULL,
+                                 balance_weights_col = ".ipw_treat",
+                                 balance_by_occasion = FALSE,
                                  ...) {
   if (is.null(attr(object, "ild_data", exact = TRUE))) {
     stop("ild_diagnose() for brmsfit requires ild_brms() (ild_data attribute missing).", call. = FALSE)
@@ -217,7 +248,15 @@ ild_diagnose.brmsfit <- function(object,
     residual = fill_diagnostics_residual_brms(object),
     predictive = pred_sec,
     missingness = miss,
-    causal = fill_diagnostics_causal(data, causal_detail = causal_detail),
+    causal = fill_diagnostics_causal(
+      data,
+      causal_detail = causal_detail,
+      balance = balance,
+      balance_treatment = balance_treatment,
+      balance_covariates = balance_covariates,
+      balance_weights_col = balance_weights_col,
+      balance_by_occasion = balance_by_occasion
+    ),
     warnings = wg$warnings,
     guardrails = guardrails_empty_tibble(),
     summary_text = character()

@@ -28,6 +28,8 @@ fitted model, so the package presents one coherent diagnostics story: a top-leve
     inverse-probability weights for \strong{treatment} (pooled or sequential \eqn{A_t}) and \strong{monotone censoring}, combined into \code{.ipw}.
     Distinct from outcome missingness IPW above.}
   \item{\code{\link{ild_msm_bootstrap}}, \code{\link{tidy_ild_msm_bootstrap}}}{Person-level bootstrap for weighted \code{lmer} after \code{\link{ild_ipw_refit}}; see \code{\link{ild_msm_inference}}.}
+  \item{\code{\link{ild_msm_balance}}, \code{\link{ild_ipw_ess}}, \code{\link{ild_msm_overlap_plot}}}{Weighted covariate balance (SMD), effective sample size, and propensity overlap plots for MSM / IPW workflows.}
+  \item{\code{\link{ild_msm_estimand}}, \code{\link{ild_msm_fit}}, \code{\link{ild_msm_diagnose}}, \code{\link{ild_msm_contrast_over_time}}, \code{\link{ild_msm_history_spec}}, \code{\link{ild_build_msm_history}}, \code{\link{ild_msm_recovery}}}{Estimand-first MSM workflow, one-call diagnostics bridge, time-indexed contrasts, history construction, and simulation-based recovery checks.}
 }
 }
 

@@ -15,6 +15,8 @@ ILD_GUARDRAIL_REGISTRY <- tibble::tibble(
     "GR_DROPOUT_LATE_CONCENTRATION",
     "GR_IPW_WEIGHTS_UNSTABLE",
     "GR_MSM_COMPONENT_WEIGHTS_UNSTABLE",
+    "GR_MSM_BALANCE_SMD_HIGH",
+    "GR_MSM_ESS_LOW",
     "GR_KFAS_HIGH_IRREGULARITY_FOR_DISCRETE_TIME",
     "GR_KFAS_SHORT_SERIES_FOR_STATE_SPACE",
     "GR_KFAS_STATE_DIMENSION_HIGH_FOR_N",
@@ -26,13 +28,13 @@ ILD_GUARDRAIL_REGISTRY <- tibble::tibble(
   section = c(
     "fit", "fit", "fit",
     "design", "data", "data",
-    "missingness", "causal", "causal",
+    "missingness", "causal", "causal", "causal", "causal",
     "design", "data", "fit", "fit", "fit", "data", "fit"
   ),
   severity = c(
     "warning", "warning", "warning",
     "warning", "warning", "info",
-    "warning", "warning", "warning",
+    "warning", "warning", "warning", "info", "info",
     "warning", "warning", "warning", "warning", "warning", "info", "warning"
   ),
   default_message = c(
@@ -45,6 +47,8 @@ ILD_GUARDRAIL_REGISTRY <- tibble::tibble(
     "Missingness on the outcome is more concentrated in the later part of the study timeline.",
     "Inverse probability weights show extreme variability (possible instability).",
     "IPTW or IPCW component weights show extreme variability (possible instability).",
+    "At least one covariate shows large weighted standardized mean difference after weighting.",
+    "Effective sample size from the analysis weights is low relative to the number of rows.",
     "Interval timing is highly irregular relative to the median step; discrete-time KFAS models assume a consistent time index.",
     "The observed series is short for the requested state-space complexity.",
     "Latent state dimension is large relative to series length.",
@@ -63,6 +67,8 @@ ILD_GUARDRAIL_REGISTRY <- tibble::tibble(
     "Investigate selective dropout (MNAR) and sensitivity analyses; consider IPW or models for missingness.",
     "Review the missingness model, trim bounds, or stabilize weights before interpreting results.",
     "Review treatment and censoring models, trim bounds, or stabilize weights before interpreting MSM results.",
+    "Review confounder selection, functional forms, overlap, or weight stabilization.",
+    "Consider trimming, stabilizing, or respecifying weight models; interpret weighted estimates cautiously.",
     "Align or aggregate to a regular grid, or use continuous-time modeling for irregular spacing.",
     "Collect more time points or simplify the state specification (e.g. fewer latent components).",
     "Simplify the model (fewer states) or extend the series before interpreting complex latent structure.",
@@ -351,6 +357,38 @@ evaluate_guardrails_contextual <- function(object, data, bundle, engine = c("lme
           )
         }
       }
+    }
+  }
+  if (!is.null(bundle$causal) && is.list(bundle$causal$balance) && !is.null(bundle$causal$balance$table)) {
+    tab <- bundle$causal$balance$table
+    if (inherits(tab, "tbl_df") && nrow(tab) > 0L) {
+      mx <- suppressWarnings(max(abs(tab$smd), na.rm = TRUE))
+      if (is.finite(mx) && mx > 0.25) {
+        rows[[length(rows) + 1L]] <- list(
+          rule_id = "GR_MSM_BALANCE_SMD_HIGH",
+          triggered = TRUE,
+          message = sprintf("Maximum |SMD| across balance table = %.3f (threshold > 0.25).", mx),
+          recommendation = NULL
+        )
+      }
+    }
+    ess <- bundle$causal$balance$ess
+    ess_min <- if (inherits(ess, "tbl_df")) {
+      suppressWarnings(min(ess$ess, na.rm = TRUE))
+    } else {
+      as.numeric(ess)[1L]
+    }
+    n <- if (!is.null(data) && is_ild(data)) nrow(data) else NA_integer_
+    if (is.finite(ess_min) && is.finite(n) && ess_min < max(30, 0.05 * n)) {
+      rows[[length(rows) + 1L]] <- list(
+        rule_id = "GR_MSM_ESS_LOW",
+        triggered = TRUE,
+        message = sprintf(
+          "Minimum ESS = %.1f (threshold: max(30, 0.05 * N) with N = %d).",
+          ess_min, n
+        ),
+        recommendation = NULL
+      )
     }
   }
   guardrail_finalize_rows(rows)

@@ -4,6 +4,34 @@
 
 - **`ild_msm_bootstrap()`**: person-level cluster bootstrap for **`lmer`** fits after **`ild_ipw_refit()`** (or formula + ILD + weight column); **`weight_policy`** **`fixed_weights`** vs **`reestimate_weights`** with user **`weights_fn`**. **`tidy_ild_msm_bootstrap()`** returns **`ild_tidy_schema`** rows with **`interval_type = "bootstrap_percentile"`**. Umbrella topic **`?ild_msm_inference`** (bootstrap vs sandwich vs Bayes guidance). Provenance step **`ild_msm_bootstrap`**.
 
+## MSM balance, ESS, overlap
+
+- **`ild_msm_balance()`**: weighted **standardized mean differences** (binary treatment) for named covariates; optional **by-occasion** stratification. **`ild_ipw_ess()`**: Kish effective sample size from a weight column (pooled or by occasion).
+- **`ild_msm_overlap_plot()`**: **propensity overlap** densities (pooled IPTW via **`attr(x, "ild_iptw_fit")`**, or sequential MSM via **`attr(x, "ild_iptw_msm_fits")`**).
+- **`ild_diagnose(..., balance = TRUE, balance_treatment, balance_covariates, ...)`** adds **`causal$balance`** (table + ESS). Guardrails **`GR_MSM_BALANCE_SMD_HIGH`** (|SMD| > 0.25) and **`GR_MSM_ESS_LOW`** (ESS vs **N**). **`ild_autoplot(bundle, section = "causal", type = "overlap", treatment = ...)`**.
+
+## Estimand-first, history builder, and recovery harness (MSM v1)
+
+- **`ild_msm_estimand()`** + **`ild_msm_fit()`**: estimand-first runner (v1 scope: static-regime ATE) that executes history/weighting/refit and optional robust/bootstrap inference with provenance.
+- **`ild_msm_history_spec()`** + **`ild_build_msm_history()`**: declarative history construction on top of `ild_lag()` with deterministic lag-column manifest.
+- **`ild_msm_simulate_scenario()`** + **`ild_msm_recovery()`**: causal DGP and recovery harness reporting bias, RMSE, CI coverage, and positivity stress summaries.
+- **New vignette:** `vignette("msm-identification-and-recovery", package = "tidyILD")` for explicit identification assumptions and recovery workflow.
+
+## MSM remaining-gaps closeout (v1.1 hardening)
+
+- **`ild_msm_fit()` inference capability model:** explicit `inference$status` (`ok`/`degraded`/`unsupported`), machine-readable `reason`, user-facing `message`, unified `inference$summary` schema (`term`, `terms`, `estimate`, `std_error`, `conf_low`, `conf_high`, `interval_type`, `method`), and `strict_inference` fail-fast mode instead of silent degradation.
+- **Bootstrap capability signaling:** `ild_msm_fit(..., inference = "bootstrap")` now distinguishes full success vs partial/no-success replicate paths and records degraded/unsupported status codes.
+- **Estimand schema v1.1 (backward compatible):** `ild_msm_estimand()` supports structured regime specs, `target_time`, explicit contrast metadata, and validation gates for placeholder estimand classes (`att`) and dynamic-rule scaffolding.
+- **Dynamic regime + contrasts:** `ild_msm_fit()` evaluates deterministic dynamic rules and records explicit degraded status when full dynamic weighting is not yet implemented; `ild_msm_contrast_over_time()` computes time-indexed contrasts with target-time support and tidy-schema-aligned output.
+- **Recovery scenario grid + diagnostics:** `ild_msm_recovery()` accepts scenario grids (positivity stress, misspecification toggles, censoring severity) and reports richer per-scenario metrics (failure/degradation rates, ESS quantiles, overlap-extreme rate, interval-calibration gap, modal inference method) with fast + extended test tiers.
+
+## MSM remaining gaps closeout (architecture-aligned)
+
+- **Inference capability model in `ild_msm_fit()`**: explicit `inference$status` (`ok`, `degraded`, `unsupported`), `inference$reason`, and `inference$message`; unified `inference$summary` table schema across robust/bootstrap paths; `strict_inference = TRUE` for fail-fast behavior.
+- **Regime/estimand v1.1 schema scaffold**: `ild_msm_estimand()` now supports structured `regime_spec`, `target_time`, and explicit `contrast` fields while remaining backward compatible with static ATE calls; dynamic regimes are scaffolded and produce explicit degraded/unsupported status when full weighting is unavailable.
+- **New utilities**: `ild_msm_contrast_over_time()` for post-fit time-indexed treatment contrasts and `ild_msm_diagnose()` as a one-call bridge from `ild_msm_fit` outputs into the diagnostics bundle.
+- **Recovery harness expansion**: `ild_msm_recovery()` now supports scenario-grid inputs, per-scenario summaries, inference degradation/failure-rate metrics, ESS and overlap-extremity summaries, and calibration-gap reporting, with fast and extended test tiers.
+
 ## IPTW / IPCW / joint MSM weights
 
 - **`ild_iptw_msm_weights()`**: **sequential** MSM IPTW for time-varying binary `A_t`—per-occasion `glm`, stabilized factors, cumulative `.ipw_treat` within person; attributes `ild_iptw_msm_fits` / `ild_iptw_msm_numerator_fits`. Contrasts with pooled **`ild_iptw_weights()`**.

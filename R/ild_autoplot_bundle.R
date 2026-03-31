@@ -42,7 +42,7 @@ ild_autoplot.ild_diagnostics_bundle <- function(x, section = "residual", type = 
       predictive = if (is_kfas) c("forecast", "errors") else c("ppc"),
       data = c("missingness"),
       design = c("coverage"),
-      causal = c("weights")
+      causal = c("weights", "overlap")
     )
     if (is.null(type)) {
       type <- choices[1L]
@@ -60,7 +60,10 @@ ild_autoplot.ild_diagnostics_bundle <- function(x, section = "residual", type = 
       },
       data = plot_bundle_data_missingness(x),
       design = plot_bundle_design_coverage(x),
-      causal = plot_bundle_causal_weights(x)
+      causal = switch(type,
+        weights = plot_bundle_causal_weights(x),
+        overlap = plot_bundle_causal_overlap(x, ...)
+      )
     )
   }
 }
@@ -298,4 +301,20 @@ plot_bundle_causal_weights <- function(x) {
     ggplot2::facet_wrap(~ source, scales = "free_y", ncol = 1) +
     ggplot2::labs(x = "Weight", y = "Count", title = "Causal / IPW weights") +
     ggplot2::theme_minimal()
+}
+
+#' @keywords internal
+#' @noRd
+plot_bundle_causal_overlap <- function(x, treatment, source = "auto", ...) {
+  if (missing(treatment) || is.null(treatment) || !nzchar(as.character(treatment)[1L])) {
+    stop(
+      "Overlap plot requires treatment = <column name> (e.g. treatment = \"trt\").",
+      call. = FALSE
+    )
+  }
+  dat <- attr(x, "ild_data", exact = TRUE)
+  if (is.null(dat)) {
+    stop("Overlap plot requires attr(bundle, \"ild_data\"). Re-run ild_diagnose().", call. = FALSE)
+  }
+  ild_msm_overlap_plot(dat, treatment = treatment, source = source)
 }

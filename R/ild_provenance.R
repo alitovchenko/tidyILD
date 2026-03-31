@@ -89,6 +89,8 @@ ild_provenance_object_type <- function(step) {
     ild_crosslag = "ild_model",
     ild_ipw_refit = "ild_model",
     ild_msm_bootstrap = "ild_msm_bootstrap",
+    ild_msm_fit = "ild_msm_fit",
+    ild_msm_recovery = "ild_msm_recovery",
     ild_kfas = "ild_model",
     ild_diagnostics = "ild_diagnostics",
     ild_power = "ild_power",

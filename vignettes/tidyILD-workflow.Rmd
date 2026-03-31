@@ -100,6 +100,10 @@ fit_msm <- ild_lme(y ~ y_bp + y_wp + stress + (1 | id), data = x2,
 fit_msm_w <- ild_ipw_refit(fit_msm, data = x2)
 ```
 
+**Balance and overlap:** After weights are attached, use `ild_msm_balance()` (weighted SMDs), `ild_ipw_ess()` (Kish effective sample size), and `ild_msm_overlap_plot()` (propensity densities by treatment—pooled IPTW or sequential MSM via `attr(x, "ild_iptw_msm_fits")`). Optional: `ild_diagnose(..., balance = TRUE, balance_treatment = "trt", balance_covariates = c("stress"))` fills `causal$balance` and may trigger guardrails `GR_MSM_BALANCE_SMD_HIGH` / `GR_MSM_ESS_LOW`. `ild_autoplot(bundle, section = "causal", type = "overlap", treatment = "trt")` draws overlap when `ggplot2` is available.
+
+For a full assumptions-oriented walkthrough (exchangeability, positivity/overlap, consistency, and weight-model correctness) and simulation-based recovery checks, see `vignette("msm-identification-and-recovery", package = "tidyILD")`. When using `ild_msm_fit()`, check `fit_obj$inference$status`/`reason` for degraded paths, or set `strict_inference = TRUE` to fail fast.
+
 A minimal **bootstrap** illustration (small `n_boot` for speed; increase in real analyses):
 
 ```{r msm_bootstrap, eval = requireNamespace("lme4", quietly = TRUE)}

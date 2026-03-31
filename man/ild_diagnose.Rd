@@ -22,6 +22,11 @@ ild_diagnose(object, ...)
   missing_model = FALSE,
   missing_model_predictors = NULL,
   causal_detail = FALSE,
+  balance = FALSE,
+  balance_treatment = NULL,
+  balance_covariates = NULL,
+  balance_weights_col = ".ipw_treat",
+  balance_by_occasion = FALSE,
   ...
 )
 
@@ -33,6 +38,11 @@ ild_diagnose(object, ...)
   missing_model = FALSE,
   missing_model_predictors = NULL,
   causal_detail = FALSE,
+  balance = FALSE,
+  balance_treatment = NULL,
+  balance_covariates = NULL,
+  balance_weights_col = ".ipw_treat",
+  balance_by_occasion = FALSE,
   ...
 )
 
@@ -45,6 +55,11 @@ ild_diagnose(object, ...)
   missing_model = FALSE,
   missing_model_predictors = NULL,
   causal_detail = FALSE,
+  balance = FALSE,
+  balance_treatment = NULL,
+  balance_covariates = NULL,
+  balance_weights_col = ".ipw_treat",
+  balance_by_occasion = FALSE,
   ...
 )
 
@@ -67,6 +82,17 @@ For \code{brmsfit}: \code{"all"} or any of \code{"convergence"}, \code{"sampler"
 \item{missing_model_predictors}{Character vector for \code{ild_missing_model}; default \code{NULL} uses formula predictors.}
 
 \item{causal_detail}{If \code{TRUE}, add extra quantile summaries for \code{.ipw} when present.}
+
+\item{balance}{If \code{TRUE}, add weighted covariate balance (SMD) and ESS to \code{causal$balance}
+when \code{balance_covariates} and \code{balance_treatment} are set.}
+
+\item{balance_treatment}{Character. Binary treatment column for balance (required if \code{balance = TRUE}).}
+
+\item{balance_covariates}{Character vector of covariate columns for SMDs (required if \code{balance = TRUE}).}
+
+\item{balance_weights_col}{Weights column for balance (default \code{".ipw_treat"}; use \code{".ipw"} for joint MSM).}
+
+\item{balance_by_occasion}{If \code{TRUE}, balance and ESS are stratified by \code{.ild_seq}.}
 
 \item{ppc_ndraws}{For \code{brmsfit}: posterior predictive draws.}
 }
