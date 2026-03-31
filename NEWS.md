@@ -23,14 +23,8 @@
 - **Bootstrap capability signaling:** `ild_msm_fit(..., inference = "bootstrap")` now distinguishes full success vs partial/no-success replicate paths and records degraded/unsupported status codes.
 - **Estimand schema v1.1 (backward compatible):** `ild_msm_estimand()` supports structured regime specs, `target_time`, explicit contrast metadata, and validation gates for placeholder estimand classes (`att`) and dynamic-rule scaffolding.
 - **Dynamic regime + contrasts:** `ild_msm_fit()` evaluates deterministic dynamic rules and records explicit degraded status when full dynamic weighting is not yet implemented; `ild_msm_contrast_over_time()` computes time-indexed contrasts with target-time support and tidy-schema-aligned output.
+- **Diagnostics bridge:** `ild_msm_diagnose()` provides one-call dispatch from `ild_msm_fit` outputs into the diagnostics bundle API.
 - **Recovery scenario grid + diagnostics:** `ild_msm_recovery()` accepts scenario grids (positivity stress, misspecification toggles, censoring severity) and reports richer per-scenario metrics (failure/degradation rates, ESS quantiles, overlap-extreme rate, interval-calibration gap, modal inference method) with fast + extended test tiers.
-
-## MSM remaining gaps closeout (architecture-aligned)
-
-- **Inference capability model in `ild_msm_fit()`**: explicit `inference$status` (`ok`, `degraded`, `unsupported`), `inference$reason`, and `inference$message`; unified `inference$summary` table schema across robust/bootstrap paths; `strict_inference = TRUE` for fail-fast behavior.
-- **Regime/estimand v1.1 schema scaffold**: `ild_msm_estimand()` now supports structured `regime_spec`, `target_time`, and explicit `contrast` fields while remaining backward compatible with static ATE calls; dynamic regimes are scaffolded and produce explicit degraded/unsupported status when full weighting is unavailable.
-- **New utilities**: `ild_msm_contrast_over_time()` for post-fit time-indexed treatment contrasts and `ild_msm_diagnose()` as a one-call bridge from `ild_msm_fit` outputs into the diagnostics bundle.
-- **Recovery harness expansion**: `ild_msm_recovery()` now supports scenario-grid inputs, per-scenario summaries, inference degradation/failure-rate metrics, ESS and overlap-extremity summaries, and calibration-gap reporting, with fast and extended test tiers.
 
 ## IPTW / IPCW / joint MSM weights
 
