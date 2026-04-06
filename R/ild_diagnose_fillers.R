@@ -497,7 +497,14 @@ fill_diagnostics_predictive_brms <- function(fit, ppc_ndraws) {
 fill_diagnostics_fit_ctsem <- function(object) {
   fit <- object$ct_fit
   conv <- tryCatch(fit$optimization$convergence, error = function(e) NA_integer_)
-  if (!is.finite(conv)) conv <- tryCatch(fit$opt$convergence, error = function(e) NA_integer_)
+  # ctsem/OpenMx may expose empty-length convergence slots on some platforms; guard
+  # so `if (!is.finite(conv))` never sees logical(0).
+  if (length(conv) != 1L || !is.finite(conv)) {
+    conv <- tryCatch(fit$opt$convergence, error = function(e) NA_integer_)
+  }
+  if (length(conv) != 1L || !is.finite(conv)) {
+    conv <- NA_integer_
+  }
   ll <- tryCatch(as.numeric(stats::logLik(fit)[1L]), error = function(e) NA_real_)
   drift_abs_max <- tryCatch({
     dr <- suppressWarnings(as.numeric(fit$DRIFT))

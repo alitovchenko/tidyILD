@@ -46,7 +46,7 @@ A minimal workflow: simulate or load data, prepare with
     \code{\link{ild_missing_hazard_first}}, \code{\link{ild_missingness_report}},
     \code{\link{ild_missing_bias}}, \code{\link{ild_missing_model}},
     \code{\link{ild_ipw_weights}}, \code{\link{ild_ipw_refit}},
-    \code{\link{ild_plot}} (types: trajectory, gaps, missingness).
+    \code{\link{ild_plot}} (types: trajectory, gaps, missingness, predicted_trajectory).
     These overlap with \code{\link{ild_diagnostics_utilities}} (bundle section providers).}
   \item{Within-person and lags}{\code{\link{ild_center}}, \code{\link{ild_center_plot}},
     \code{\link{ild_decomposition}}, \code{\link{ild_lag}}, \code{\link{ild_check_lags}},
@@ -57,7 +57,8 @@ A minimal workflow: simulate or load data, prepare with
     \code{\link{ild_tvem}} (time-varying effects)}
   \item{Diagnostics and visualization}{\code{\link{ild_diagnose}} (\code{\link{ild_diagnostics_bundle}}),
     \code{\link{ild_diagnostics_utilities}}, \code{\link{ild_acf}}, \code{\link{ild_diagnostics}},
-    \code{\link{ild_plot}} (types: fitted, residual_acf), \code{\link{ild_heatmap}},
+    \code{\link{ild_plot}} (types: fitted, predicted_trajectory, residual_acf; optional \code{facet_by}),
+    \code{\link{ild_plot_predicted_trajectory}}, \code{\link{ild_heatmap}},
     \code{\link{ild_spaghetti}}, \code{\link{ild_circadian}}, \code{\link{ild_tvem_plot}}}
   \item{Provenance and methods}{\code{\link{ild_provenance}}, \code{\link{ild_history}},
     \code{\link{ild_methods}}, \code{\link{ild_report}}, \code{\link{ild_compare_pipelines}},
@@ -75,12 +76,26 @@ A minimal workflow: simulate or load data, prepare with
 }
 }
 
+\section{Visualization}{
+
+\code{\link{ild_plot}}, \code{\link{ild_spaghetti}}, and \code{\link{ild_heatmap}} cover trajectories,
+heatmaps, gaps, and missingness; optional \code{facet_by} adds panels (e.g. by cluster).
+For observed and fitted lines over time, use \code{\link{ild_plot_predicted_trajectory}} or
+\code{ild_plot(..., type = "predicted_trajectory")}. After \code{\link{ild_diagnose}}, use
+\code{\link{ild_autoplot}} on the bundle. Backend-specific plots include \code{\link{ild_tvem_plot}},
+\code{\link{ild_plot_states}}, \code{\link{ild_plot_forecast}}, and \code{\link{ild_plot_filtered_vs_smoothed}}
+(KFAS). See \code{vignette("visualization-in-tidyILD", package = "tidyILD")} for a question-to-function map
+and recipes (including partial effects via \strong{marginaleffects} / \strong{ggeffects} on \code{_wp} / \code{_bp} columns).
+}
+
 \section{Vignettes}{
 
 \code{browseVignettes("tidyILD")} lists all vignettes. Key entries:
 \itemize{
   \item \emph{From raw data to model with tidyILD} --- Full pipeline:
     prepare, inspect, center, lag, fit, diagnose.
+  \item \emph{Visualization in tidyILD} --- Index of plots, bundle sections, \code{facet_by},
+    predicted trajectories, and partial-effects templates.
   \item \emph{Short analysis report} --- Fit, tidy fixed effects,
     fitted vs observed, residual ACF and Q-Q.
   \item \emph{Within-between decomposition and irregular spacing} ---

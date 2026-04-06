@@ -23,9 +23,10 @@ articles:
       - ctsem-continuous-time-dynamics
   - title: Workflows and reports
     desc: >
-      Start with **tidyILD-workflow**; **temporal-dynamics-model-choice** maps questions to lags, AR, TVEM, and state-space; **benchmark-simulation-recovery** shows recovery/power under the bundled simulation DGP.
+      Start with **tidyILD-workflow**; **visualization-in-tidyILD** indexes plots and bundle sections; **temporal-dynamics-model-choice** maps questions to lags, AR, TVEM, and state-space; **benchmark-simulation-recovery** shows recovery/power under the bundled simulation DGP.
     contents:
       - tidyILD-workflow
+      - visualization-in-tidyILD
       - temporal-dynamics-model-choice
       - brms-dynamics-recipes
       - benchmark-simulation-recovery
@@ -42,9 +43,24 @@ reference:
   - title: Setup and validation
     contents: [ild_prepare, as_ild, is_ild, validate_ild, ild_meta]
   - title: Summaries and inspection
-    contents: [ild_summary, ild_spacing_class, ild_spacing, ild_design_check, ild_plot]
+    contents: [ild_summary, ild_spacing_class, ild_spacing, ild_design_check]
+  - title: Visualization
+    contents:
+      - ild_plot
+      - ild_spaghetti
+      - ild_heatmap
+      - ild_plot_predicted_trajectory
+      - ild_center_plot
+      - ild_circadian
+      - ild_plot_states
+      - ild_plot_forecast
+      - ild_plot_filtered_vs_smoothed
+      - ild_acf
+      - ild_diagnostics
+      - plot_ild_diagnostics
+      - ild_autoplot
   - title: Within-person and lags
-    contents: [ild_center, ild_center_plot, ild_decomposition, ild_lag, ild_check_lags, ild_panel_lag_prepare, ild_crosslag, ild_align]
+    contents: [ild_center, ild_decomposition, ild_lag, ild_check_lags, ild_panel_lag_prepare, ild_crosslag, ild_align]
   - title: Modeling
     contents: [ild_fit, ild_lme, ild_brms, ild_kfas, ild_ctsem, ild_person_model, ild_person_distribution, ild_heterogeneity, ild_heterogeneity_stratified, ild_tvem, ild_tvem_plot]
   - title: Robust SE and missingness
@@ -59,8 +75,8 @@ reference:
       - ild_missing_model
       - ild_ipw_weights
       - ild_ipw_refit
-  - title: Diagnostics and visualization
-    contents: [ild_acf, ild_diagnostics, plot_ild_diagnostics, ild_heatmap, ild_spaghetti, ild_circadian]
+  - title: Model diagnostics (tables and contracts)
+    contents: [ild_diagnose]
   - title: Model tidiers
     contents: [augment_ild_model, tidy_ild_model, broom_ild_lme]
   - title: Reproducibility

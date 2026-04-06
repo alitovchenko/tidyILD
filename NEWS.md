@@ -1,5 +1,12 @@
 # tidyILD 0.3.0
 
+## Visualization layer (index, facets, predicted trajectories)
+
+- **Vignette:** `vignette("visualization-in-tidyILD", package = "tidyILD")` maps common questions to `ild_plot()`, `ild_autoplot()`, and backend helpers; documents `facet_by`, `ild_plot_predicted_trajectory()`, and `eval = FALSE` templates for **marginaleffects** / **ggeffects** on `x_wp` / `x_bp`.
+- **`ild_plot()`:** optional **`facet_by`** for `trajectory`, `heatmap`, `gaps`, and new type **`predicted_trajectory`** (observed and fitted lines vs `time_var`). **`ild_spaghetti()`** and **`ild_heatmap()`** pass **`facet_by`** through.
+- **`ild_plot_predicted_trajectory()`:** convenience wrapper for the predicted-trajectory plot.
+- **pkgdown:** **Visualization** reference group; article listed under workflows. **`?tidyILD`:** **Visualization** section.
+
 ## Missingness workflow (diagnostics and reporting)
 
 - **Vignette:** `vignette("ild-missingness-workflow", package = "tidyILD")` — MAR/MNAR context, `ild_missing_pattern()`, compliance, cohort/hazard summaries, IPW template, limits of tidyILD.
