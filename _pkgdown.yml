@@ -23,14 +23,17 @@ articles:
       - ctsem-continuous-time-dynamics
   - title: Workflows and reports
     desc: >
-      Start with **tidyILD-workflow**; **benchmark-simulation-recovery** shows recovery/power under the bundled simulation DGP.
+      Start with **tidyILD-workflow**; **temporal-dynamics-model-choice** maps questions to lags, AR, TVEM, and state-space; **benchmark-simulation-recovery** shows recovery/power under the bundled simulation DGP.
     contents:
       - tidyILD-workflow
+      - temporal-dynamics-model-choice
+      - brms-dynamics-recipes
       - benchmark-simulation-recovery
       - ild-analysis-report
       - ild-provenance
       - ild-decomposition-and-spacing
       - tsibble-interoperability
+      - heterogeneity-interpretation
       - ild-glossary-and-quickstart
       - developer-contracts
 
@@ -40,9 +43,9 @@ reference:
   - title: Summaries and inspection
     contents: [ild_summary, ild_spacing_class, ild_spacing, ild_design_check, ild_missing_pattern, ild_missing_bias, ild_plot]
   - title: Within-person and lags
-    contents: [ild_center, ild_center_plot, ild_decomposition, ild_lag, ild_check_lags, ild_crosslag, ild_align]
+    contents: [ild_center, ild_center_plot, ild_decomposition, ild_lag, ild_check_lags, ild_panel_lag_prepare, ild_crosslag, ild_align]
   - title: Modeling
-    contents: [ild_fit, ild_lme, ild_brms, ild_kfas, ild_ctsem, ild_person_model, ild_person_distribution, ild_tvem, ild_tvem_plot]
+    contents: [ild_fit, ild_lme, ild_brms, ild_kfas, ild_ctsem, ild_person_model, ild_person_distribution, ild_heterogeneity, ild_heterogeneity_stratified, ild_tvem, ild_tvem_plot]
   - title: Robust SE and missingness
     contents: [ild_robust_se, ild_missing_model, ild_ipw_weights, ild_ipw_refit]
   - title: Diagnostics and visualization
@@ -52,4 +55,4 @@ reference:
   - title: Reproducibility
     contents: [ild_manifest, ild_bundle]
   - title: Utilities and data
-    contents: [ild_simulate, ild_power, ild_recovery_metrics, ema_example]
+    contents: [ild_simulate, ild_power, ild_recovery_metrics, ild_compare_fits, ild_brms_dynamics_formula, ema_example]

@@ -69,6 +69,11 @@ Additional named entries are allowed if documented per engine.
 
 **Bayesian (`brmsfit`):** `engine`, `ild_posterior`, `convergence_table`, `max_rhat`, `n_divergent`, `n_max_treedepth_hits`; **`residual_correlation`** (`note` only; residual structure is model-specific).
 
+**Optional `heterogeneity` (`lmerMod`, `lme`, `brmsfit`):** `list(available, reason, object)`.
+When `available` is `TRUE`, `object` is an `ild_heterogeneity` result from [ild_heterogeneity()] (person-specific partial-pooling summaries).
+When extraction fails (e.g. intercept-only fixed model without random effects, or parsing error), `available` is `FALSE` and `reason` is a short message.
+`ild_autoplot(bundle, section = "fit", type = "heterogeneity", ...)` forwards `term` / `heterogeneity_type` to [ild_autoplot.ild_heterogeneity()].
+
 ### 1.6 Section: `residual`
 
 **Purpose:** **Residual** behavior (ACF, Q-Q, vs time/fitted).
@@ -265,13 +270,50 @@ Each new estimation backend (e.g. KFAS, ctsem) should ship:
 
 ---
 
-## 6. Related files in the source tree
+## 6. Cross-backend validation benchmark harness
+
+**Normative spec:** `inst/dev/BACKEND_VALIDATION_BENCHMARK_CONTRACT.md` (scenario IDs, tiers, metric columns, artifact layout).
+
+**Purpose:** Run shared simulation scenarios across `lme4` / `nlme` / `brms` / KFAS / ctsem entry points (where installed), write `benchmark_raw.csv`, `benchmark_summary.csv`, and `benchmark_metadata.json`, and optionally gate regressions with JSON thresholds in `inst/benchmarks/thresholds-*.json`.
+
+**Implementation (not exported API):**
+
+| Location | Role |
+|----------|------|
+| `tests/testthat/helper-backend-validation-harness.R` | `harness_run_benchmark()`, metric extraction, summarization, threshold evaluation. |
+| `scripts/run-backend-validation-benchmarks.R` | CLI runner (`--tier`, `--backends`, `--n-sim`, `--seed`, `--out-dir`). Expects package root + `pkgload::load_all()` or `devtools::load_all()`. |
+| `scripts/check-backend-validation-thresholds.R` | Reads `benchmark_summary.csv` + thresholds JSON; writes `benchmark_checks.csv`; exit code 1 on hard failures. |
+| `.github/workflows/backend-validation-benchmarks.yml` | Scheduled / manual CI; uploads artifacts. |
+
+**When adding a new backend:** extend the scenario manifest and `harness_fit_one()` in the harness helper; document the scenario here and in the benchmark contract; add or adjust `skip_if_not_installed()` tests in `tests/testthat/test-backend-validation-harness.R`. Prefer **warn-only** thresholds for slow or fragile optional engines until metrics stabilize.
+
+---
+
+## 7. Temporal dynamics helpers and guardrails
+
+**User-facing functions** (see `vignette("temporal-dynamics-model-choice", package = "tidyILD")`):
+
+| Function | Role |
+|----------|------|
+| `ild_panel_lag_prepare()` | Multi-variable `ild_lag()` + single `ild_check_lags()`; provenance step `ild_panel_lag_prepare`. |
+| `ild_compare_fits()` | Named list of fits → tibble (`aic`, `bic`, `n_obs`, `converged`, optional `n_guardrails`); **not** an automatic nested-model test. |
+| `ild_brms_dynamics_formula()` | Returns a suggested `formula` + `notes` for `ild_brms()`; does not fit. |
+
+**Guardrails** (registry + `evaluate_guardrails_contextual()`):
+
+- `GR_LAG_MEAN_STRONG_RESIDUAL_ACF_NO_AR` — lag terms in mean, no residual AR, pooled residual ACF at lag 1 above a fixed threshold (heuristic).
+- `GR_INDEX_LAG_IRREGULAR_SPACING` — `ild_spacing_class` irregular-ish and data provenance records `ild_lag(..., mode = "index")`.
+
+---
+
+## 8. Related files in the source tree
 
 | Location | Role |
 |----------|------|
 | `inst/CONTRACTS.md` | Short user-facing mirror of slot/column names. |
 | `inst/dev/backend-adapter-template.R` | Skeleton methods and checklist for new engines (copy-paste starting point). |
 | `inst/dev/KFAS_V1_BACKEND.md` | KFAS / `ild_kfas()` v1 design (Gaussian local level first; full vocabulary staged). |
+| `inst/dev/BACKEND_VALIDATION_BENCHMARK_CONTRACT.md` | Benchmark scenario matrix and artifact schema. |
 | `R/ild_diagnostics_bundle.R` | Bundle constructor and validation. |
 | `R/ild_schema_tidy_augment.R` | Tidy/augment column lists. |
 | `R/ild_guardrail_registry.R` | Guardrail rule ids and evaluation helpers. |

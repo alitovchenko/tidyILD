@@ -49,6 +49,7 @@ Ask:
 
 ## Short pointers to other vignettes
 
+- **Temporal dynamics and model choice (lags, AR, TVEM vs latent):** `vignette("temporal-dynamics-model-choice", package = "tidyILD")`
 - **Overall workflow:** `vignette("tidyILD-workflow", package = "tidyILD")`
 - **Report-style analysis:** `vignette("ild-analysis-report", package = "tidyILD")`
 - **State-space concepts (KFAS):** `vignette("kfas-state-space-modeling", package = "tidyILD")`

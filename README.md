@@ -9,6 +9,20 @@ Author: **Alex Litovchenko**.
 remotes::install_github("alitovchenko/tidyILD")
 ```
 
+## Backend validation benchmarks (developers / CI)
+
+From a **source checkout** of the package (directory containing `DESCRIPTION`), optional cross-backend simulation benchmarks can be run locally:
+
+```bash
+Rscript scripts/run-backend-validation-benchmarks.R --tier smoke --out-dir /tmp/bench
+Rscript scripts/check-backend-validation-thresholds.R \
+  --summary /tmp/bench/benchmark_summary.csv \
+  --thresholds inst/benchmarks/thresholds-smoke.json \
+  --out /tmp/bench/benchmark_checks.csv
+```
+
+This uses `pkgload::load_all()` when available. **Tiers:** `smoke` (fast), `nightly`, `full` — see `inst/dev/BACKEND_VALIDATION_BENCHMARK_CONTRACT.md`. GitHub Actions workflow: `.github/workflows/backend-validation-benchmarks.yml` (scheduled + manual dispatch; artifacts uploaded).
+
 ## Quick start
 
 ```r
@@ -49,7 +63,10 @@ diag <- ild_diagnostics(fit); diag; plot_ild_diagnostics(diag)
 - `ild_lag()` — index, gap-aware, or time-window lags (supports `lubridate::hours(2)` etc.)
 - `ild_decomposition()` — WP/BP variance and ratio; optional WP vs BP density plot
 - `ild_check_lags()` — lag validity (valid/invalid, pct_invalid, lag order)
+- `ild_panel_lag_prepare()` — several `ild_lag()` columns + one lag audit table
 - `ild_crosslag()` — one-call cross-lag: lag predictor, check lags, fit outcome ~ lag
+- `ild_compare_fits()` — AIC/BIC/nobs table for a list of models (optional guardrail counts)
+- `ild_brms_dynamics_formula()` — template `brms` formula for random lag slopes (does not fit)
 - `ild_acf()` — ACF on a variable or on residuals (pre-model check for AR1)
 - `ild_spacing_class()` — regular-ish vs irregular-ish
 - `ild_spacing()` — spacing diagnostics (median/IQR, large gaps %, CV) and AR1/CAR1 recommendation
@@ -69,6 +86,7 @@ diag <- ild_diagnostics(fit); diag; plot_ild_diagnostics(diag)
 - `ild_msm_simulate_scenario()` + `ild_msm_recovery()` — causal simulation and recovery harness with scenario-grid validation
 - `ild_ctsem()` — continuous-time latent-dynamics backend with `ild_tidy()`, `ild_augment()`, `ild_diagnose()`, and `ild_autoplot()`
 - `ild_tvem()` — time-varying effects (GAM); `ild_tvem_plot()` for the coefficient curve
+- **Temporal model choice:** `vignette("temporal-dynamics-model-choice", package = "tidyILD")` (lags vs AR vs TVEM vs state-space); `vignette("brms-dynamics-recipes", package = "tidyILD")` for Bayesian templates
 - `ild_person_model()` — fit model per person (N-of-1); `ild_person_distribution()` — plot distribution of estimates
 - `ild_diagnostics()` — residual ACF, residuals vs fitted/time (use `print()` for summary)
 - `plot_ild_diagnostics()` — build diagnostic plots from an `ild_diagnostics` object

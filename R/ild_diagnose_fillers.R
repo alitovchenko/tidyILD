@@ -295,6 +295,7 @@ fill_diagnostics_fit_lmerMod <- function(fit) {
       character(1L)
     )
   }
+  out$heterogeneity <- fill_diagnostics_heterogeneity(fit)
   out
 }
 
@@ -334,6 +335,7 @@ fill_diagnostics_fit_lme <- function(fit) {
     class = if (!is.null(corr_class)) as.character(corr_class)[1L] else NA_character_,
     coef_corStruct = coef_cs
   )
+  out$heterogeneity <- fill_diagnostics_heterogeneity(fit)
   out
 }
 
@@ -354,7 +356,7 @@ fill_diagnostics_fit_brms <- function(fit) {
     )
   }
   mx <- ild_brms_max_rhat(fit)
-  list(
+  out <- list(
     engine = "brms",
     convergence = list(
       convergence_table = conv_tbl,
@@ -373,6 +375,8 @@ fill_diagnostics_fit_brms <- function(fit) {
     ),
     posterior_summary = list(ild_posterior = ps)
   )
+  out$heterogeneity <- fill_diagnostics_heterogeneity(fit)
+  out
 }
 
 #' Residual diagnostics -- frequentist (embeds legacy [ild_diagnostics()] for plotting)

@@ -43,10 +43,10 @@
 #'     These overlap with \code{\link{ild_diagnostics_utilities}} (bundle section providers).}
 #'   \item{Within-person and lags}{\code{\link{ild_center}}, \code{\link{ild_center_plot}},
 #'     \code{\link{ild_decomposition}}, \code{\link{ild_lag}}, \code{\link{ild_check_lags}},
-#'     \code{\link{ild_crosslag}}, \code{\link{ild_align}}}
+#'     \code{\link{ild_panel_lag_prepare}}, \code{\link{ild_crosslag}}, \code{\link{ild_align}}}
 #'   \item{Modeling}{\code{\link{ild_fit}} (unified: lme4, nlme, brms), \code{\link{ild_lme}},
 #'     \code{\link{ild_brms}} (Bayesian), \code{\link{ild_kfas}} (KFAS state-space; not via \code{ild_fit}),
-#'     \code{\link{ild_person_model}},
+#'     \code{\link{ild_person_model}}, \code{\link{ild_heterogeneity}}, \code{\link{ild_heterogeneity_stratified}},
 #'     \code{\link{ild_tvem}} (time-varying effects)}
 #'   \item{Diagnostics and visualization}{\code{\link{ild_diagnose}} (\code{\link{ild_diagnostics_bundle}}),
 #'     \code{\link{ild_diagnostics_utilities}}, \code{\link{ild_acf}}, \code{\link{ild_diagnostics}},
@@ -54,7 +54,7 @@
 #'     \code{\link{ild_spaghetti}}, \code{\link{ild_circadian}}, \code{\link{ild_tvem_plot}}}
 #'   \item{Provenance and methods}{\code{\link{ild_provenance}}, \code{\link{ild_history}},
 #'     \code{\link{ild_methods}}, \code{\link{ild_report}}, \code{\link{ild_compare_pipelines}},
-#'     \code{\link{ild_export_provenance}}}
+#'     \code{\link{ild_compare_fits}}, \code{\link{ild_export_provenance}}}
 #'   \item{Reproducibility}{\code{\link{ild_manifest}}, \code{\link{ild_bundle}}}
 #'   \item{Package standards (developers)}{\code{vignette("developer-contracts", package = "tidyILD")};
 #'     normative spec: \code{system.file("dev", "DEVELOPER_CONTRACTS.md", package = "tidyILD")}}
@@ -76,10 +76,15 @@
 #'     fitted vs observed, residual ACF and Q-Q.
 #'   \item \emph{Within-between decomposition and irregular spacing} ---
 #'     Centering (BP/WP), gap-aware lags, spacing classification.
+#'   \item \emph{Temporal dynamics: choosing a model for ILD} ---
+#'     Maps estimands to lags, residual AR (\code{ild_lme}), time-varying effects (\code{ild_tvem}),
+#'     and state-space backends (\code{ild_kfas}, \code{ild_ctsem}).
 #'   \item \emph{Reproducible ILD workflows with tidyILD provenance} ---
 #'     Inspect history, generate methods text, ild_report(), export and compare pipelines.
 #'   \item \emph{Glossary and quick-start checklist} --- Table of main
 #'     functions and a short checklist.
+#'   \item \emph{Heterogeneity and person-specific effects} --- BLUPs vs \code{ild_person_model},
+#'     \code{ild_heterogeneity()}, bundle plots.
 #' }
 #'
 #' @section Key concepts:
@@ -99,7 +104,8 @@
 #'     \code{irregular-ish} spacing.
 #'   \item \strong{Person-level:} \code{\link{ild_person_model}} fits models separately
 #'     per participant; \code{\link{ild_person_distribution}} plots the distribution of
-#'     estimates across persons (N-of-1 / idiographic).
+#'     estimates across persons (N-of-1 / idiographic). \code{\link{ild_heterogeneity}} summarizes
+#'     partial-pooling person-specific effects from mixed models (contrasts with no pooling).
 #' }
 #'
 #' @author Alex Litovchenko \email{al4877@columbia.edu}

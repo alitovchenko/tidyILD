@@ -20,6 +20,8 @@ knitr::opts_chunk$set(
 
 This vignette walks through the full tidyILD pipeline: prepare data, inspect structure, apply within-between decomposition and lags, fit a mixed-effects model, and run diagnostics and plots.
 
+For **which temporal assumptions** (lags in the mean, residual AR, time-varying effects, state-space) fit your question, see `vignette("temporal-dynamics-model-choice", package = "tidyILD")`.
+
 ## Simulate and prepare
 
 ```{r prepare}

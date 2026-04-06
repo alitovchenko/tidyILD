@@ -1,0 +1,74 @@
+# Cross-backend validation benchmarks (tiered; optional heavy Suggests).
+# Does not replace R-CMD-check; publishes artifacts for trend review.
+name: backend-validation-benchmarks
+
+on:
+  workflow_dispatch:
+    inputs:
+      tier:
+        description: Benchmark tier (smoke, nightly, full)
+        required: true
+        default: smoke
+        type: choice
+        options:
+          - smoke
+          - nightly
+          - full
+  schedule:
+    - cron: "0 5 * * *"
+
+permissions:
+  contents: read
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      R_KEEP_PKG_SOURCE: yes
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          r-version: release
+          use-public-rspm: true
+
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          extra-packages: any::pkgload any::jsonlite any::rcmdcheck
+          needs: check
+
+      - name: Resolve tier
+        id: tier
+        run: |
+          T="${{ github.event.inputs.tier }}"
+          if [ -z "$T" ]; then T="nightly"; fi
+          echo "tier=$T" >> "$GITHUB_OUTPUT"
+
+      - name: Run benchmarks and threshold check
+        run: |
+          TIER="${{ steps.tier.outputs.tier }}"
+          if [ "$TIER" = "smoke" ]; then
+            THR="inst/benchmarks/thresholds-smoke.json"
+            NSIM="3"
+          else
+            THR="inst/benchmarks/thresholds-nightly.json"
+            NSIM="8"
+          fi
+          Rscript scripts/run-backend-validation-benchmarks.R \
+            --tier "$TIER" \
+            --n-sim "$NSIM" \
+            --seed 20260406 \
+            --out-dir benchmark_artifacts \
+            --git-sha "${GITHUB_SHA}"
+          Rscript scripts/check-backend-validation-thresholds.R \
+            --summary benchmark_artifacts/benchmark_summary.csv \
+            --thresholds "$THR" \
+            --out benchmark_artifacts/benchmark_checks.csv
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: benchmarks-${{ steps.tier.outputs.tier }}-${{ github.sha }}
+          path: benchmark_artifacts/

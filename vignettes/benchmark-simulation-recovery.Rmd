@@ -145,6 +145,10 @@ if (!is.null(fit_ar)) summary(fit_ar) else "nlme fit failed on this platform (sk
 - **`ild_power()`** currently drives **`ild_lme()`** only. For **brms** / Stan, use **`ild_simulate()`** + **`ild_fit(..., backend = "brms")`** (or **`ild_brms()`**) in your own replication loop, then summarize posterior intervals against **`truth`** with the same **coverage** idea (credible vs Wald nominal coverage is **not** interchangeable—document which you use).
 - **KFAS** targets **state-space** models; see **`vignette("kfas-state-space-modeling", package = "tidyILD")`** and **`?ild_kfas`**. Cross-checking mixed-model simulation benchmarks against KFAS is out of scope here but natural for method comparison papers.
 
+## Cross-backend validation harness (optional)
+
+For **repeatable CI-style checks** across several engines (`lme4`, optional `nlme` / `brms` / **KFAS** / **ctsem**), the package ships a **non-exported** harness documented in **`inst/dev/BACKEND_VALIDATION_BENCHMARK_CONTRACT.md`**. From a **source tree**, run `scripts/run-backend-validation-benchmarks.R` with a **`--tier`** (`smoke`, `nightly`, `full`) and compare outputs to JSON thresholds via `scripts/check-backend-validation-thresholds.R`. This complements the **`ild_power()`** / **`ild_recovery_metrics()`** workflow above by standardizing **raw and summary tables** for trend comparison; it is **not** a substitute for study-specific simulation design.
+
 ## Limitations and scope
 
 - **One estimand in `ild_power()`**: this path targets a **single fixed effect** in a linear mixed model fit with **`ild_lme()`**, matching the current **`ild_power()`** implementation.

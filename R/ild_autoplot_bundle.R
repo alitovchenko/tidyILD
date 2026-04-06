@@ -45,7 +45,7 @@ ild_autoplot.ild_diagnostics_bundle <- function(x, section = "residual", type = 
     }
   } else {
     choices <- switch(section,
-      fit = c("convergence"),
+      fit = c("convergence", "heterogeneity"),
       predictive = if (is_kfas) c("forecast", "errors") else if (is_ctsem) c("errors") else c("ppc"),
       data = c("missingness"),
       design = c("coverage"),
@@ -56,7 +56,13 @@ ild_autoplot.ild_diagnostics_bundle <- function(x, section = "residual", type = 
     }
     type <- match.arg(type, choices)
     switch(section,
-      fit = if (is_kfas) plot_bundle_kfas_fit_convergence(x) else plot_bundle_fit_convergence(x),
+      fit = if (identical(type, "heterogeneity")) {
+        plot_bundle_fit_heterogeneity(x, ...)
+      } else if (is_kfas) {
+        plot_bundle_kfas_fit_convergence(x)
+      } else {
+        plot_bundle_fit_convergence(x)
+      },
       predictive = if (is_kfas) {
         switch(type,
           forecast = plot_bundle_kfas_predictive_forecast(x),
@@ -420,4 +426,25 @@ plot_bundle_ctsem_predictive_errors <- function(x) {
     ggplot2::labs(title = "ctsem predictive error summary") +
     ggplot2::xlim(0, 1) +
     ggplot2::ylim(0, 1)
+}
+
+#' @keywords internal
+#' @noRd
+plot_bundle_fit_heterogeneity <- function(x, ...) {
+  het <- x$fit$heterogeneity
+  if (is.null(het) || !isTRUE(het$available) || is.null(het$object)) {
+    stop(
+      "Heterogeneity plot requires random effects and a successful ild_heterogeneity() extraction. ",
+      "Re-run ild_diagnose() on a model with (e.g.) (predictor | id).",
+      call. = FALSE
+    )
+  }
+  dots <- list(...)
+  term <- dots$term
+  htype <- if (!is.null(dots$heterogeneity_type)) {
+    dots$heterogeneity_type
+  } else {
+    "caterpillar"
+  }
+  ild_autoplot(het$object, type = htype, term = term)
 }

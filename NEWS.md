@@ -1,5 +1,33 @@
 # tidyILD 0.3.0
 
+## Temporal dynamics and model choice
+
+- **Vignettes:** `vignette("temporal-dynamics-model-choice", package = "tidyILD")` (decision axes, feature map, minimal examples); `vignette("brms-dynamics-recipes", package = "tidyILD")` (copy-paste `ild_brms` templates, `eval = FALSE` on CRAN).
+- **`ild_panel_lag_prepare()`:** build multiple lag columns with one `ild_check_lags()` audit and provenance step.
+- **`ild_compare_fits()`:** compare a named list of fits on AIC/BIC/`nobs` with optional parallel `guardrail_bundles` for triggered-rule counts.
+- **`ild_brms_dynamics_formula()`:** suggested formula list for person-varying lag slopes (identification/priors still user responsibility).
+- **Guardrails:** `GR_LAG_MEAN_STRONG_RESIDUAL_ACF_NO_AR`, `GR_INDEX_LAG_IRREGULAR_SPACING` (contextual evaluation from `ild_diagnose()`).
+- **Benchmark harness:** scenario `mlm_lag_x` (recovery of `x_lag1` coefficient, lme4); manifest version 2; contract updated in `inst/dev/BACKEND_VALIDATION_BENCHMARK_CONTRACT.md`.
+- **pkgdown / cross-links:** workflow and KFAS choosing-backend vignettes point to temporal-dynamics article.
+
+## Cross-backend validation harness (CI / developers)
+
+- **Benchmark contract:** `inst/dev/BACKEND_VALIDATION_BENCHMARK_CONTRACT.md` — scenario matrix, tiers (`smoke`, `nightly`, `full`), metric and artifact schema (`benchmark_raw.csv`, `benchmark_summary.csv`, `benchmark_metadata.json`).
+- **Harness helpers:** `tests/testthat/helper-backend-validation-harness.R` — `harness_run_benchmark()`, summarization, JSON threshold evaluation (optional **jsonlite**).
+- **Scripts:** `scripts/run-backend-validation-benchmarks.R`, `scripts/check-backend-validation-thresholds.R`; default thresholds in `inst/benchmarks/thresholds-smoke.json` and `thresholds-nightly.json`.
+- **GitHub Actions:** `.github/workflows/backend-validation-benchmarks.yml` (manual + nightly schedule; artifact upload). Does not replace `R-CMD-check`.
+- **Tests:** `tests/testthat/test-backend-validation-harness.R` for schema and threshold logic.
+- **Docs:** README “Backend validation benchmarks”; developer contracts in `inst/dev/DEVELOPER_CONTRACTS.md`; vignette `vignette("benchmark-simulation-recovery")` cross-link.
+
+## Random slope heterogeneity interpretation
+
+- **`ild_heterogeneity()`**: partial-pooling summaries for **`lmerMod`**, **`lme`**, and **`brmsfit`** (from **`ild_brms()`**): long-format person-level **`ranef` / `coef`**-style tables with conditional SEs/CIs where available; **`summary`** with **`prop_gt_zero`**, quantiles, optional **`threshold`** + **`scale`** (`"raw"`, `"sd_x"`, `"sd_y"`); joins **`VarCorr`** SDs for **`lmer`** when names align.
+- **`ild_tidy.ild_heterogeneity()`**, **`ild_autoplot.ild_heterogeneity()`** (caterpillar and histogram), **`print.ild_heterogeneity()`**.
+- **`ild_heterogeneity_stratified()`**: descriptive refits by **`subgroup`** with **`min_n_id`** guardrail; not a formal variance-difference test.
+- **Diagnostics:** **`ild_diagnose()`** populates **`fit$heterogeneity`** when extraction succeeds; **`ild_autoplot(bundle, section = "fit", type = "heterogeneity", term = ...)`**.
+- **Guardrails:** **`GR_RE_SLOPE_VARIANCE_VERSUS_RESIDUAL_LOW`**, **`GR_PERSON_SPECIFIC_SLOPES_EMPIRICALLY_TIGHT`** (heuristic interpretation aids).
+- **Vignette:** `vignette("heterogeneity-interpretation", package = "tidyILD")`. Developer contract: **`fit$heterogeneity`** in **`inst/dev/DEVELOPER_CONTRACTS.md`**.
+
 ## MSM bootstrap inference (weighted `lmer`)
 
 - **`ild_msm_bootstrap()`**: person-level cluster bootstrap for **`lmer`** fits after **`ild_ipw_refit()`** (or formula + ILD + weight column); **`weight_policy`** **`fixed_weights`** vs **`reestimate_weights`** with user **`weights_fn`**. **`tidy_ild_msm_bootstrap()`** returns **`ild_tidy_schema`** rows with **`interval_type = "bootstrap_percentile"`**. Umbrella topic **`?ild_msm_inference`** (bootstrap vs sandwich vs Bayes guidance). Provenance step **`ild_msm_bootstrap`**.

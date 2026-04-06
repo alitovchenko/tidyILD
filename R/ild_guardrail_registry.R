@@ -26,21 +26,29 @@ ILD_GUARDRAIL_REGISTRY <- tibble::tibble(
     "GR_KFAS_UNMODELED_BETWEEN_PERSON_HETEROGENEITY",
     "GR_CTSEM_NONCONVERGENCE",
     "GR_CTSEM_UNSTABLE_DYNAMICS",
-    "GR_CTSEM_SHORT_SERIES_FOR_COMPLEX_DYNAMICS"
+    "GR_CTSEM_SHORT_SERIES_FOR_COMPLEX_DYNAMICS",
+    "GR_RE_SLOPE_VARIANCE_VERSUS_RESIDUAL_LOW",
+    "GR_PERSON_SPECIFIC_SLOPES_EMPIRICALLY_TIGHT",
+    "GR_LAG_MEAN_STRONG_RESIDUAL_ACF_NO_AR",
+    "GR_INDEX_LAG_IRREGULAR_SPACING"
   ),
   section = c(
     "fit", "fit", "fit",
     "design", "data", "data",
     "missingness", "causal", "causal", "causal", "causal",
     "design", "data", "fit", "fit", "fit", "data", "fit",
-    "fit", "fit", "data"
+    "fit", "fit", "data",
+    "fit", "fit",
+    "residual", "data"
   ),
   severity = c(
     "warning", "warning", "warning",
     "warning", "warning", "info",
     "warning", "warning", "warning", "info", "info",
     "warning", "warning", "warning", "warning", "warning", "info", "warning",
-    "warning", "warning", "warning"
+    "warning", "warning", "warning",
+    "info", "info",
+    "warning", "info"
   ),
   default_message = c(
     "Estimated random-effect covariance is singular or near-singular.",
@@ -63,7 +71,11 @@ ILD_GUARDRAIL_REGISTRY <- tibble::tibble(
     "Independent single-subject state-space fits are not a substitute for pooled multilevel latent-dynamics models (e.g. ctsem).",
     "ctsem optimization did not report clean convergence.",
     "Estimated continuous-time dynamics appear unstable or implausibly large.",
-    "The observed series may be too short for the requested continuous-time latent dynamics complexity."
+    "The observed series may be too short for the requested continuous-time latent dynamics complexity.",
+    "Random slope standard deviation is small relative to residual standard deviation.",
+    "Person-specific partial-pooling slopes show very little empirical spread versus residual noise.",
+    "Pooled residual ACF at lag 1 is large while the mean includes lag columns and residual AR1/CAR1 is not modeled.",
+    "Index-based ild_lag() was used on irregular-ish spacing; row-order lags may not align with elapsed time between observations."
   ),
   default_recommendation = c(
     "Consider simpler random structure, stronger priors (Bayesian), or rescaling predictors.",
@@ -86,7 +98,11 @@ ILD_GUARDRAIL_REGISTRY <- tibble::tibble(
     "Do not treat stacked single-ID KFAS fits as a pooled latent model; use hierarchical latent frameworks if that is the estimand.",
     "Try alternative starting values, simplify the ctsem model, or inspect time scaling and identification.",
     "Rescale time/outcome or constrain unstable drift parameters before interpretation.",
-    "Collect more observations per person or simplify latent dynamics before strong inferences."
+    "Collect more observations per person or simplify latent dynamics before strong inferences.",
+    "Use ild_heterogeneity() and VarCorr(); consider a simpler random structure if slopes are not substantively heterogeneous.",
+    "Compare to ild_person_model() and population fixed effects; confirm whether random slopes merit interpretation.",
+    "Consider ild_lme(..., ar1 = TRUE) or a dynamics model that matches spacing; see vignette(\"temporal-dynamics-model-choice\", package = \"tidyILD\").",
+    "Prefer ild_lag(..., mode = \"gap_aware\" or \"time_window\"), align to a grid, or use continuous-time models when appropriate."
   )
 )
 
@@ -272,6 +288,52 @@ guardrail_finalize_rows <- function(rows) {
   )
 }
 
+#' @keywords internal
+#' @noRd
+ild_formula_includes_lag_terms <- function(f) {
+  if (is.null(f)) {
+    return(FALSE)
+  }
+  rhs <- tryCatch(stats::terms(f), error = function(e) NULL)
+  if (is.null(rhs)) {
+    return(FALSE)
+  }
+  labels <- attr(rhs, "term.labels")
+  any(grepl("_lag[0-9]+$|_lag_window$", labels))
+}
+
+#' @keywords internal
+#' @noRd
+ild_bundle_residual_acf_lag1 <- function(bundle) {
+  ac <- tryCatch(bundle$residual$stats$acf$pooled, error = function(e) NULL)
+  if (is.null(ac) || nrow(ac) == 0L) {
+    return(NA_real_)
+  }
+  hit <- ac[ac$lag %in% c(1, 1L), , drop = FALSE]
+  if (nrow(hit) == 0L) {
+    return(NA_real_)
+  }
+  as.numeric(hit$acf[1L])
+}
+
+#' @keywords internal
+#' @noRd
+ild_provenance_has_index_lag <- function(data) {
+  p <- ild_get_history(data)
+  if (is.null(p) || is.null(p$steps)) {
+    return(FALSE)
+  }
+  for (s in p$steps) {
+    if (identical(as.character(s$step), "ild_lag")) {
+      am <- s$args$mode
+      if (identical(am, "index")) {
+        return(TRUE)
+      }
+    }
+  }
+  FALSE
+}
+
 #' Evaluate design / data / causal guardrails from bundle + model
 #' @keywords internal
 #' @noRd
@@ -290,6 +352,32 @@ evaluate_guardrails_contextual <- function(object, data, bundle, engine = c("lme
             "Predictor(s) %s vary within and between persons but are not WP/BP decomposed.",
             paste(paste0("'", unc, "'"), collapse = ", ")
           ),
+          recommendation = NULL
+        )
+      }
+    }
+    if (engine %in% c("lmer", "lme")) {
+      ar1_dyn <- tryCatch(isTRUE(attr(object, "ild_ar1", exact = TRUE)), error = function(e) FALSE)
+      if (!ar1_dyn && !is.null(f) && ild_formula_includes_lag_terms(f)) {
+        acf1 <- ild_bundle_residual_acf_lag1(bundle)
+        if (is.finite(acf1) && acf1 > 0.2) {
+          rows[[length(rows) + 1L]] <- list(
+            rule_id = "GR_LAG_MEAN_STRONG_RESIDUAL_ACF_NO_AR",
+            triggered = TRUE,
+            message = sprintf(
+              "Pooled residual ACF at lag 1 is %.2f with lag term(s) in the mean and residual AR1/CAR1 not used.",
+              acf1
+            ),
+            recommendation = NULL
+          )
+        }
+      }
+      sc2 <- tryCatch(ild_spacing_class(data), error = function(e) NA_character_)
+      if (!is.na(sc2) && sc2 == "irregular-ish" && ild_provenance_has_index_lag(data)) {
+        rows[[length(rows) + 1L]] <- list(
+          rule_id = "GR_INDEX_LAG_IRREGULAR_SPACING",
+          triggered = TRUE,
+          message = NULL,
           recommendation = NULL
         )
       }
@@ -452,6 +540,47 @@ evaluate_guardrails_fit <- function(object, fit_diag, engine = c("lmer", "lme", 
         message = NULL,
         recommendation = NULL
       )
+    }
+  }
+  if (engine %in% c("lmer", "lme", "brms")) {
+    het <- fit_diag$heterogeneity
+    if (!is.null(het) && isTRUE(het$available) && !is.null(het$object)) {
+      sig <- tryCatch(stats::sigma(object), error = function(e) NA_real_)
+      sm <- het$object$summary
+      # isTRUE guards nrow/sig comparisons that can be NA; skip heuristics when sigma is
+      # numerically degenerate (e.g. failed lmer) to avoid false guardrails / if(NA).
+      sig_ok <- is.finite(sig) && isTRUE(sig > 1e-8)
+      if (!is.null(sm) && isTRUE(nrow(sm) > 0L) && sig_ok) {
+        hit_var <- FALSE
+        for (k in seq_len(nrow(sm))) {
+          termk <- as.character(sm$term[k])
+          if (termk %in% c("(Intercept)", "Intercept")) {
+            next
+          }
+          vcs <- sm$varcorr_sdcor[k]
+          if (is.finite(vcs) && vcs < 0.01 * sig) {
+            hit_var <- TRUE
+            break
+          }
+        }
+        if (hit_var) {
+          rows[[length(rows) + 1L]] <- list(
+            rule_id = "GR_RE_SLOPE_VARIANCE_VERSUS_RESIDUAL_LOW",
+            triggered = TRUE,
+            message = NULL,
+            recommendation = NULL
+          )
+        }
+        sdt_max <- suppressWarnings(max(sm$sd_total, na.rm = TRUE))
+        if (is.finite(sdt_max) && sdt_max < 0.05 * sig) {
+          rows[[length(rows) + 1L]] <- list(
+            rule_id = "GR_PERSON_SPECIFIC_SLOPES_EMPIRICALLY_TIGHT",
+            triggered = TRUE,
+            message = NULL,
+            recommendation = NULL
+          )
+        }
+      }
     }
   }
   if (engine == "brms") {
