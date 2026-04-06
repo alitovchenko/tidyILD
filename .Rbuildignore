@@ -15,3 +15,5 @@
 ^downloads$
 ^HANDOFF\.md$
 ^_pkgdown\.yml$
+^papers$
+^scripts$

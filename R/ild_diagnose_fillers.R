@@ -540,7 +540,7 @@ fill_diagnostics_residual_ctsem <- function(object, data) {
   if (is.null(aug)) {
     return(list(engine = "ctsem", legacy_ild_diagnostics = NULL))
   }
-  acf_obj <- tryCatch(stats::acf(aug$.resid, plot = FALSE, na.action = na.pass), error = function(e) NULL)
+  acf_obj <- tryCatch(stats::acf(aug$.resid, plot = FALSE, na.action = stats::na.pass), error = function(e) NULL)
   acf_tbl <- if (!is.null(acf_obj)) {
     tibble::tibble(lag = as.numeric(acf_obj$lag), acf = as.numeric(acf_obj$acf))
   } else {

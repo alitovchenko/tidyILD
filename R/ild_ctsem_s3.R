@@ -206,7 +206,13 @@ ild_autoplot.ild_fit_ctsem <- function(x, type = c("fitted_vs_actual", "residual
     out <- suppressWarnings(as.numeric(f1))
   }
   if (all(!is.finite(out))) {
-    pred <- tryCatch(ctsem::ctPredict(fit), error = function(e) NULL)
+    # ctPredict is not always exported from ctsem; avoid ctsem::ctPredict (R CMD check).
+    pred <- tryCatch({
+      if (!requireNamespace("ctsem", quietly = TRUE)) return(NULL)
+      fn <- get0("ctPredict", envir = asNamespace("ctsem"), inherits = FALSE, ifnotfound = NULL)
+      if (!is.function(fn)) return(NULL)
+      fn(fit)
+    }, error = function(e) NULL)
     if (!is.null(pred)) {
       if (is.data.frame(pred) && "y" %in% names(pred)) {
         v <- suppressWarnings(as.numeric(pred$y))

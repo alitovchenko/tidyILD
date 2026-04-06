@@ -29,6 +29,7 @@ Suggests:
   roxygen2,
   knitr,
   rmarkdown,
+  rstan,
   RcppEigen,
   broom.mixed,
   clubSandwich,
