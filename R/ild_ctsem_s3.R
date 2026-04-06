@@ -80,10 +80,19 @@ ild_augment.ild_fit_ctsem <- function(x, ...) {
   if (is.null(resp) || !resp %in% names(data)) {
     stop("ild_response attribute missing or not present in data; refit with ild_ctsem().", call. = FALSE)
   }
+  n <- nrow(data)
   y <- suppressWarnings(as.numeric(data[[resp]]))
-  fit <- .ild_ctsem_extract_fitted(x$ct_fit, n_expected = nrow(data))
-  resid <- ifelse(is.finite(y) & is.finite(fit), y - fit, NA_real_)
-  resid_std <- .ild_ctsem_extract_resid_std(x$ct_fit, n_expected = nrow(data))
+  if (length(y) != n) {
+    stop("Outcome length does not match ILD rows after coercion; check missing outcome values.", call. = FALSE)
+  }
+  fit <- .ild_ctsem_extract_fitted(x$ct_fit, n_expected = n)
+  if (length(fit) != n || !is.numeric(fit)) {
+    fit <- rep(NA_real_, n)
+  }
+  resid <- rep(NA_real_, n)
+  ok <- is.finite(y) & is.finite(fit)
+  resid[ok] <- (y - fit)[ok]
+  resid_std <- .ild_ctsem_extract_resid_std(x$ct_fit, n_expected = n)
 
   ild_augment_assemble(
     .ild_id = data[[".ild_id"]],
@@ -207,12 +216,21 @@ ild_autoplot.ild_fit_ctsem <- function(x, type = c("fitted_vs_actual", "residual
   }
   if (all(!is.finite(out))) {
     # ctPredict is not always exported from ctsem; avoid ctsem::ctPredict (R CMD check).
-    pred <- tryCatch({
-      if (!requireNamespace("ctsem", quietly = TRUE)) return(NULL)
-      fn <- get0("ctPredict", envir = asNamespace("ctsem"), inherits = FALSE, ifnotfound = NULL)
-      if (!is.function(fn)) return(NULL)
-      fn(fit)
-    }, error = function(e) NULL)
+    # Do not use return() inside tryCatch expr: it exits .ild_ctsem_extract_fitted() with NULL
+    # instead of the intended length-n_expected vector (breaks ild_augment / tibble).
+    pred <- tryCatch(
+      {
+        pred_raw <- NULL
+        if (requireNamespace("ctsem", quietly = TRUE)) {
+          fn <- get0("ctPredict", envir = asNamespace("ctsem"), inherits = FALSE, ifnotfound = NULL)
+          if (is.function(fn)) {
+            pred_raw <- fn(fit)
+          }
+        }
+        pred_raw
+      },
+      error = function(e) NULL
+    )
     if (!is.null(pred)) {
       # ctPredict shape varies by ctsem version; coercion can error (e.g. list-column y).
       v <- tryCatch(
