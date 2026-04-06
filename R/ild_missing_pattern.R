@@ -18,14 +18,20 @@
 #' @param max_ids Optional integer. If set, subset to this many persons (sampled)
 #'   before computing \code{by_id}, \code{summary}, and \code{plot} to handle large N.
 #' @param seed Optional integer. Seed for sampling when \code{max_ids} is set.
+#' @param outcome Optional character; if set, \code{by_id} is left-joined with
+#'   [ild_missing_compliance()] for that column (interpretable adherence metrics).
+#' @param expected_occasions Passed to [ild_missing_compliance()] when \code{outcome} is set.
 #' @return A list with: \code{summary} (tibble: one row per var, columns var, n_obs, n_na, pct_na),
 #'   \code{plot} (ggplot2 object for missingness heatmap), \code{by_id}, \code{overall},
-#'   \code{n_complete}, \code{vars}.
+#'   \code{n_complete}, \code{vars}. When \code{outcome} is set, \code{by_id} includes
+#'   compliance columns (see [ild_missing_compliance()]).
 #' @seealso [ild_diagnose()], [ild_diagnostics_bundle()]
-#' @importFrom dplyr across all_of group_by summarise n_distinct
+#' @importFrom dplyr across all_of group_by left_join summarise
+#' @importFrom rlang .data
 #' @importFrom tibble tibble
 #' @export
-ild_missing_pattern <- function(x, vars = NULL, max_ids = NULL, seed = NULL) {
+ild_missing_pattern <- function(x, vars = NULL, max_ids = NULL, seed = NULL,
+                                outcome = NULL, expected_occasions = NULL) {
   validate_ild(x)
   ild_cols <- c(".ild_id", ".ild_time", ".ild_time_num", ".ild_seq", ".ild_dt", ".ild_gap")
   all_nms <- names(x)
@@ -84,6 +90,13 @@ ild_missing_pattern <- function(x, vars = NULL, max_ids = NULL, seed = NULL) {
     ggplot2::labs(x = "Time (sequence)", y = "Person", fill = NULL, title = "Missingness") +
     ggplot2::theme_minimal()
   if (length(vars) > 1) p <- p + ggplot2::facet_wrap(ggplot2::vars(.data$variable), ncol = 1)
+  if (!is.null(outcome)) {
+    if (!outcome %in% names(x_work)) {
+      stop("outcome '", outcome, "' not found in data.", call. = FALSE)
+    }
+    comp <- ild_missing_compliance(x_work, outcome, expected_occasions = expected_occasions)
+    by_id <- dplyr::left_join(by_id, comp, by = ".ild_id")
+  }
   list(
     summary = summary_tbl,
     plot = p,

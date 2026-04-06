@@ -1,5 +1,14 @@
 # tidyILD 0.3.0
 
+## Missingness workflow (diagnostics and reporting)
+
+- **Vignette:** `vignette("ild-missingness-workflow", package = "tidyILD")` — MAR/MNAR context, `ild_missing_pattern()`, compliance, cohort/hazard summaries, IPW template, limits of tidyILD.
+- **`ild_missing_compliance()`:** person-level `%` observed, longest observed run, monotone-missing flag, optional `expected_occasions`.
+- **`ild_missing_cohort()`**, **`ild_missing_hazard_first()`:** cohort fraction observed by `.ild_seq`; discrete hazard of first missing row among at-risk occasions.
+- **`ild_missingness_report()`:** orchestrates compliance, pattern (with optional `outcome` join), cohort, hazard, optional **`ild_missing_model()`**, late-dropout flag, text **`snippets`**.
+- **`ild_missing_pattern()`:** new arguments **`outcome`**, **`expected_occasions`** to enrich **`by_id`** via **`ild_missing_compliance()`**.
+- **pkgdown / `?tidyILD`:** missingness functions grouped under reference; workflow article listed.
+
 ## Temporal dynamics and model choice
 
 - **Vignettes:** `vignette("temporal-dynamics-model-choice", package = "tidyILD")` (decision axes, feature map, minimal examples); `vignette("brms-dynamics-recipes", package = "tidyILD")` (copy-paste `ild_brms` templates, `eval = FALSE` on CRAN).

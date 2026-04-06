@@ -28,25 +28,23 @@ This article is a **decision guide** for **temporal structure**: lags in the mea
 
 ## Decision flow (conceptual)
 
-The following diagram is a navigation aid (rendered on sites that support Mermaid; otherwise read the labels as a checklist).
+The following diagram is a navigation aid (rendered on sites that support Mermaid; otherwise read the labels as a checklist). Source in Mermaid syntax:
 
-```{mermaid, eval=FALSE}
-flowchart TD
-  q1[Estimand clear?]
-  spacing[Check ild_spacing_class]
-  meanLag[Lags in mean: ild_lag ild_panel_lag_prepare ild_crosslag]
-  residAR[Residual AR: ild_lme ar1=TRUE]
-  tvem[Effect varies over time: ild_tvem]
-  ct[Continuous-time latent: ild_ctsem]
-  kfas[Discrete-time latent level: ild_kfas]
-  q1 --> spacing
-  spacing --> meanLag
-  spacing --> residAR
-  meanLag --> residAR
-  spacing --> tvem
-  spacing --> ct
-  spacing --> kfas
-```
+    flowchart TD
+      q1[Estimand clear?]
+      spacing[Check ild_spacing_class]
+      meanLag[Lags in mean: ild_lag ild_panel_lag_prepare ild_crosslag]
+      residAR[Residual AR: ild_lme ar1=TRUE]
+      tvem[Effect varies over time: ild_tvem]
+      ct[Continuous-time latent: ild_ctsem]
+      kfas[Discrete-time latent level: ild_kfas]
+      q1 --> spacing
+      spacing --> meanLag
+      spacing --> residAR
+      meanLag --> residAR
+      spacing --> tvem
+      spacing --> ct
+      spacing --> kfas
 
 - **Irregular spacing** makes **index lags** (row order) easy to misinterpret as equal time. Prefer **`gap_aware`** or **`time_window`** in `ild_lag()`, or align to a grid, or use **continuous-time** models when the estimand requires it (`vignette("kfas-irregular-timing-spacing", package = "tidyILD")`).
 - **Residual ACF** after a lag-mean model may indicate **unmodeled autocorrelation**; compare to **`ild_lme(..., ar1 = TRUE)`** (nlme path with AR1 or CAR1 chosen from spacing). See `vignette("temporal-dynamics-model-choice", package = "tidyILD")` guardrails in `ild_diagnose()`.

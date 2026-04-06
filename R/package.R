@@ -37,6 +37,8 @@
 #'   \item{Summaries and inspection}{\code{\link{ild_summary}},
 #'     \code{\link{ild_spacing_class}}, \code{\link{ild_spacing}},
 #'     \code{\link{ild_design_check}}, \code{\link{ild_missing_pattern}},
+#'     \code{\link{ild_missing_compliance}}, \code{\link{ild_missing_cohort}},
+#'     \code{\link{ild_missing_hazard_first}}, \code{\link{ild_missingness_report}},
 #'     \code{\link{ild_missing_bias}}, \code{\link{ild_missing_model}},
 #'     \code{\link{ild_ipw_weights}}, \code{\link{ild_ipw_refit}},
 #'     \code{\link{ild_plot}} (types: trajectory, gaps, missingness).
@@ -85,6 +87,8 @@
 #'     functions and a short checklist.
 #'   \item \emph{Heterogeneity and person-specific effects} --- BLUPs vs \code{ild_person_model},
 #'     \code{ild_heterogeneity()}, bundle plots.
+#'   \item \emph{Missingness in ILD: diagnostics and sensitivity routes} ---
+#'     \code{ild_missingness_report()}, MAR/MNAR context, IPW templates.
 #' }
 #'
 #' @section Key concepts:

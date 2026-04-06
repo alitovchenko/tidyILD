@@ -4,7 +4,7 @@ author: "tidyILD authors"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Within-between decomposition and irregular spacing}
+  %\VignetteIndexEntry{Within-between decomposition and handling irregular spacing}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

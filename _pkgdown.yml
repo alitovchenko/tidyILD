@@ -34,6 +34,7 @@ articles:
       - ild-decomposition-and-spacing
       - tsibble-interoperability
       - heterogeneity-interpretation
+      - ild-missingness-workflow
       - ild-glossary-and-quickstart
       - developer-contracts
 
@@ -41,13 +42,23 @@ reference:
   - title: Setup and validation
     contents: [ild_prepare, as_ild, is_ild, validate_ild, ild_meta]
   - title: Summaries and inspection
-    contents: [ild_summary, ild_spacing_class, ild_spacing, ild_design_check, ild_missing_pattern, ild_missing_bias, ild_plot]
+    contents: [ild_summary, ild_spacing_class, ild_spacing, ild_design_check, ild_plot]
   - title: Within-person and lags
     contents: [ild_center, ild_center_plot, ild_decomposition, ild_lag, ild_check_lags, ild_panel_lag_prepare, ild_crosslag, ild_align]
   - title: Modeling
     contents: [ild_fit, ild_lme, ild_brms, ild_kfas, ild_ctsem, ild_person_model, ild_person_distribution, ild_heterogeneity, ild_heterogeneity_stratified, ild_tvem, ild_tvem_plot]
   - title: Robust SE and missingness
-    contents: [ild_robust_se, ild_missing_model, ild_ipw_weights, ild_ipw_refit]
+    contents:
+      - ild_robust_se
+      - ild_missing_pattern
+      - ild_missing_compliance
+      - ild_missing_cohort
+      - ild_missing_hazard_first
+      - ild_missingness_report
+      - ild_missing_bias
+      - ild_missing_model
+      - ild_ipw_weights
+      - ild_ipw_refit
   - title: Diagnostics and visualization
     contents: [ild_acf, ild_diagnostics, plot_ild_diagnostics, ild_heatmap, ild_spaghetti, ild_circadian]
   - title: Model tidiers

@@ -64,7 +64,11 @@ Other ild_diagnostics_utilities:
 \code{\link{ild_iptw_weights}()},
 \code{\link{ild_ipw_weights}()},
 \code{\link{ild_joint_msm_weights}()},
+\code{\link{ild_missing_cohort}()},
+\code{\link{ild_missing_compliance}()},
+\code{\link{ild_missing_hazard_first}()},
 \code{\link{ild_missing_model}()},
-\code{\link{ild_missing_pattern}()}
+\code{\link{ild_missing_pattern}()},
+\code{\link{ild_missingness_report}()}
 }
 \concept{ild_diagnostics_utilities}
