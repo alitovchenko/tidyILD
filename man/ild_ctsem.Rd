@@ -21,7 +21,10 @@ ild_ctsem(
 \item{outcome}{Character name of numeric outcome column.}
 
 \item{ct_model}{Optional ctsem model object. If \code{NULL}, a conservative
-default model is created.}
+default model is created: for \code{model_type = "stanct"}, \code{ctsem::ctModel(type = "ct", ...)}
+with one manifest loading on one latent; for \code{"ctfit"}, \code{type = "omx"} with
+\code{Tpoints = max(rows per id, 2)} from the prepared long data (custom \code{ct_model}
+may still be needed for irregular designs).}
 
 \item{model_type}{Character. \code{"stanct"} (default) or \code{"ctfit"}.}
 

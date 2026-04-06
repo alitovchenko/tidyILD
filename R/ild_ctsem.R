@@ -13,7 +13,10 @@
 #' @param data An object that passes [validate_ild()] (typically after [ild_prepare()]).
 #' @param outcome Character name of numeric outcome column.
 #' @param ct_model Optional ctsem model object. If \code{NULL}, a conservative
-#'   default model is created.
+#'   default model is created: for \code{model_type = "stanct"}, \code{ctsem::ctModel(type = "ct", ...)}
+#'   with one manifest loading on one latent; for \code{"ctfit"}, \code{type = "omx"} with
+#'   \code{Tpoints = max(rows per id, 2)} from the prepared long data (custom \code{ct_model}
+#'   may still be needed for irregular designs).
 #' @param model_type Character. \code{"stanct"} (default) or \code{"ctfit"}.
 #' @param id_col Person-id column in \code{data} (default \code{".ild_id"}).
 #' @param time_col Continuous-time index column in \code{data}
@@ -69,7 +72,12 @@ ild_ctsem <- function(data,
   dat <- dat[is.finite(dat$y), , drop = FALSE]
 
   if (is.null(ct_model)) {
-    ct_model <- .ild_ctsem_default_model(manifest_name = "y")
+    max_tp <- max(2L, as.integer(max(table(dat$id))))
+    ct_model <- .ild_ctsem_default_model(
+      manifest_name = "y",
+      model_type = model_type,
+      max_Tpoints = max_tp
+    )
   }
 
   fit <- .ild_ctsem_fit_dispatch(
@@ -128,13 +136,32 @@ print.ild_fit_ctsem <- function(x, ...) {
 
 #' @keywords internal
 #' @noRd
-.ild_ctsem_default_model <- function(manifest_name = "y") {
-  ctsem::ctModel(
-    n.manifest = 1L,
-    n.latent = 1L,
-    manifestNames = manifest_name,
-    latentNames = "eta"
-  )
+.ild_ctsem_default_model <- function(manifest_name = "y",
+                                      model_type = c("stanct", "ctfit"),
+                                      max_Tpoints = 2L) {
+  model_type <- match.arg(model_type)
+  lam <- matrix(1, nrow = 1L, ncol = 1L)
+  if (identical(model_type, "stanct")) {
+    ctsem::ctModel(
+      type = "ct",
+      n.manifest = 1L,
+      n.latent = 1L,
+      manifestNames = manifest_name,
+      latentNames = "eta",
+      LAMBDA = lam
+    )
+  } else {
+    tp <- max(2L, as.integer(max_Tpoints)[1L])
+    ctsem::ctModel(
+      type = "omx",
+      n.manifest = 1L,
+      n.latent = 1L,
+      Tpoints = tp,
+      manifestNames = manifest_name,
+      latentNames = "eta",
+      LAMBDA = lam
+    )
+  }
 }
 
 #' @keywords internal
