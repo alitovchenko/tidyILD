@@ -200,8 +200,8 @@ ild_autoplot.ild_fit_ctsem <- function(x, type = c("fitted_vs_actual", "residual
   out <- rep(NA_real_, n_expected)
   f1 <- tryCatch(stats::fitted(fit), error = function(e) NULL)
   if (is.matrix(f1) || is.data.frame(f1)) {
-    v <- suppressWarnings(as.numeric(f1[, 1L]))
-    if (length(v) == n_expected) out <- v
+    v <- tryCatch(suppressWarnings(as.numeric(f1[, 1L])), error = function(e) NULL)
+    if (!is.null(v) && length(v) == n_expected) out <- v
   } else if (is.numeric(f1) && length(f1) == n_expected) {
     out <- suppressWarnings(as.numeric(f1))
   }
@@ -214,13 +214,20 @@ ild_autoplot.ild_fit_ctsem <- function(x, type = c("fitted_vs_actual", "residual
       fn(fit)
     }, error = function(e) NULL)
     if (!is.null(pred)) {
-      if (is.data.frame(pred) && "y" %in% names(pred)) {
-        v <- suppressWarnings(as.numeric(pred$y))
-        if (length(v) == n_expected) out <- v
-      } else if (is.list(pred) && !is.null(pred$yhat)) {
-        v <- suppressWarnings(as.numeric(pred$yhat))
-        if (length(v) == n_expected) out <- v
-      }
+      # ctPredict shape varies by ctsem version; coercion can error (e.g. list-column y).
+      v <- tryCatch(
+        {
+          vv <- NULL
+          if (is.data.frame(pred) && "y" %in% names(pred)) {
+            vv <- suppressWarnings(as.numeric(unlist(pred$y, recursive = FALSE, use.names = FALSE)))
+          } else if (is.list(pred) && !is.null(pred$yhat)) {
+            vv <- suppressWarnings(as.numeric(unlist(pred$yhat, recursive = FALSE, use.names = FALSE)))
+          }
+          if (!is.null(vv) && length(vv) == n_expected) vv else NULL
+        },
+        error = function(e) NULL
+      )
+      if (!is.null(v)) out <- v
     }
   }
   out
