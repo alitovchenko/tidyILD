@@ -52,7 +52,9 @@ ild_missing_pattern(x, vars = "mood")
 fit <- ild_lme(mood ~ 1 + (1 | id), data = x, ar1 = FALSE, warn_no_ar1 = FALSE)
 tidy_ild_model(fit)
 ild_plot(fit, type = "fitted")
+ild_plot_predicted_trajectory(fit, time_var = ".ild_seq") # observed + fitted vs time
 diag <- ild_diagnostics(fit); diag; plot_ild_diagnostics(diag)
+bundle <- ild_diagnose(fit) # diagnostics bundle; use ild_autoplot(bundle, ...)
 ```
 
 ## Pipeline
@@ -90,8 +92,10 @@ diag <- ild_diagnostics(fit); diag; plot_ild_diagnostics(diag)
 - `ild_person_model()` — fit model per person (N-of-1); `ild_person_distribution()` — plot distribution of estimates
 - `ild_diagnostics()` — residual ACF, residuals vs fitted/time (use `print()` for summary)
 - `plot_ild_diagnostics()` — build diagnostic plots from an `ild_diagnostics` object
-- `ild_plot()` — trajectory, heatmap, gaps, fitted vs observed, residual ACF
-- `ild_heatmap()`, `ild_spaghetti()` — aliases for heatmap and trajectory plots
+- `ild_plot()` — trajectory, heatmap, gaps, missingness, fitted vs observed, **predicted trajectory** (observed + fitted vs time), residual ACF; optional **`facet_by`** for panels (e.g. cluster)
+- `ild_plot_predicted_trajectory()` — convenience wrapper for predicted trajectory vs `time_var`
+- `ild_heatmap()`, `ild_spaghetti()` — aliases; pass **`facet_by`** through to `ggplot2::facet_wrap()`
+- `ild_diagnose()` — assemble **`ild_diagnostics_bundle`** (data, design, fit, residual, …); **`ild_autoplot(bundle, ...)`** for sectioned plots
 - `ild_circadian()` — variable by hour of day (when time is POSIXct)
 - `augment_ild_model()` / `ild_augment()` — tibble per `ild_augment_schema()`: `.outcome`, `.fitted`, `.resid`, `.resid_std` (Pearson when available), `engine`, `model_class`, etc.
 - `tidy_ild_model()` — fixed-effect table (estimate, SE, CI, p); use `se = "robust"` for cluster-robust inference
@@ -102,6 +106,7 @@ diag <- ild_diagnostics(fit); diag; plot_ild_diagnostics(diag)
 
 ## Vignettes
 
+- **Visualization in tidyILD**: index of plots, bundle sections, `facet_by`, predicted trajectories, and partial-effects templates (`marginaleffects` / `ggeffects` on `_wp` / `_bp`).
 - **From raw data to model**: full pipeline with `ild_prepare()` through `ild_lme()` and `ild_plot()`.
 - **MSM identification and recovery**: assumptions, estimand-first MSM workflow, strict/degraded inference behavior, and scenario-grid recovery checks.
 - **Continuous-time dynamics with ctsem**: `ild_ctsem()` workflow, diagnostics, and guardrails for ctsem fits.

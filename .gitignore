@@ -1,3 +1,6 @@
+# Maintainer handoff (local only; not versioned — see README if you need onboarding)
+HANDOFF.md
+
 .Rproj.user
 .Rhistory
 .RData
