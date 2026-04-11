@@ -55,10 +55,25 @@ names(x2$data)
 # fit2 <- ild_brms(f2, data = x2$data, iter = 500, chains = 2, refresh = 0)
 ```
 
+## Recipe 3: Multivariate outcomes with `mvbind` (sketch)
+
+For **two or more outcomes measured on the same occasions**, **brms** can model them **jointly** with `mvbind()` so residuals can correlate across outcomes. This is still **not** a full panel VAR / DSEM: you must choose lags, priors, and residual structure deliberately. When the estimand is a **fully specified dynamic system** with feedback, **dynamite** or **lavaan** DSEM (or similar) is often more appropriate than stacking outcomes in a single `brms` formula.
+
+```{r recipe-mvbind}
+# Not run — requires brms; illustration only:
+# library(brms)
+# f_mv <- bf(mvbind(mood, stress) ~ mood_lag1 + stress_lag1 + (1 | id)) + set_rescor(TRUE)
+# fit_mv <- brm(f_mv, data = x2$data, chains = 2, iter = 500, refresh = 0)
+# Build mood_lag1 / stress_lag1 with ild_lag() or ild_panel_lag_prepare() first.
+```
+
+For routing when joint multivariate dynamics or high-dimensional predictors matter, see `vignette("ild-specialist-backends", package = "tidyILD")`.
+
 ## See also
 
 - `?ild_brms`, `?ild_prior_ild`, `?ild_diagnose`
 - `vignette("temporal-dynamics-model-choice", package = "tidyILD")`
+- `vignette("ild-specialist-backends", package = "tidyILD")`
 
 ```{r session-info, echo = FALSE}
 sessionInfo()

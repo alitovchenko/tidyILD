@@ -106,6 +106,7 @@ bundle <- ild_diagnose(fit) # diagnostics bundle; use ild_autoplot(bundle, ...)
 
 ## Vignettes
 
+- **Specialist backends** (`vignette("ild-specialist-backends", package = "tidyILD")`): when to move beyond `lme4` / default tidyILD fits; handoffs to dynamite, PGEE, DSEM, and multivariate workflows; export patterns after `ild_prepare()` / `ild_center()` / `ild_lag()`.
 - **Visualization in tidyILD**: index of plots, bundle sections, `facet_by`, predicted trajectories, and partial-effects templates (`marginaleffects` / `ggeffects` on `_wp` / `_bp`).
 - **From raw data to model**: full pipeline with `ild_prepare()` through `ild_lme()` and `ild_plot()`.
 - **MSM identification and recovery**: assumptions, estimand-first MSM workflow, strict/degraded inference behavior, and scenario-grid recovery checks.

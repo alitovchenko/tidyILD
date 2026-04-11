@@ -17,7 +17,11 @@
 #' All ILD structure (`.ild_*` columns and `ild_*` metadata) is created only
 #' by \code{\link{ild_prepare}} (via the internal constructor). Downstream
 #' functions expect data prepared with \code{ild_prepare()}. For the full
-#' workflow and applications, see the vignettes.
+#' workflow and applications, see the vignettes. Estimands that require
+#' \strong{joint multivariate dynamics}, \strong{penalized high-dimensional}
+#' longitudinal models, or full \strong{latent-variable DSEM} are better handled
+#' by specialist packages after preprocessing; see
+#' \code{vignette("ild-specialist-backends", package = "tidyILD")}.
 #'
 #' @section Getting started:
 #' A minimal workflow: simulate or load data, prepare with
@@ -94,6 +98,8 @@
 #'   \item \emph{Temporal dynamics: choosing a model for ILD} ---
 #'     Maps estimands to lags, residual AR (\code{ild_lme}), time-varying effects (\code{ild_tvem}),
 #'     and state-space backends (\code{ild_kfas}, \code{ild_ctsem}).
+#'   \item \emph{Specialist backends: when to move beyond the default stack} ---
+#'     Handoffs to dynamite, PGEE, DSEM, and multivariate workflows; export patterns after prepare/center/lag.
 #'   \item \emph{Reproducible ILD workflows with tidyILD provenance} ---
 #'     Inspect history, generate methods text, ild_report(), export and compare pipelines.
 #'   \item \emph{Glossary and quick-start checklist} --- Table of main
@@ -130,6 +136,8 @@
 #' @seealso
 #' \code{\link{browseVignettes}} and \code{vignette(package = "tidyILD")} for
 #' vignettes. Core entry points: \code{\link{ild_prepare}}, \code{\link{ild_lme}}.
+#' \code{vignette("ild-specialist-backends", package = "tidyILD")} for using
+#' tidyILD as a preprocessing layer with external multivariate or high-dimensional estimators.
 #' Related packages: \pkg{lme4}, \pkg{nlme} (model backends),
 #' \pkg{broom.mixed} (tidiers).
 #'

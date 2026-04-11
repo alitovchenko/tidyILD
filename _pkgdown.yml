@@ -21,6 +21,11 @@ articles:
       - kfas-irregular-timing-spacing
       - kfas-choosing-backend
       - ctsem-continuous-time-dynamics
+  - title: Beyond the default stack
+    desc: >
+      Hand off preprocessed ILD to multivariate, high-dimensional, or DSEM-style estimators (dynamite, PGEE, lavaan, and similar).
+    contents:
+      - ild-specialist-backends
   - title: Workflows and reports
     desc: >
       Start with **tidyILD-workflow**; **visualization-in-tidyILD** indexes plots and bundle sections; **temporal-dynamics-model-choice** maps questions to lags, AR, TVEM, and state-space; **benchmark-simulation-recovery** shows recovery/power under the bundled simulation DGP.

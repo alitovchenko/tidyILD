@@ -60,6 +60,8 @@ The following diagram is a navigation aid (rendered on sites that support Mermai
 | Discrete-time latent level | `ild_kfas()` | KFAS | Pooled multilevel latent model across many IDs |
 | Continuous-time latent dynamics | `ild_ctsem()` | ctsem / Stan | Quick lag regression on irregular data without CT assumptions |
 | Compare a few fitted models | `ild_compare_fits()` | AIC/BIC where defined | Likelihood-ratio tests unless models are nested and comparable |
+| Multivariate lags / feedback (joint system) | Same lag helpers; `ild_crosslag()` is one equation at a time | Export preprocessed data; see `vignette("ild-specialist-backends", package = "tidyILD")` | dynamite, lavaan DSEM, multivariate brms / ctsem |
+| High-dimensional time-varying predictors (p >> n) | Unpenalized `ild_lme` / `lme4` is not designed for this | Same vignette: hand off to penalized longitudinal tools | PGEE and related methods |
 
 ## Minimal examples
 
@@ -96,6 +98,7 @@ summary(tv)
 ## Further reading
 
 - `vignette("tidyILD-workflow", package = "tidyILD")`
+- `vignette("ild-specialist-backends", package = "tidyILD")` (multivariate / high-p handoffs)
 - `vignette("kfas-choosing-backend", package = "tidyILD")`
 - `vignette("brms-dynamics-recipes", package = "tidyILD")` (Bayesian templates)
 - `vignette("heterogeneity-interpretation", package = "tidyILD")` (person-specific slopes vs dynamics)
