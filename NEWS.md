@@ -1,3 +1,20 @@
+# tidyILD 0.4.0
+
+## Specialist backends and handoff documentation
+
+- **New vignette:** `vignette("ild-specialist-backends", package = "tidyILD")` — when to move beyond the default tidyILD stack, with a contract (what tidyILD owns vs specialist tools), a decision table (multivariate feedback, p >> n, latent/DSEM, nonlinear/TVP, HD confounding, correlated outcomes), a runnable **export** pattern after `ild_prepare()` / `ild_center()` / `ild_lag()`, and `eval = FALSE` code stubs for **dynamite**, **PGEE**, and **lavaan** (no new Suggests).
+- **`temporal-dynamics-model-choice`:** feature-map rows for **multivariate lag systems / feedback** and **high-dimensional predictors (p >> n)** with a pointer to the new specialist vignette.
+- **`brms-dynamics-recipes`:** Recipe 3 — multivariate outcomes with `mvbind()` + `set_rescor(TRUE)` sketch, with caveats on residual coupling vs full DSEM / dynamite.
+- **Navigation:** `_pkgdown.yml` gains a "Beyond the default stack" articles section; `README.md` adds a Vignettes bullet; `R/package.R` (`?tidyILD`) adds a `@details` paragraph, a vignette list entry, and a `@seealso` link.
+
+## Dependency hygiene
+
+- **`DESCRIPTION`:** `Depends: R (>= 4.1.0)` to match package code that uses the native pipe `|>` and lambda `\(...)` (R 4.1+). Previously `R (>= 4.0.0)`.
+
+## Wide panel ingestion
+
+- **`ild_prepare()`:** optional `input_format = "wide"` converts strict wide layouts to canonical long ILD before existing validation (regex `wide_names_pattern` with two capture groups, `wide_time_parser` / `wide_time_format`, optional `wide_keep_cols` and `wide_cols`); provenance records `source_was_wide` and wide summary counts.
+
 # tidyILD 0.3.0
 
 ## Visualization layer (index, facets, predicted trajectories)

@@ -10,7 +10,13 @@ ild_prepare(
   time = NULL,
   gap_threshold = Inf,
   duplicate_handling = c("first", "last", "error", "collapse"),
-  collapse_fn = NULL
+  collapse_fn = NULL,
+  input_format = c("long", "wide"),
+  wide_cols = NULL,
+  wide_names_pattern = "^(.+)_t(.+)$",
+  wide_time_parser = c("numeric", "date", "datetime"),
+  wide_time_format = NULL,
+  wide_keep_cols = NULL
 )
 }
 \arguments{
@@ -45,6 +51,27 @@ within the same id: `"first"` (keep first), `"last"` (keep last),
 \item{collapse_fn}{Named list of functions, one per variable to collapse.
 Used only when \code{duplicate_handling = "collapse"}. E.g. \code{list(x = mean, y = function(z) z[1])}.
 Variables not in \code{collapse_fn} keep their first value within the duplicate group.}
+
+\item{input_format}{Character. Input data layout: \code{"long"} (default) or
+\code{"wide"}. Wide inputs are converted to canonical long form before
+validation; downstream architecture is unchanged.}
+
+\item{wide_cols}{Character vector of wide measurement columns to convert when
+\code{input_format = "wide"}. If \code{NULL}, all non-id/non-keep columns
+must match \code{wide_names_pattern}.}
+
+\item{wide_names_pattern}{Regular expression with exactly two capture groups:
+measure and time token. Default \code{"^(.+)_t(.+)$"} parses names such as
+\code{mood_t1} and \code{stress_t2024-01-01}.}
+
+\item{wide_time_parser}{Character. How to parse extracted time tokens:
+\code{"numeric"} (default), \code{"date"}, or \code{"datetime"}.}
+
+\item{wide_time_format}{Optional format string passed to \code{as.Date()} or
+\code{as.POSIXct()} when parsing wide time tokens.}
+
+\item{wide_keep_cols}{Optional character vector of baseline/static columns
+to carry across all generated long rows when \code{input_format = "wide"}.}
 }
 \value{
 An ILD tibble with `.ild_*` columns and metadata attributes.

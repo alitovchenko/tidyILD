@@ -30,6 +30,21 @@
 #' @param collapse_fn Named list of functions, one per variable to collapse.
 #'   Used only when \code{duplicate_handling = "collapse"}. E.g. \code{list(x = mean, y = function(z) z[1])}.
 #'   Variables not in \code{collapse_fn} keep their first value within the duplicate group.
+#' @param input_format Character. Input data layout: \code{"long"} (default) or
+#'   \code{"wide"}. Wide inputs are converted to canonical long form before
+#'   validation; downstream architecture is unchanged.
+#' @param wide_cols Character vector of wide measurement columns to convert when
+#'   \code{input_format = "wide"}. If \code{NULL}, all non-id/non-keep columns
+#'   must match \code{wide_names_pattern}.
+#' @param wide_names_pattern Regular expression with exactly two capture groups:
+#'   measure and time token. Default \code{"^(.+)_t(.+)$"} parses names such as
+#'   \code{mood_t1} and \code{stress_t2024-01-01}.
+#' @param wide_time_parser Character. How to parse extracted time tokens:
+#'   \code{"numeric"} (default), \code{"date"}, or \code{"datetime"}.
+#' @param wide_time_format Optional format string passed to \code{as.Date()} or
+#'   \code{as.POSIXct()} when parsing wide time tokens.
+#' @param wide_keep_cols Optional character vector of baseline/static columns
+#'   to carry across all generated long rows when \code{input_format = "wide"}.
 #' @return An ILD tibble with `.ild_*` columns and metadata attributes.
 #'   Spacing metadata (see [ild_meta()]) includes overall stats and a
 #'   \code{by_id} tibble of per-person spacing stats (median_dt, iqr_dt,
@@ -45,12 +60,41 @@ ild_prepare <- function(data,
                         time = NULL,
                         gap_threshold = Inf,
                         duplicate_handling = c("first", "last", "error", "collapse"),
-                        collapse_fn = NULL) {
+                        collapse_fn = NULL,
+                        input_format = c("long", "wide"),
+                        wide_cols = NULL,
+                        wide_names_pattern = "^(.+)_t(.+)$",
+                        wide_time_parser = c("numeric", "date", "datetime"),
+                        wide_time_format = NULL,
+                        wide_keep_cols = NULL) {
   duplicate_handling <- match.arg(duplicate_handling)
+  input_format <- match.arg(input_format)
+  wide_time_parser <- match.arg(wide_time_parser)
   if (duplicate_handling == "collapse" && (is.null(collapse_fn) || !is.list(collapse_fn))) {
     stop("When duplicate_handling = 'collapse', provide a named list of functions in collapse_fn (e.g. list(x = mean)).", call. = FALSE)
   }
   if (!is.data.frame(data)) stop("'data' must be a data frame or tibble.", call. = FALSE)
+  wide_meta <- NULL
+  if (identical(input_format, "wide")) {
+    if (is.null(id)) {
+      stop("When input_format = 'wide', provide id.", call. = FALSE)
+    }
+    if (is.null(time)) {
+      time <- ".ild_wide_time"
+    }
+    conv <- ild_prepare_wide_to_long(
+      data = data,
+      id = as.character(id)[1],
+      time_col = as.character(time)[1],
+      wide_cols = wide_cols,
+      wide_names_pattern = wide_names_pattern,
+      wide_time_parser = wide_time_parser,
+      wide_time_format = wide_time_format,
+      wide_keep_cols = wide_keep_cols
+    )
+    data <- conv$data
+    wide_meta <- conv$meta
+  }
   ts_meta <- NULL
   if (xor(is.null(id), is.null(time))) {
     stop("Provide both id and time, or omit both and pass a tsibble (tbl_ts) with one key and an index.", call. = FALSE)
@@ -124,12 +168,23 @@ ild_prepare <- function(data,
     tsibble_meta = ts_meta
   )
   out <- ild_add_step(out, "ild_prepare",
-    list(id = id, time = time, gap_threshold = gap_threshold, duplicate_handling = duplicate_handling),
+    list(
+      id = id, time = time, gap_threshold = gap_threshold, duplicate_handling = duplicate_handling,
+      input_format = input_format,
+      wide_cols = wide_cols,
+      wide_names_pattern = if (identical(input_format, "wide")) wide_names_pattern else NULL,
+      wide_time_parser = if (identical(input_format, "wide")) wide_time_parser else NULL,
+      wide_time_format = if (identical(input_format, "wide")) wide_time_format else NULL,
+      wide_keep_cols = if (identical(input_format, "wide")) wide_keep_cols else NULL
+    ),
     list(
       n_id = attr(out, "ild_n_units", exact = TRUE),
       n_obs = attr(out, "ild_n_obs", exact = TRUE),
       spacing_class = ild_spacing_class(out),
       source_was_tsibble = !is.null(ts_meta),
+      source_was_wide = !is.null(wide_meta),
+      wide_n_measures = if (!is.null(wide_meta)) wide_meta$n_measures else NULL,
+      wide_n_time = if (!is.null(wide_meta)) wide_meta$n_time else NULL,
       tsibble_interval_declared = if (!is.null(ts_meta)) ts_meta$interval_format else NULL
     )
   )

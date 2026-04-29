@@ -40,6 +40,35 @@ library(tidyILD)
 6. **Fit**: `fit <- ild_lme(formula, data = x, ar1 = TRUE)` (or `ar1 = FALSE`)
 7. **Diagnose**: `ild_diagnostics(fit)` and `ild_plot(fit, type = "fitted")`, `type = "residual_acf"`
 
+## Wide input (strict and explicit)
+
+`ild_prepare()` now supports strict wide-to-long ingestion via `input_format = "wide"`.
+This conversion runs **before** standard ILD checks; all downstream functions still
+receive the same canonical long `ild_tbl`.
+
+```{r eval = FALSE}
+wide <- data.frame(
+  id = c(1, 2),
+  age = c(30, 40),
+  mood_t1 = c(10, 20), mood_t2 = c(11, 21),
+  stress_t1 = c(5, 6), stress_t2 = c(7, 8)
+)
+
+x <- ild_prepare(
+  wide,
+  id = "id",
+  input_format = "wide",
+  wide_keep_cols = "age",
+  wide_names_pattern = "^(.+)_t(.+)$",
+  wide_time_parser = "numeric"
+)
+```
+
+Safety defaults:
+- non-id columns must match `wide_names_pattern` unless declared in `wide_keep_cols`;
+- parsed `(measure, time)` slots must be unique;
+- time tokens must parse cleanly under `wide_time_parser`.
+
 ## Comparison with generic workflows
 
 | Task | Generic R | tidyILD |
