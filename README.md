@@ -127,7 +127,7 @@ Release tags follow `vMAJOR.MINOR.PATCH` and are listed in version order with:
 git tag -l 'v*' --sort=version:refname
 ```
 
-Current tags: **v0.0.1**, **v0.2.0**, **v0.3.0** (each annotated message is `tidyILD <version>`).
+Use the command above to list tags present in your checkout; this avoids stale tag lists in the README.
 
 ## License
 

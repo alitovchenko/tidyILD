@@ -1,3 +1,15 @@
+# tidyILD 0.4.1
+
+## Test robustness (no-long-double builds)
+
+- Made two `lme4`-based tests robust to no-long-double (noLD) builds. Under reduced
+  numeric precision a degenerate within/between fixture (`test-contract-regression.R`)
+  could be flagged as a singular random-effects fit, and a random-slope fit
+  (`test-heterogeneity-lmer.R`) could hit an optimizer hard-error on a near-zero slope
+  variance. The contract fixture now decomposes an independent predictor so the random
+  intercept is genuinely identified, and the random-slope test skips gracefully if the
+  optimizer cannot fit the boundary model on a given platform. No user-facing changes.
+
 # tidyILD 0.4.0
 
 ## Specialist backends and handoff documentation

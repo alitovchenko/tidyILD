@@ -1,3 +1,7 @@
+^renv$
+^\.renv$
+^renv\.lock$
+^cran-comments\.md$
 ^\.git
 ^\.github
 ^\.Rproj\.user

@@ -52,11 +52,20 @@ contract_assert_autoplot_frequentist_core <- function(b) {
 ## --- Fixtures (fixed seeds) -------------------------------------------------
 
 #' Regular-ish spacing, WP/BP decomposition, no intentional guardrails
+#'
+#' Decompose an *independent* predictor (`xp`) rather than the outcome itself.
+#' Regressing `y` on its own person-mean (`y_bp`) drives the random-intercept
+#' variance to ~0, which `lme4::isSingular()` flips to TRUE under reduced-precision
+#' (noLD) builds and fires a spurious GR_SINGULAR_RANDOM_EFFECTS guardrail. Using an
+#' independent predictor keeps `(1 | id)` genuinely identified and the fit robustly
+#' non-singular across precision levels.
 fixture_contract_regular_decomposed <- function() {
-  d <- ild_simulate(n_id = 10, n_obs_per = 8, seed = 9101L)
+  d  <- ild_simulate(n_id = 10, n_obs_per = 8, seed = 9101L)
+  dx <- ild_simulate(n_id = 10, n_obs_per = 8, seed = 9201L)
+  d$xp <- dx$y
   x <- ild_prepare(d, id = "id", time = "time")
-  x <- ild_center(x, y)
-  fit <- ild_lme(y ~ y_bp + y_wp + (1 | id), data = x, ar1 = FALSE, warn_no_ar1 = FALSE)
+  x <- ild_center(x, xp)
+  fit <- ild_lme(y ~ xp_bp + xp_wp + (1 | id), data = x, ar1 = FALSE, warn_no_ar1 = FALSE)
   b <- ild_diagnose(fit, data = x, type = "qq")
   list(
     name = "regular_decomposed",

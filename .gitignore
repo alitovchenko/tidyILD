@@ -20,3 +20,4 @@ tidyILD.Rcheck/
 *.tar.gz
 downloads/
 vignettes/*.html
+.renv/
