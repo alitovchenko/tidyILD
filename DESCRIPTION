@@ -6,8 +6,7 @@ Authors@R:
     given = "Alex",
     family = "Litovchenko",
     role = c("aut", "cre"),
-    email = "al4877@columbia.edu",
-    comment = c(ORCID = "0009-0009-3204-080X")
+    email = "al4877@columbia.edu"
   )
 Description: A reproducible, tidyverse-style framework for intensive longitudinal
   data analysis in R, with built-in methodological safeguards, provenance
